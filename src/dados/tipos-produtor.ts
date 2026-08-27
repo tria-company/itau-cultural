@@ -422,6 +422,10 @@ export function somarMinutos(inicio: string, minutos: number): string {
 /** O inverso: dois instantes, quantos minutos entre eles. Negativo vira `null`, uma sessão
  *  que termina antes de começar é erro de digitação, não duração. */
 export function minutosEntre(inicio: string, fim: string): number | null {
+  // ENTRADA EXTERNA ENTRA AQUI: sessões vindas do armazenamento podem não ter `inicio`,
+  // e `undefined.split` derrubava a tela inteira (2026-08-27). Data ilegível é `null`,
+  // nunca exceção: quem chama já trata o null.
+  if (typeof inicio !== "string" || typeof fim !== "string") return null;
   const ms = (s: string): number | null => {
     const [dia, hora] = s.split("T");
     if (!dia || !hora) return null;
@@ -1142,18 +1146,18 @@ function falta(
 /** O que TODA pauta exige, antes do que só ela exige. */
 function impedimentosComuns(r: Registro): Impedimento[] {
   const saida: Impedimento[] = [];
-  if (r.titulo.trim().length < 3) {
+  if ((r.titulo ?? "").trim().length < 3) {
     saida.push(falta("título com pelo menos 3 caracteres", true, 0, "Identidade"));
   }
   if (r.imagem !== null && r.imagem.caminho.trim() !== "") {
-    if (r.imagem.credito.trim() === "") {
+    if ((r.imagem.credito ?? "").trim() === "") {
       saida.push(falta("crédito da imagem, imagem sem crédito não publica (165)", true, 0, "Identidade"));
     }
-    if (r.imagem.alt.trim() === "") {
+    if ((r.imagem.alt ?? "").trim() === "") {
       saida.push(falta("texto alternativo da imagem", true, 0, "Identidade"));
     }
   }
-  if (r.resumo.trim().length < 20) {
+  if ((r.resumo ?? "").trim().length < 20) {
     saida.push(falta("resumo, 27 dos 75 cartões de hoje não têm", false, 0, "Identidade"));
   }
   if (r.linguagens.length === 0) {

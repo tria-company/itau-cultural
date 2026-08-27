@@ -252,14 +252,45 @@ function hidratar(sementeNova: Registro[], contextoNovo: ContextoDoProdutor) {
   // ganha default, dado antigo e preservado.
   estado = {
     ...lido,
-    registros: lido.registros.map((r) =>
-      comChavesDoRegistro({
-        ...registroVazio(r.id, r.pauta, contexto),
-        ...r,
-      } as Registro),
-    ),
+    registros: lido.registros.map((r) => normalizarRegistro(r)),
   };
   avisar();
+}
+
+/**
+ * POR FORMA, e não só por presença. O spread raso preservava valor com o TIPO errado
+ * (um `preco` gravado como número por versão antiga, uma lista que virou outra coisa),
+ * e o leitor seguinte derrubava a tela. A regra: campo ausente ganha o default; campo
+ * com a mesma forma do default entra; array só se for array; objeto só se for objeto,
+ * e MESCLADO sobre o default para os subcampos novos existirem.
+ */
+function normalizarRegistro(r: Registro): Registro {
+  const vazio = registroVazio(r.id, r.pauta, contexto) as unknown as Record<string, unknown>;
+  const bruto = r as unknown as Record<string, unknown>;
+  const saida: Record<string, unknown> = { ...vazio };
+  for (const chave of Object.keys(vazio)) {
+    const padrao = vazio[chave];
+    const valor = bruto[chave];
+    if (valor === undefined) continue;
+    if (Array.isArray(padrao)) {
+      if (Array.isArray(valor)) saida[chave] = valor;
+    } else if (padrao !== null && typeof padrao === "object") {
+      if (valor !== null && typeof valor === "object" && !Array.isArray(valor)) {
+        saida[chave] = { ...(padrao as object), ...(valor as object) };
+      }
+    } else if (
+      padrao === null
+        ? valor === null || (typeof valor === "object" && !Array.isArray(valor))
+        : typeof valor === typeof padrao
+    ) {
+      // Default null e campo de OBJETO opcional (imagem, preco de sessão): uma STRING
+      // gravada por versão antiga passava e `imagem.credito.trim()` derrubava a tela.
+      // `resumo: null` gravado por versão antiga NÃO pode substituir a string vazia:
+      // o primeiro `.trim()` derrubava a tela. Primitivo só entra com o mesmo typeof.
+      saida[chave] = valor;
+    }
+  }
+  return comChavesDoRegistro(saida as unknown as Registro);
 }
 
 // ---------------------------------------------------------------------------
