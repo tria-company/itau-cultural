@@ -3801,3 +3801,79 @@
   font-size: var(--tipo-micro);
   color: var(--cor-tinta-3);
 }
+
+/* ---- a ficha como popup, na web ------------------------------------------- */
+
+/**
+ * No app a ficha E a pagina, e a camada nao gera caixa nenhuma (display: contents).
+ * Na web ela vira um POPUP central com scrim, mantendo o passo a passo: a tela de
+ * criacao em pagina inteira foi reprovada a olho (2026-08-27).
+ */
+[data-view="mobile"] .prod-ficha-camada,
+[data-view="mobile"] .prod-ficha-janela {
+  display: contents;
+}
+
+[data-view="web"] .prod-ficha-camada {
+  /* FIXED aqui nao fere D-03: a regra proibe fixed DENTRO DA MOLDURA do app, e no app
+   * esta camada e display: contents. Na web o popup ancora na viewport, que e o que um
+   * modal faz. */
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  animation: prod-scrim-entra var(--dur-2) var(--ease-padrao);
+}
+
+[data-view="web"] .prod-ficha-janela {
+  display: flex;
+  flex-direction: column;
+  width: min(76rem, 100%);
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-fundo);
+  box-shadow: var(--sombra-3);
+  animation: prod-janela-entra var(--dur-3) var(--ease-padrao);
+}
+
+@keyframes prod-janela-entra {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.98);
+  }
+}
+
+/* Dentro da janela: cabecalho fixo em cima, corpo rolando por dentro, barra no pe.
+ * O sticky do cabecalho vira static porque ele ja esta fora do scroll. */
+[data-view="web"] .prod-ficha-janela > .prod-cabecalho {
+  position: static;
+  margin: 0;
+  padding: 1.25rem 1.5rem 0.75rem;
+}
+
+[data-view="web"] .prod-ficha-janela > .prod-corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 1.5rem;
+}
+
+[data-view="web"] .prod-ficha-janela > .prod-barra-acao {
+  margin: 0;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+/* A coluna colada ancora no scroll do corpo do popup, nao mais na viewport. */
+[data-view="web"] .prod-ficha-janela .prod-lado-fixo {
+  top: 0;
+  max-height: none;
+}

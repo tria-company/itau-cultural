@@ -134,8 +134,12 @@ export function FichaEmAtos({
   const ehUltimoAplicavel = !atos.some((a, i) => i > indice && a.aplicavel !== false);
   const posicao = aplicaveis.indexOf(atoAtual as Ato) + 1;
 
+  // A CAMADA E A JANELA existem PARA A WEB: lá a ficha é um POPUP central sobre a
+  // tela, com os mesmos passos. No app as duas são `display: contents` e não geram
+  // caixa nenhuma: a ficha continua sendo a página, e D-03 continua de pé.
   return (
-    <>
+    <div className="prod-ficha-camada" data-ficha-em-atos>
+      <div className="prod-ficha-janela">
       {/* O CABEÇALHO COMPACTO. A revisão a olho reprovou o anterior: kicker, título em
           duas linhas, parágrafo de objetivo, aviso de quatro linhas e um trilho de pontos
           com rótulo ocupavam metade da tela antes do primeiro campo. Agora: uma linha de
@@ -227,6 +231,26 @@ export function FichaEmAtos({
         </div>
       </div>
 
+      <BarraDeAcao>
+        <BotaoDoStudio
+          curto
+          aoClicar={anterior}
+          desabilitado={indice === 0}
+          porQueDesabilitado="Este é o primeiro ato."
+          data-acao="ato-anterior"
+        >
+          Voltar
+        </BotaoDoStudio>
+        {ehUltimoAplicavel ? (
+          acaoFinal
+        ) : (
+          <BotaoDoStudio primaria aoClicar={proximo} data-acao="ato-proximo">
+            Continuar
+          </BotaoDoStudio>
+        )}
+      </BarraDeAcao>
+      </div>
+
       {/* A FOLHA DE PASSOS: o mapa da ficha, com rótulo, estado e salto por ato. É para
           onde foi tudo o que disputava espaço no cabeçalho. */}
       <Folha
@@ -289,25 +313,7 @@ export function FichaEmAtos({
         </ol>
       </Folha>
 
-      <BarraDeAcao>
-        <BotaoDoStudio
-          curto
-          aoClicar={anterior}
-          desabilitado={indice === 0}
-          porQueDesabilitado="Este é o primeiro ato."
-          data-acao="ato-anterior"
-        >
-          Voltar
-        </BotaoDoStudio>
-        {ehUltimoAplicavel ? (
-          acaoFinal
-        ) : (
-          <BotaoDoStudio primaria aoClicar={proximo} data-acao="ato-proximo">
-            Continuar
-          </BotaoDoStudio>
-        )}
-      </BarraDeAcao>
-    </>
+    </div>
   );
 }
 
