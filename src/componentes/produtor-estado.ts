@@ -528,9 +528,34 @@ export function consumirAberturaDoDetalhe(): boolean {
  * registro no instante em que a hidratação sobrescrevesse o estado.
  */
 let pautaParaCriar: string | null = null;
+const ouvintesDeCriacao = new Set<() => void>();
 
+/**
+ * COM ASSINATURA, ao contrário das outras duas intenções, e a razão é medida: quem
+ * cria a partir da folha JÁ ESTANDO na rota da pauta não navega para lugar nenhum (o
+ * push para a mesma rota não remonta a página), então o efeito de montagem nunca
+ * redispara e a intenção ficava gravada sem ninguém consumir. O assinante acorda o
+ * componente na hora em que a marca acontece, montado ou não.
+ */
 export function marcarCriacaoDaPauta(pauta: string): void {
   pautaParaCriar = pauta;
+  for (const o of ouvintesDeCriacao) o();
+}
+
+export function assinarCriacaoDaPauta(ouvinte: () => void): () => void {
+  ouvintesDeCriacao.add(ouvinte);
+  return () => {
+    ouvintesDeCriacao.delete(ouvinte);
+  };
+}
+
+export function pautaPendenteDeCriacao(): string | null {
+  return pautaParaCriar;
+}
+
+/** No servidor não há intenção nenhuma: o HTML exportado nasce sem pendência. */
+export function pautaPendenteNoServidor(): string | null {
+  return null;
 }
 
 export function consumirCriacaoDaPauta(): string | null {

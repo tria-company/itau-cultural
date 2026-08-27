@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { CampoComProposta } from "@/componentes/base/campo-com-proposta";
@@ -13,9 +13,12 @@ import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { SeletorDeVisibilidade } from "@/componentes/base/seletor-de-visibilidade";
 import { Previa } from "@/componentes/base/previa";
 import {
+  assinarCriacaoDaPauta,
   consumirAberturaDaFicha,
   consumirAberturaDoDetalhe,
   consumirCriacaoDaPauta,
+  pautaPendenteDeCriacao,
+  pautaPendenteNoServidor,
   useProdutor,
 } from "@/componentes/produtor-estado";
 import { PautaInicio } from "@/componentes/produtor-pauta-inicio";
@@ -106,15 +109,22 @@ export function FichaDaAgenda({
   }, []);
 
   // A CRIAÇÃO espera o armazém, como na ficha simples.
+  // A pendência é assinada: marcar estando JÁ nesta rota re-renderiza e consome.
+  const pendente = useSyncExternalStore(
+    assinarCriacaoDaPauta,
+    pautaPendenteDeCriacao,
+    pautaPendenteNoServidor,
+  );
   useEffect(() => {
     if (!armazem.pronto) return;
+    if (pendente !== "agenda") return;
     const criar = consumirCriacaoDaPauta();
     if (criar === "agenda") {
       armazem.criar("agenda");
       setModo("ficha");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- dispara na hidratação
-  }, [armazem.pronto]);
+  }, [armazem.pronto, pendente]);
 
   if (!armazem.pronto) {
     return (

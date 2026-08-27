@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
@@ -12,12 +12,16 @@ import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { SeletorDeVisibilidade } from "@/componentes/base/seletor-de-visibilidade";
 import { Previa } from "@/componentes/base/previa";
 import {
+  assinarCriacaoDaPauta,
   consumirAberturaDaFicha,
   consumirAberturaDoDetalhe,
   consumirCriacaoDaPauta,
+  pautaPendenteDeCriacao,
+  pautaPendenteNoServidor,
   useProdutor,
 } from "@/componentes/produtor-estado";
 import { PautaInicio } from "@/componentes/produtor-pauta-inicio";
+import type { ExtrasDoInicio } from "@/componentes/produtor-pauta-inicio";
 import { RegistroDetalhe } from "@/componentes/produtor-registro-detalhe";
 import { DESCRICAO_DA_PAUTA, podePublicar, impedimentosDe, scoreDoRegistro } from "@/dados/tipos-produtor";
 import type {
@@ -73,6 +77,43 @@ export interface PropsFichaSimples<P extends Pauta> {
   temLugarFisico?: (r: PorPauta<P>) => boolean;
   /** A tela pública para onde publicar leva. Vazio: fica onde está. */
   destinoAoPublicar?: string;
+  /**
+   * A COMPOSIÇÃO DOS PASSOS, quando a pauta tem uma ordem melhor que a padrão.
+   *
+   * O Play é o caso que a criou: subir um vídeo começa pelo VÍDEO, não pelo título, e
+   * a revisão a olho reprovou a ordem genérica. A pauta recebe as PEÇAS prontas (os
+   * campos comuns, a acessibilidade, a publicação) e as recombina em atos próprios; o
+   * encanamento (armazém, modos, intenções, impedimentos) continua sendo um só.
+   */
+  composicao?: (
+    r: PorPauta<P>,
+    alterar: (m: Partial<PorPauta<P>>) => void,
+    pecas: PecasDaFicha,
+  ) => Ato[];
+  /**
+   * A GESTÃO que o início da pauta ganha, quando a pauta tem uma (o Play tem: trilhas
+   * e playlists). Recebe os registros da pauta e as operações do armazém, devolve o
+   * que o painel monta.
+   */
+  montarExtrasDoInicio?: (
+    daPauta: PorPauta<P>[],
+    operacoes: {
+      criar: () => string;
+      alterarId: (id: string, m: Partial<PorPauta<P>>) => void;
+    },
+  ) => ExtrasDoInicio;
+}
+
+/** Os campos comuns, prontos para a pauta recombinar. */
+export interface PecasDaFicha {
+  seletorDeRegistro: ReactNode;
+  titulo: ReactNode;
+  resumo: ReactNode;
+  capa: ReactNode;
+  linguagens: ReactNode;
+  temas: ReactNode;
+  acessibilidade: ReactNode;
+  publicacao: ReactNode;
 }
 
 export function FichaSimples<P extends Pauta>({
@@ -84,6 +125,8 @@ export function FichaSimples<P extends Pauta>({
   atosProprios,
   temLugarFisico,
   destinoAoPublicar,
+  composicao,
+  montarExtrasDoInicio,
 }: PropsFichaSimples<P>) {
   const router = useRouter();
   const armazem = useProdutor(semente, contexto);
@@ -103,8 +146,15 @@ export function FichaSimples<P extends Pauta>({
 
   // A CRIAÇÃO espera o armazém: criar antes de hidratar perderia o registro quando a
   // hidratação sobrescrevesse o estado. A folha de criação só marcou a pauta.
+  // A pendência é assinada: marcar estando JÁ nesta rota re-renderiza e consome.
+  const pendente = useSyncExternalStore(
+    assinarCriacaoDaPauta,
+    pautaPendenteDeCriacao,
+    pautaPendenteNoServidor,
+  );
   useEffect(() => {
     if (!armazem.pronto) return;
+    if (pendente !== pauta) return;
     const criar = consumirCriacaoDaPauta();
     if (criar === pauta) {
       armazem.criar(pauta);
@@ -112,7 +162,7 @@ export function FichaSimples<P extends Pauta>({
       setModo("ficha");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- dispara na hidratação
-  }, [armazem.pronto]);
+  }, [armazem.pronto, pendente]);
   const d = DESCRICAO_DA_PAUTA[pauta];
 
   if (!armazem.pronto) {
@@ -151,6 +201,10 @@ export function FichaSimples<P extends Pauta>({
             setModo("ficha");
           }
         }}
+        extras={montarExtrasDoInicio?.(daPauta, {
+          criar: () => armazem.criar(pauta),
+          alterarId: (id, m) => armazem.alterarId(id, m as Partial<Registro>),
+        })}
       />
     );
   }
@@ -197,121 +251,143 @@ export function FichaSimples<P extends Pauta>({
   const score = scoreDoRegistro(atual, contexto);
   const bloqueiam = impedimentosDe(atual).filter((i) => i.bloqueia);
 
-  const atos: Ato[] = [
-    {
-      rotulo: "Identidade",
-      fechado: atual.titulo.trim().length >= 3 && atual.resumo.trim().length >= 20,
-      conteudo: (
-        <>
-          <SeletorDeRegistro
-            pauta={pauta}
-            atual={atual}
-            todos={daPauta}
-            aoEscolher={armazem.escolher}
-            aoCriar={() => armazem.criar(pauta)}
-          />
-          {cabecalhoDaIdentidade?.(atual)}
-          <Campo rotulo="Título" obrigatorio>
-            <input
-              type="text"
-              value={atual.titulo}
-              onChange={(e) => alterar({ titulo: e.target.value } as Partial<PorPauta<P>>)}
-              className="prod-campo-entrada"
-              data-titulo
-              aria-invalid={atual.titulo.trim().length < 3}
-            />
-          </Campo>
-          <Campo rotulo="Resumo" nota="É o que o cartão mostra na vitrine.">
-            <textarea
-              value={atual.resumo}
-              onChange={(e) => alterar({ resumo: e.target.value } as Partial<PorPauta<P>>)}
-              rows={4}
-              className="prod-campo-entrada"
-              data-resumo
-            />
-          </Campo>
-          <CampoDeImagem
-            imagem={atual.imagem}
-            aoMudar={(i: ImagemDeclarada | null) =>
-              alterar({ imagem: i } as Partial<PorPauta<P>>)
-            }
-            acervo={catalogo.imagens}
-          />
-          <Campo rotulo="Linguagens">
-            <SeletorDeCatalogo
-              nome="Linguagens"
-              termos={catalogo.linguagens}
-              escolhidos={atual.linguagens}
-              aoMudar={(ids) => alterar({ linguagens: ids } as Partial<PorPauta<P>>)}
-              propostos={atual.termosPropostos}
-              aoPropor={(t) => alterar({ termosPropostos: t } as Partial<PorPauta<P>>)}
-            />
-          </Campo>
-          <Campo rotulo="Temas">
-            <SeletorDeCatalogo
-              nome="Temas"
-              termos={catalogo.temas}
-              escolhidos={atual.temas}
-              aoMudar={(ids) => alterar({ temas: ids } as Partial<PorPauta<P>>)}
-              propostos={[]}
-              aoPropor={(t) =>
-                alterar({
-                  termosPropostos: [...atual.termosPropostos, ...t],
-                } as Partial<PorPauta<P>>)
-              }
-            />
-          </Campo>
-        </>
-      ),
-    },
-    ...atosProprios(atual, alterar),
-    {
-      rotulo: "Acessibilidade",
-      fechado: atual.declaraAcessibilidade,
-      conteudo: (
-        <FichaDeAcessibilidade
-          dimensoes={atual.acessibilidade}
-          fisicos={atual.fisicos}
-          declarada={atual.declaraAcessibilidade}
-          temLugarFisico={temLugarFisico?.(atual) ?? false}
-          aoMudarDimensoes={(a) => alterar({ acessibilidade: a } as Partial<PorPauta<P>>)}
-          aoMudarFisicos={(f) => alterar({ fisicos: f } as Partial<PorPauta<P>>)}
-          aoDeclarar={() =>
-            alterar({ declaraAcessibilidade: true } as Partial<PorPauta<P>>)
-          }
-          aoDesfazer={() =>
-            alterar({ declaraAcessibilidade: false } as Partial<PorPauta<P>>)
+  // ---- AS PEÇAS: cada campo comum, pronto para a pauta recombinar ----
+  const pecas: PecasDaFicha = {
+    seletorDeRegistro: (
+      <SeletorDeRegistro
+        pauta={pauta}
+        atual={atual}
+        todos={daPauta}
+        aoEscolher={armazem.escolher}
+        aoCriar={() => armazem.criar(pauta)}
+      />
+    ),
+    titulo: (
+      <Campo rotulo="Título" obrigatorio>
+        <input
+          type="text"
+          value={atual.titulo}
+          onChange={(e) => alterar({ titulo: e.target.value } as Partial<PorPauta<P>>)}
+          className="prod-campo-entrada"
+          data-titulo
+          aria-invalid={atual.titulo.trim().length < 3}
+        />
+      </Campo>
+    ),
+    resumo: (
+      <Campo rotulo="Resumo" nota="É o que o cartão mostra na vitrine.">
+        <textarea
+          value={atual.resumo}
+          onChange={(e) => alterar({ resumo: e.target.value } as Partial<PorPauta<P>>)}
+          rows={4}
+          className="prod-campo-entrada"
+          data-resumo
+        />
+      </Campo>
+    ),
+    capa: (
+      <CampoDeImagem
+        imagem={atual.imagem}
+        aoMudar={(i: ImagemDeclarada | null) =>
+          alterar({ imagem: i } as Partial<PorPauta<P>>)
+        }
+        acervo={catalogo.imagens}
+      />
+    ),
+    linguagens: (
+      <Campo rotulo="Linguagens">
+        <SeletorDeCatalogo
+          nome="Linguagens"
+          termos={catalogo.linguagens}
+          escolhidos={atual.linguagens}
+          aoMudar={(ids) => alterar({ linguagens: ids } as Partial<PorPauta<P>>)}
+          propostos={atual.termosPropostos}
+          aoPropor={(t) => alterar({ termosPropostos: t } as Partial<PorPauta<P>>)}
+        />
+      </Campo>
+    ),
+    temas: (
+      <Campo rotulo="Temas">
+        <SeletorDeCatalogo
+          nome="Temas"
+          termos={catalogo.temas}
+          escolhidos={atual.temas}
+          aoMudar={(ids) => alterar({ temas: ids } as Partial<PorPauta<P>>)}
+          propostos={[]}
+          aoPropor={(t) =>
+            alterar({
+              termosPropostos: [...atual.termosPropostos, ...t],
+            } as Partial<PorPauta<P>>)
           }
         />
-      ),
-    },
-    {
-      rotulo: "Publicação",
-      fechado: atual.situacao === "publicado",
-      conteudo: (
-        <>
-          <ListaDeImpedimentos
-            impedimentos={score.impedimentos}
-            total={score.total}
-            aoIrParaAto={setAtoPedido}
-          />
-          <p className="prod-campo-nota">
-            O que falta acima é <strong>o que o público não vai ver</strong>, não o que uma
-            fila vai devolver. Publicar aqui é publicar: a fiscalização é posterior.
-          </p>
-          <SeletorDeVisibilidade
-            visibilidade={atual.visibilidade}
-            agendadoPara={atual.agendadoPara}
-            aoMudar={(v, quando) =>
-              alterar({ visibilidade: v, agendadoPara: quando } as Partial<PorPauta<P>>)
-            }
-            hoje={contexto.dataDeReferencia}
-          />
-          <Previa registro={atual} />
-        </>
-      ),
-    },
-  ];
+      </Campo>
+    ),
+    acessibilidade: (
+      <FichaDeAcessibilidade
+        dimensoes={atual.acessibilidade}
+        fisicos={atual.fisicos}
+        declarada={atual.declaraAcessibilidade}
+        temLugarFisico={temLugarFisico?.(atual) ?? false}
+        aoMudarDimensoes={(a) => alterar({ acessibilidade: a } as Partial<PorPauta<P>>)}
+        aoMudarFisicos={(f) => alterar({ fisicos: f } as Partial<PorPauta<P>>)}
+        aoDeclarar={() => alterar({ declaraAcessibilidade: true } as Partial<PorPauta<P>>)}
+        aoDesfazer={() => alterar({ declaraAcessibilidade: false } as Partial<PorPauta<P>>)}
+      />
+    ),
+    publicacao: (
+      <>
+        <ListaDeImpedimentos
+          impedimentos={score.impedimentos}
+          total={score.total}
+          aoIrParaAto={setAtoPedido}
+        />
+        <p className="prod-campo-nota">
+          O que falta acima é <strong>o que o público não vai ver</strong>, não o que uma
+          fila vai devolver. Publicar aqui é publicar: a fiscalização é posterior.
+        </p>
+        <SeletorDeVisibilidade
+          visibilidade={atual.visibilidade}
+          agendadoPara={atual.agendadoPara}
+          aoMudar={(v, quando) =>
+            alterar({ visibilidade: v, agendadoPara: quando } as Partial<PorPauta<P>>)
+          }
+          hoje={contexto.dataDeReferencia}
+        />
+        <Previa registro={atual} />
+      </>
+    ),
+  };
+
+  const atos: Ato[] = composicao
+    ? composicao(atual, alterar, pecas)
+    : [
+        {
+          rotulo: "Identidade",
+          fechado: atual.titulo.trim().length >= 3 && atual.resumo.trim().length >= 20,
+          conteudo: (
+            <>
+              {pecas.seletorDeRegistro}
+              {cabecalhoDaIdentidade?.(atual)}
+              {pecas.titulo}
+              {pecas.resumo}
+              {pecas.capa}
+              {pecas.linguagens}
+              {pecas.temas}
+            </>
+          ),
+        },
+        ...atosProprios(atual, alterar),
+        {
+          rotulo: "Acessibilidade",
+          fechado: atual.declaraAcessibilidade,
+          conteudo: pecas.acessibilidade,
+        },
+        {
+          rotulo: "Publicação",
+          fechado: atual.situacao === "publicado",
+          conteudo: pecas.publicacao,
+        },
+      ];
 
   return (
     <FichaEmAtos

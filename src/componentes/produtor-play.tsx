@@ -51,28 +51,81 @@ export function FichaDoPlay({
       contexto={contexto}
       catalogo={catalogo}
       destinoAoPublicar="/play/"
-      atosProprios={(r, alterar) => [
+      atosProprios={() => []}
+      composicao={(r, alterar, pecas) => [
         {
-          rotulo: "Tipo",
-          fechado: r.tipo !== "episodio" || r.serieTitulo !== null,
-          conteudo: <AtoTipo registro={r} catalogo={catalogo} aoAlterar={alterar} />,
-        },
-        {
-          rotulo: "Fonte",
+          // O VÍDEO PRIMEIRO: quem sobe um vídeo começa pelo vídeo, como em qualquer
+          // estúdio de publicação. Título e capa vêm DEPOIS que existe o que descrever.
+          rotulo: "Vídeo",
           fechado: r.idDoVideo.trim() !== "" || r.linkExterno.trim() !== "",
-          conteudo: <AtoFonte registro={r} aoAlterar={alterar} />,
+          conteudo: (
+            <>
+              {pecas.seletorDeRegistro}
+              <AtoFonte registro={r} aoAlterar={alterar} />
+            </>
+          ),
         },
         {
-          rotulo: "Direitos",
-          fechado: r.direito.declarado,
-          conteudo: <AtoDireitos registro={r} aoAlterar={alterar} />,
+          // A CAPA SOBRE O PLAYER, e então o texto: a miniatura é o que o público vê
+          // antes do play, e escolhê-la olhando a moldura é escolher o que ela decide.
+          rotulo: "Detalhes",
+          fechado: r.titulo.trim().length >= 3 && r.imagem !== null,
+          conteudo: (
+            <>
+              <div className="prod-capa-player">{pecas.capa}</div>
+              {pecas.titulo}
+              {pecas.resumo}
+              <AtoTipo registro={r} catalogo={catalogo} aoAlterar={alterar} />
+              {pecas.linguagens}
+              {pecas.temas}
+            </>
+          ),
         },
         {
-          rotulo: "Pontes",
-          fechado: r.pontes.length > 0,
-          conteudo: <AtoPontes registro={r} catalogo={catalogo} aoAlterar={alterar} />,
+          rotulo: "Conferências",
+          fechado: r.direito.declarado && r.declaraAcessibilidade,
+          conteudo: (
+            <>
+              <AtoDireitos registro={r} aoAlterar={alterar} />
+              {pecas.acessibilidade}
+              <AtoPontes registro={r} catalogo={catalogo} aoAlterar={alterar} />
+            </>
+          ),
+        },
+        {
+          rotulo: "Publicar",
+          fechado: r.situacao === "publicado",
+          conteudo: pecas.publicacao,
         },
       ]}
+      montarExtrasDoInicio={(daPauta, operacoes) => ({
+        // A TRILHA de um vídeo é a série que ele declara; sem série, «Avulsos».
+        // Playlists ficam fora do agrupamento: elas são a seção de baixo.
+        trilhaDe: (r) => {
+          const play = r as RegistroDePlay;
+          if (play.tipo === "playlist") return null;
+          return play.serieTitulo ?? "Avulsos";
+        },
+        playlists: daPauta
+          .filter((r) => r.tipo === "playlist")
+          .map((r) => ({
+            id: r.id,
+            titulo: r.titulo,
+            itens: r.itens.length,
+            situacao: r.situacao,
+          })),
+        aoNovaPlaylist: (nome) => {
+          // NASCE RASCUNHO, SEM ABRIR A FICHA: criar uma playlist não é publicar nada.
+          const id = operacoes.criar();
+          operacoes.alterarId(id, { tipo: "playlist", titulo: nome });
+        },
+        aoAdicionarAPlaylist: (playlistId, videoId) => {
+          const alvo = daPauta.find((r) => r.id === playlistId);
+          if (!alvo || alvo.tipo !== "playlist") return;
+          if (alvo.itens.includes(videoId)) return;
+          operacoes.alterarId(playlistId, { itens: [...alvo.itens, videoId] });
+        },
+      })}
     />
   );
 }

@@ -138,7 +138,16 @@ export function FichaEmAtos({
   // tela, com os mesmos passos. No app as duas são `display: contents` e não geram
   // caixa nenhuma: a ficha continua sendo a página, e D-03 continua de pé.
   return (
-    <div className="prod-ficha-camada" data-ficha-em-atos>
+    <div
+      className="prod-ficha-camada"
+      data-ficha-em-atos
+      onClick={(e) => {
+        // CLICAR FORA FECHA, só na web: no app a camada é display:contents e nunca é o
+        // alvo do clique. O alvo tem de ser o PRÓPRIO backdrop, senão qualquer clique
+        // dentro da janela fecharia o popup junto.
+        if (aoVoltar && e.target === e.currentTarget) aoVoltar();
+      }}
+    >
       <div className="prod-ficha-janela">
       {/* O CABEÇALHO COMPACTO. A revisão a olho reprovou o anterior: kicker, título em
           duas linhas, parágrafo de objetivo, aviso de quatro linhas e um trilho de pontos
@@ -147,18 +156,33 @@ export function FichaEmAtos({
           atos, objetivo, aviso completo) mora na FOLHA DE PASSOS, aberta pelo contador. */}
       <header className="prod-cabecalho prod-cabecalho-ficha">
         <div className="prod-cabecalho-linha">
+          {/* O MESMO botão nas duas visões, com duas caras: «‹ Eventos» no app, onde a
+              ficha é uma página e voltar é navegar; um ✕ na web, onde a ficha é um popup
+              e fechar é fechar. Quem troca a cara é o CSS, a árvore é uma só (D-05). */}
           {aoVoltar ? (
             <button
               type="button"
               className="prod-superficie prod-voltar"
               data-voltar-studio
+              aria-label={rotuloDaVolta ? `fechar e voltar a ${rotuloDaVolta}` : "fechar"}
               onClick={aoVoltar}
             >
-              ‹ {rotuloDaVolta ?? "Voltar"}
+              <span className="prod-voltar-texto">‹ {rotuloDaVolta ?? "Voltar"}</span>
+              <span className="prod-voltar-x" aria-hidden>
+                ✕
+              </span>
             </button>
           ) : (
-            <Link href="/studio/" className="prod-superficie prod-voltar" data-voltar-studio>
-              ‹ Studio
+            <Link
+              href="/studio/"
+              className="prod-superficie prod-voltar"
+              data-voltar-studio
+              aria-label="voltar ao Studio"
+            >
+              <span className="prod-voltar-texto">‹ Studio</span>
+              <span className="prod-voltar-x" aria-hidden>
+                ✕
+              </span>
             </Link>
           )}
           <span className="prod-cabecalho-direita">

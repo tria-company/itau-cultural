@@ -7,14 +7,21 @@ import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { Folha } from "@/componentes/base/folha";
 import { iniciaisDe, usePerfil } from "@/componentes/perfil-estado";
-import { marcarAberturaDaFicha, useProdutor } from "@/componentes/produtor-estado";
+import {
+  marcarAberturaDaFicha,
+  marcarAberturaDoDetalhe,
+  useProdutor,
+} from "@/componentes/produtor-estado";
 import { PORTAS, ROTULO_DA_SITUACAO, SITUACOES } from "@/dados/tipos-acesso";
 import { GraficoDaSerie } from "@/componentes/base/grafico-da-serie";
 import {
   DESEMPENHO_E_AUTORADO,
   DIAS_DA_SERIE,
+  comentariosDe,
   desempenhoDe,
-  minutosLegiveis,
+  heroiDe,
+  metricasDe,
+  milhar,
   variacaoSemanal,
 } from "@/dados/desempenho-produtor";
 import {
@@ -189,11 +196,16 @@ export function ProdutorPainel({
           </button>
         ) : null}
 
-        {/* ---- 3 · o desempenho da última publicação ---- */}
-        <DesempenhoDaUltima
+        {/* ---- 3 · a visão geral: KPIs, o gráfico agregado e os tops ---- */}
+        <VisaoGeral
           registros={armazem.ordenados}
           dataDeReferencia={contexto.dataDeReferencia}
           imagens={imagens}
+          aoAbrirRegistro={(r) => {
+            armazem.escolher(r.id);
+            marcarAberturaDoDetalhe();
+            router.push(DESCRICAO_DA_PAUTA[r.pauta].rota);
+          }}
         />
 
         {/* ---- 4 · os atalhos: o painel é a navegação ---- */}
@@ -934,133 +946,195 @@ function Reiniciar({ aoReiniciar }: { aoReiniciar: () => void }) {
   );
 }
 
-/** Milhar com ponto, sem `toLocaleString`: o export estático exige o mesmo texto no build e no navegador. */
-function milhar(n: number): string {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
 /**
- * A última publicação, medida na métrica da PRÓPRIA pauta e lida como uma frase: a capa
- * e o título dizem O QUÊ, um número grande com a variação semanal diz COMO VAI, a curva
- * mostra a forma dos catorze dias, e uma linha de texto entrega o resto (receita e
- * próxima sessão para evento; tempo médio e conclusão para audiovisual). O desenho
- * anterior eram três caixas de KPI e barras soltas, e a revisão a olho o reprovou:
- * caixa dentro de caixa, sem hierarquia, sem contexto. Números autorados e
- * determinísticos (desempenho-produtor.ts), declarados na legenda.
+ * A VISÃO GERAL do Início: KPIs, o gráfico agregado dos catorze dias e as duas colunas
+ * de leitura rápida, no molde dos painéis de canal (o dash do Seu Elias foi a referência
+ * de diagramação; a identidade é a da casa). Tudo AUTORADO E DETERMINÍSTICO, da mesma
+ * fonte de desempenho-produtor.ts: os números daqui são os mesmos das telas de pauta e
+ * de registro, porque duas fontes discordariam na primeira edição.
  */
-function DesempenhoDaUltima({
+function VisaoGeral({
   registros,
   dataDeReferencia,
   imagens,
+  aoAbrirRegistro,
 }: {
   registros: Registro[];
   dataDeReferencia: string;
   imagens: ImagemDeAtalho[];
+  aoAbrirRegistro: (r: Registro) => void;
 }) {
-  const ultima = registros.find((r) => r.situacao === "publicado") ?? null;
-  const numeros = useMemo(
-    () => (ultima ? desempenhoDe(ultima, dataDeReferencia) : null),
-    [ultima, dataDeReferencia],
+  const publicados = useMemo(
+    () => registros.filter((r) => r.situacao === "publicado"),
+    [registros],
   );
-  if (ultima === null || numeros === null) return null;
 
-  const d = DESCRICAO_DA_PAUTA[ultima.pauta];
+  const medidos = useMemo(
+    () =>
+      publicados.map((r) => {
+        const desempenho = desempenhoDe(r, dataDeReferencia);
+        return { r, desempenho, heroi: heroiDe(desempenho), metricas: metricasDe(desempenho) };
+      }),
+    [publicados, dataDeReferencia],
+  );
 
-  // A capa do próprio registro; sem ela, a imagem que o atalho da pauta já usa.
-  const caminhoDaCapa =
-    ultima.imagem?.caminho ??
-    imagens[PAUTAS.indexOf(ultima.pauta) % Math.max(1, imagens.length)]?.caminho ??
-    null;
+  const agregados = useMemo(() => {
+    const serie = Array.from({ length: DIAS_DA_SERIE }, () => 0);
+    let alcance = 0;
+    let ingressos = 0;
+    let salvos = 0;
+    let comentarios = 0;
+    const porPauta = new Map<string, number>();
+    for (const m of medidos) {
+      m.desempenho.serie.forEach((v, i) => {
+        serie[i] = (serie[i] ?? 0) + v;
+      });
+      alcance += m.heroi.valor;
+      salvos += Math.round(m.heroi.valor * 0.09);
+      comentarios += comentariosDe(m.r.id).length;
+      if (m.desempenho.familia === "evento") ingressos += m.desempenho.ingressos;
+      const rotulo = DESCRICAO_DA_PAUTA[m.r.pauta].rotulo;
+      porPauta.set(rotulo, (porPauta.get(rotulo) ?? 0) + m.heroi.valor);
+    }
+    return {
+      serie,
+      alcance,
+      ingressos,
+      salvos,
+      comentarios,
+      porPauta: [...porPauta.entries()].sort((a, b) => b[1] - a[1]),
+    };
+  }, [medidos]);
 
-  const minutosNoAr = ultima.publicadoEm
-    ? minutosEntre(`${ultima.publicadoEm.slice(0, 10)}T00:00`, `${dataDeReferencia}T00:00`)
-    : null;
-  const diasNoAr = minutosNoAr === null ? null : Math.floor(minutosNoAr / 1440);
-  const quando =
-    diasNoAr === null
-      ? ""
-      : diasNoAr <= 0
-        ? "publicado hoje"
-        : diasNoAr === 1
-          ? "publicado ontem"
-          : `publicado há ${diasNoAr} dias`;
+  const delta = variacaoSemanal(agregados.serie);
+  const top = useMemo(
+    () => [...medidos].sort((a, b) => b.heroi.valor - a.heroi.valor).slice(0, 5),
+    [medidos],
+  );
+  const conversas = useMemo(
+    () =>
+      publicados
+        .flatMap((r) => comentariosDe(r.id).map((c) => ({ ...c, r })))
+        .sort((a, b) => a.haDias - b.haDias || a.r.id.localeCompare(b.r.id))
+        .slice(0, 3),
+    [publicados],
+  );
+  const maiorPauta = Math.max(1, ...agregados.porPauta.map(([, v]) => v));
+  const capaDe = (r: Registro): string | null =>
+    r.imagem?.caminho ?? imagens[0]?.caminho ?? null;
 
-  let numero: number;
-  let legenda: string;
-  let secundario: string;
-  if (numeros.familia === "evento") {
-    numero = numeros.ingressos;
-    legenda = `ingressos nos últimos ${DIAS_DA_SERIE} dias`;
-    const receita = numeros.gratuito
-      ? "evento gratuito"
-      : numeros.receita === null
-        ? "receita a declarar"
-        : `${emReais(numeros.receita)} de receita`;
-    const proxima = numeros.vigencia
-      ? "em cartaz, visita livre"
-      : numeros.proximaEmDias === null
-        ? "temporada encerrada"
-        : numeros.proximaEmDias === 0
-          ? "próxima sessão hoje"
-          : `próxima sessão em ${numeros.proximaEmDias} ${numeros.proximaEmDias === 1 ? "dia" : "dias"}`;
-    secundario = `${receita} · ${proxima}`;
-  } else if (numeros.familia === "audiovisual") {
-    numero = numeros.plays;
-    legenda = `plays nos últimos ${DIAS_DA_SERIE} dias`;
-    secundario = `${minutosLegiveis(numeros.tempoMedioMinutos)} de tempo médio · ${numeros.conclusao}% assistem até o fim`;
-  } else if (numeros.familia === "leitura") {
-    numero = numeros.leituras;
-    legenda = `leituras nos últimos ${DIAS_DA_SERIE} dias`;
-    secundario = `${minutosLegiveis(numeros.tempoMedioMinutos)} de leitura média · ${numeros.ateOFim}% leem até o fim`;
-  } else {
-    numero = numeros.vistas;
-    legenda = `visualizações nos últimos ${DIAS_DA_SERIE} dias`;
-    secundario = `${milhar(numeros.salvos)} salvos · ${milhar(numeros.compartilhamentos)} compartilhados`;
-  }
-
-  const delta = variacaoSemanal(numeros.serie);
-
+  if (publicados.length === 0) return null;
 
   return (
-    <section className="prod-secao" aria-labelledby="prod-desempenho-titulo">
-      <h2 className="prod-secao-titulo" id="prod-desempenho-titulo">
-        Desempenho
+    <section className="prod-secao" aria-labelledby="prod-vg-titulo" data-visao-geral>
+      <h2 className="prod-secao-titulo" id="prod-vg-titulo">
+        Visão geral
       </h2>
-      <div className="prod-desempenho" data-desempenho-da-ultima={ultima.id}>
-        <Link href={d.rota} className="prod-desempenho-cabeca" data-abrir-desempenho>
-          {caminhoDaCapa ? (
-            // eslint-disable-next-line @next/next/no-img-element -- capa local do acervo
-            <img src={caminhoDaCapa} alt="" className="prod-desempenho-capa" />
-          ) : null}
-          <span className="prod-desempenho-texto">
-            <span className="prod-desempenho-meta">
-              {d.rotulo}
-              {quando ? ` · ${quando}` : ""}
-            </span>
-            <strong className="prod-desempenho-nome">
-              {semTravessao(ultima.titulo) || d.singular}
-            </strong>
-          </span>
-          <span className="prod-desempenho-seta" aria-hidden>
-            ▸
-          </span>
-        </Link>
 
-        <div className="prod-desempenho-numero">
-          <strong>{milhar(numero)}</strong>
-          <span className="prod-desempenho-delta" data-sobe={delta >= 0 ? "sim" : "nao"}>
+      {/* ---- os KPIs ---- */}
+      <div className="prod-vg-kpis">
+        <div className="prod-vg-card">
+          <strong>{milhar(agregados.alcance)}</strong>
+          <span>alcance em {DIAS_DA_SERIE} dias</span>
+          <span className="prod-vg-delta" data-sobe={delta >= 0 ? "sim" : "nao"}>
             {delta >= 0 ? "↑" : "↓"} {Math.abs(delta)}% na semana
           </span>
         </div>
-        <span className="prod-desempenho-legenda">{legenda}</span>
-
-        <GraficoDaSerie serie={numeros.serie} dataDeReferencia={dataDeReferencia} />
-
-        <p className="prod-desempenho-secundario">{secundario}</p>
-        <span className="prod-grafico-legenda" title={DESEMPENHO_E_AUTORADO}>
-          números autorados da demonstração
-        </span>
+        <div className="prod-vg-card">
+          <strong>{milhar(agregados.ingressos)}</strong>
+          <span>ingressos</span>
+        </div>
+        <div className="prod-vg-card">
+          <strong>{milhar(agregados.salvos)}</strong>
+          <span>salvos</span>
+        </div>
+        <div className="prod-vg-card">
+          <strong>{agregados.comentarios}</strong>
+          <span>comentários</span>
+        </div>
       </div>
+
+      {/* ---- o grafico agregado ---- */}
+      <div className="prod-vg-grafico">
+        <GraficoDaSerie serie={agregados.serie} dataDeReferencia={dataDeReferencia} />
+      </div>
+
+      {/* ---- as duas colunas ---- */}
+      <div className="prod-vg-colunas">
+        <div className="prod-vg-coluna">
+          <h3 className="prod-vg-subtitulo">Top conteúdos</h3>
+          {top.map((m, i) => (
+            <button
+              key={m.r.id}
+              type="button"
+              className="prod-melhor"
+              data-abrir-registro={m.r.id}
+              onClick={() => aoAbrirRegistro(m.r)}
+            >
+              <span className="prod-posicao" aria-hidden>
+                {i + 1}
+              </span>
+              {capaDe(m.r) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- capa local
+                <img src={capaDe(m.r) ?? ""} alt="" className="prod-melhor-capa" loading="lazy" />
+              ) : null}
+              <span className="prod-melhor-texto">
+                <span className="prod-melhor-nome">
+                  {semTravessao(m.r.titulo) || DESCRICAO_DA_PAUTA[m.r.pauta].singular}
+                </span>
+                <span className="prod-melhor-sub">{DESCRICAO_DA_PAUTA[m.r.pauta].rotulo}</span>
+              </span>
+              <span className="prod-melhor-metricas">
+                {m.metricas.map((mm) => (
+                  <span
+                    className="prod-metrica"
+                    key={mm.rotulo}
+                    data-extra={mm.extra ? "sim" : "nao"}
+                  >
+                    <strong>{mm.valor}</strong>
+                    <span>{mm.rotulo}</span>
+                  </span>
+                ))}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="prod-vg-coluna">
+          <h3 className="prod-vg-subtitulo">Por pauta</h3>
+          {agregados.porPauta.slice(0, 6).map(([rotulo, valor]) => (
+            <div className="prod-vg-barra" key={rotulo}>
+              <span className="prod-vg-barra-rotulo">{rotulo}</span>
+              <span className="prod-vg-barra-trilho" aria-hidden>
+                <span
+                  className="prod-vg-barra-cheia"
+                  style={{ width: `${Math.max(4, Math.round((valor / maiorPauta) * 100))}%` }}
+                />
+              </span>
+              <span className="prod-vg-barra-valor">{milhar(valor)}</span>
+            </div>
+          ))}
+
+          <h3 className="prod-vg-subtitulo">Comentários recentes</h3>
+          {conversas.map((c) => (
+            <div className="prod-comentario" key={`${c.r.id}-${c.nome}-${c.haDias}`}>
+              <span className="prod-comentario-avatar" aria-hidden>
+                {(c.nome[0] ?? "?").toUpperCase()}
+              </span>
+              <span className="prod-comentario-texto">
+                <span className="prod-comentario-meta">
+                  {c.nome} · há {c.haDias} {c.haDias === 1 ? "dia" : "dias"}
+                </span>
+                {c.texto}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="prod-grafico-legenda" title={DESEMPENHO_E_AUTORADO}>
+        números autorados da demonstração
+      </p>
     </section>
   );
 }

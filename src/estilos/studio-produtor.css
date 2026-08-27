@@ -614,6 +614,17 @@
   /* A coluna cola na borda esquerda da janela: o gutter da tela fica so no conteudo. */
   padding-left: 0;
   padding-bottom: var(--espaco-secao);
+  min-height: 100dvh;
+  /* O FUNDO E A LINHA DA COLUNA moram AQUI, na tela, e nao no nav: o nav e sticky e so
+   * tem a altura do proprio conteudo, entao a borda dele morria no meio do caminho. A
+   * tela tem a altura inteira da pagina, e o gradiente pinta faixa + fio ate o fim. */
+  background: linear-gradient(
+    to right,
+    var(--cor-superficie) calc(16rem - 1px),
+    var(--cor-borda) calc(16rem - 1px),
+    var(--cor-borda) 16rem,
+    transparent 16rem
+  );
 }
 
 /* Duas colunas, UMA linha. O invólucro é o segundo item, e por isso o trilho ocupa a
@@ -641,8 +652,7 @@
   max-height: 100dvh;
   overflow-y: auto;
   padding: 1.5rem 1rem;
-  border-right: 1px solid var(--cor-borda);
-  background: var(--cor-superficie);
+  /* Fundo e fio vem da .prod-tela (ver acima): aqui nada, para a linha nao morrer. */
 }
 
 [data-view="web"] .prod-lateral-marca {
@@ -3876,4 +3886,318 @@
 [data-view="web"] .prod-ficha-janela .prod-lado-fixo {
   top: 0;
   max-height: none;
+}
+
+/* ---- o voltar na web: so o X do popup sobrevive ---------------------------- */
+
+/**
+ * Na web o voltar dos cabecalhos nao faz sentido: a coluna lateral ja e o mapa.
+ * Ele so sobrevive DENTRO da janela do popup, onde vira um X de fechar. No app nada
+ * muda: la a ficha e uma pagina e voltar e navegar.
+ */
+.prod-voltar-x {
+  display: none;
+}
+
+[data-view="web"] .prod-voltar {
+  display: none;
+}
+
+[data-view="web"] .prod-ficha-janela .prod-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  color: var(--cor-tinta-2);
+  cursor: pointer;
+}
+
+[data-view="web"] .prod-ficha-janela .prod-voltar .prod-voltar-texto {
+  display: none;
+}
+
+[data-view="web"] .prod-ficha-janela .prod-voltar .prod-voltar-x {
+  display: inline;
+  font-size: var(--tipo-detalhe);
+}
+
+/* Dentro da janela a linha alinha a direita: no-ar, o passo, e o X por ultimo. */
+[data-view="web"] .prod-ficha-janela .prod-cabecalho-linha {
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+[data-view="web"] .prod-ficha-janela .prod-cabecalho-linha .prod-voltar {
+  order: 3;
+}
+
+/* ---- o Adicionar sobe para o canto superior direito, na web ---------------- */
+
+[data-view="web"] .prod-conteudo {
+  position: relative;
+}
+
+[data-view="web"] .prod-conteudo:has(> [data-inicio-da-pauta]) > .prod-barra-acao {
+  position: absolute;
+  top: 2rem;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ---- a capa do Play com cara de player ------------------------------------ */
+
+/**
+ * No passo de detalhes do Play a capa e escolhida SOBRE a moldura do player: e a
+ * miniatura que o publico ve antes do play. O glifo e decorativo; o iframe de
+ * verdade continua nascendo so depois do clique, na tela publica.
+ */
+/* Sem foto nao ha player para fingir: o glifo espera a capa existir. */
+.prod-capa-player .prod-imagem-palco:has(.prod-imagem-vazia)::after {
+  display: none;
+}
+
+.prod-capa-player .prod-imagem-palco::after {
+  content: "\25B6";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 60%, transparent);
+  color: var(--ic-branco);
+  font-size: var(--tipo-destaque);
+  pointer-events: none;
+}
+
+/* ---- as metricas por linha, nas listas ------------------------------------ */
+
+.prod-melhor-metricas {
+  display: flex;
+  flex: none;
+  gap: 1.5rem;
+}
+
+.prod-metrica {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.prod-metrica > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.prod-metrica > span {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+  white-space: nowrap;
+}
+
+/* Em 370px so o numero principal cabe; as extras voltam na web. */
+[data-view="mobile"] .prod-metrica[data-extra="sim"] {
+  display: none;
+}
+
+/* ---- trilhas e playlists do Play ------------------------------------------ */
+
+/* A linha composta: o toque abre o registro, o +playlist ao lado move. */
+.prod-melhor-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.prod-melhor-linha:hover {
+  background: transparent;
+}
+
+.prod-melhor-toque {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.prod-trilha-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.prod-trilha-nome {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+.prod-trilha-conta {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-nova-playlist {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.prod-nova-playlist > input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- a visao geral do Inicio ---------------------------------------------- */
+
+/**
+ * KPIs em cartoes, o grafico agregado, e duas colunas de leitura rapida: a
+ * diagramacao dos paineis de canal, com a identidade da casa. Nenhum laranja em
+ * dado: as barras por pauta sao tinta lavada, e o delta e pilula neutra.
+ */
+.prod-vg-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.5rem;
+}
+
+.prod-vg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.prod-vg-card > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-2);
+  line-height: 1.05;
+}
+
+.prod-vg-card > span {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-vg-delta {
+  align-self: flex-start;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  font-weight: 600;
+  color: var(--cor-tinta-2);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.prod-vg-grafico {
+  padding: 0.75rem 1rem 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.prod-vg-colunas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+[data-view="web"] .prod-vg-colunas {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 0 3rem;
+  align-items: start;
+}
+
+.prod-vg-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-vg-subtitulo {
+  margin: 0.75rem 0 0.25rem;
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-vg-barra {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 1.75rem;
+}
+
+.prod-vg-barra-rotulo {
+  flex: none;
+  width: 6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--tipo-detalhe);
+}
+
+.prod-vg-barra-trilho {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  overflow: hidden;
+}
+
+.prod-vg-barra-cheia {
+  display: block;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--cor-tinta) 45%, transparent);
+}
+
+.prod-vg-barra-valor {
+  flex: none;
+  min-width: 3rem;
+  text-align: right;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
 }

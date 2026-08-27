@@ -18,7 +18,7 @@
  * data de referência entra por parâmetro e a aritmética é a de `minutosEntre` (UTC).
  */
 
-import { minutosEntre } from "@/dados/tipos-produtor";
+import { emReais, minutosEntre } from "@/dados/tipos-produtor";
 import type { Registro, RegistroDeAgenda } from "@/dados/tipos-produtor";
 
 /** Quantos dias a série cobre. Duas semanas: cabe em 370px e ainda mostra tendência. */
@@ -267,6 +267,66 @@ export function variacaoSemanal(serie: number[]): number {
   const anterior = serie.slice(0, metade).reduce((n, v) => n + v, 0);
   const ultima = serie.slice(serie.length - metade).reduce((n, v) => n + v, 0);
   return Math.round(((ultima - anterior) / Math.max(1, anterior)) * 100);
+}
+
+/** Milhar com ponto, sem `toLocaleString`: o export estático exige o mesmo texto
+ *  no build e no navegador. */
+export function milhar(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/** O número principal de um registro, para ordenar e somar. */
+export function heroiDe(d: Desempenho): { valor: number; rotulo: string } {
+  if (d.familia === "evento") return { valor: d.ingressos, rotulo: "ingressos" };
+  if (d.familia === "audiovisual") return { valor: d.plays, rotulo: "plays" };
+  if (d.familia === "leitura") return { valor: d.leituras, rotulo: "leituras" };
+  return { valor: d.vistas, rotulo: "visualizações" };
+}
+
+export interface MetricaDaLinha {
+  valor: string;
+  rotulo: string;
+  /** `true` nas que só cabem na web; o app mostra a principal. */
+  extra?: boolean;
+}
+
+/**
+ * As métricas de UMA linha de listagem, na ordem de leitura: a principal primeiro,
+ * as demais marcadas como extra. É a mesma fonte da tela do registro: duas tabelas
+ * com números diferentes para o mesmo vídeo seriam o produto discordando de si.
+ */
+export function metricasDe(d: Desempenho): MetricaDaLinha[] {
+  if (d.familia === "evento") {
+    return [
+      { valor: milhar(d.ingressos), rotulo: "ingressos" },
+      {
+        valor: d.gratuito ? "grátis" : d.receita === null ? "a declarar" : emReais(d.receita),
+        rotulo: "receita",
+        extra: true,
+      },
+      { valor: `${d.ocupacao}%`, rotulo: "ocupação", extra: true },
+    ];
+  }
+  if (d.familia === "audiovisual") {
+    return [
+      { valor: milhar(d.plays), rotulo: "plays" },
+      { valor: minutosLegiveis(d.tempoMedioMinutos), rotulo: "tempo médio", extra: true },
+      { valor: `${d.conclusao}%`, rotulo: "até o fim", extra: true },
+      { valor: milhar(Math.round(d.plays * 0.09)), rotulo: "salvos", extra: true },
+    ];
+  }
+  if (d.familia === "leitura") {
+    return [
+      { valor: milhar(d.leituras), rotulo: "leituras" },
+      { valor: minutosLegiveis(d.tempoMedioMinutos), rotulo: "tempo médio", extra: true },
+      { valor: `${d.ateOFim}%`, rotulo: "até o fim", extra: true },
+    ];
+  }
+  return [
+    { valor: milhar(d.vistas), rotulo: "visualizações" },
+    { valor: milhar(d.salvos), rotulo: "salvos", extra: true },
+    { valor: milhar(d.compartilhamentos), rotulo: "compartilhados", extra: true },
+  ];
 }
 
 /** "1 h 05" acima de uma hora, "12 min" abaixo. */
