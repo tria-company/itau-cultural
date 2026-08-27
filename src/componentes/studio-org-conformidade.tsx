@@ -19,23 +19,23 @@ import {
 import type { MidiaDoAcervo } from "@/dados/organizacao";
 
 /**
- * studio-org-conformidade.tsx — O10 · Conformidade da equipe (funcionalidade 168).
+ * studio-org-conformidade.tsx, O10 · Conformidade da equipe (funcionalidade 168).
  *
  * A FUNCIONALIDADE QUE A AUDITORIA ACHOU. A Organização tinha painel de alcance de público e
- * NÃO via a fila dos próprios produtores — sabia quanta gente viu e não sabia o que estava
+ * NÃO via a fila dos próprios produtores, sabia quanta gente viu e não sabia o que estava
  * parado esperando correção. Esta tela é o inverso do painel de alcance, e as duas moram na
  * mesma superfície de propósito.
  *
  * COMO ELA LÊ A FILA, E POR QUE ISSO É LEGÍTIMO. O registro do produtor mora sob outra chave
- * de armazenamento, escrita pelo nível 7. Esta tela a lê pelo CONTRATO COMPARTILHADO —
+ * de armazenamento, escrita pelo nível 7. Esta tela a lê pelo CONTRATO COMPARTILHADO,
  * `CHAVE_DE_ARMAZENAMENTO` e `RascunhoDoProdutor` são exportados por `tipos-acesso.ts`, que
- * existe exatamente para atravessar níveis — e a lê EM LEITURA: não há neste arquivo nenhum
+ * existe exatamente para atravessar níveis, e a lê EM LEITURA: não há neste arquivo nenhum
  * caminho que escreva no registro do produtor. A organização vê a fila; quem decide sobre ela
  * continua sendo a moderação.
  *
  * A DISTINÇÃO QUE A TORNA ACEITÁVEL. Isto é conformidade, não vigilância: mede o REGISTRO,
- * não a pessoa. O recorte por colaborador existe para a organização corrigir processo — três
- * devoluções pelo mesmo motivo são um problema de instrução, não de quem preencheu —, e
+ * não a pessoa. O recorte por colaborador existe para a organização corrigir processo, três
+ * devoluções pelo mesmo motivo são um problema de instrução, não de quem preencheu,, e
  * nenhuma medida daqui vira nota de desempenho de ninguém. A tela diz isso em cima, e não em
  * letra miúda.
  *
@@ -60,7 +60,7 @@ type FilaDoProdutor = RascunhoDoProdutor[] | null;
  * Confere a forma do que veio da OUTRA chave de armazenamento.
  *
  * É entrada externa duas vezes: escrita por outro nível, e guardada num lugar que qualquer
- * coisa do mesmo domínio pode ter tocado. A checagem é estreita de propósito — confere o que
+ * coisa do mesmo domínio pode ter tocado. A checagem é estreita de propósito, confere o que
  * esta tela realmente lê, e descarta o resto em vez de tentar recuperar.
  */
 function pareceRascunho(v: unknown): v is RascunhoDoProdutor {
@@ -82,7 +82,7 @@ function pareceRascunho(v: unknown): v is RascunhoDoProdutor {
  * Lê a fila do produtor, uma vez, depois de montar.
  *
  * `useEffect` e não render: ler `localStorage` durante o render faria o HTML exportado e a
- * página hidratada divergirem. E a leitura é uma só — esta tela não observa a outra em tempo
+ * página hidratada divergirem. E a leitura é uma só, esta tela não observa a outra em tempo
  * real, porque um painel de conformidade que muda sozinho enquanto alguém o lê é pior do que
  * um que pede recarregamento.
  */
@@ -166,7 +166,7 @@ export function StudioOrgConformidade({
     return Math.round(soma / registros.length);
   }, [registros]);
 
-  /** O que falta, NOMEADO — nunca «3 registros incompletos». */
+  /** O que falta, NOMEADO, nunca «3 registros incompletos». */
   const faltasNomeadas = useMemo(() => {
     const saida: { texto: string; dono: string | null }[] = [];
 
@@ -188,7 +188,7 @@ export function StudioOrgConformidade({
 
     for (const m of midias) {
       if (!midiaPublica(m.creditoImagem, org.midias[m.id])) {
-        saida.push({ texto: `a mídia «${m.titulo}» não publica — falta crédito`, dono: null });
+        saida.push({ texto: `a mídia «${m.titulo}» não publica, falta crédito`, dono: null });
       }
     }
 
@@ -232,7 +232,7 @@ export function StudioOrgConformidade({
           <p className="studio-nota">
             Nenhum registro do produtor foi encontrado sob a chave compartilhada. Isso não quer
             dizer que a organização não tem produção: quer dizer que a jornada do nível 7 ainda
-            não rodou <strong>neste navegador</strong>. Abra a superfície do produtor e volte —
+            não rodou <strong>neste navegador</strong>. Abra a superfície do produtor e volte,
             a tela lê o mesmo armazenamento, e não um servidor.
           </p>
         </section>
@@ -255,14 +255,14 @@ export function StudioOrgConformidade({
                     data-estado={s.quantos > 0 ? "oferece" : "declarado-ausente"}
                   >
                     <span>
-                      {ROTULO_DA_SITUACAO[s.situacao]} — {s.quantos}
+                      {ROTULO_DA_SITUACAO[s.situacao]}, {s.quantos}
                     </span>
                   </li>
                 ))}
               </ul>
               <p className="studio-campo-nota">
                 Score médio dos cadastros: <strong>{scoreMedio}%</strong>. Ele é calculado pela
-                MESMA função que o produtor vê na tela dele — duas contas fariam a organização
+                MESMA função que o produtor vê na tela dele, duas contas fariam a organização
                 cobrar um número que quem preenche nunca viu.
               </p>
             </section>
@@ -293,7 +293,7 @@ export function StudioOrgConformidade({
               <h2 className="studio-painel-nome">As três portas, somadas</h2>
               <p className="studio-nota">
                 Cada porta é uma falta que depende de outro nível. Nenhuma delas bloqueia o
-                envio — elas seguem junto, nomeadas, com o responsável.
+                envio, elas seguem junto, nomeadas, com o responsável.
               </p>
               <ul className="org-falta">
                 {porPorta.map((p) => (
@@ -303,7 +303,7 @@ export function StudioOrgConformidade({
                     data-bloqueia={p.quantos > 0 ? "sim" : "nao"}
                   >
                     <span>
-                      {PORTAS[p.porta].estado} — {p.quantos}
+                      {PORTAS[p.porta].estado}, {p.quantos}
                     </span>
                     <span className="org-falta-dono">{PORTAS[p.porta].nivel}</span>
                   </li>
@@ -342,7 +342,7 @@ export function StudioOrgConformidade({
               {faltasNomeadas.length > 40 ? (
                 <p className="studio-campo-nota">
                   Mostrando 40 de {faltasNomeadas.length}. O corte é da lista, e está declarado
-                  — uma lista truncada em silêncio faria a fila parecer menor do que é.
+                 , uma lista truncada em silêncio faria a fila parecer menor do que é.
                 </p>
               ) : null}
             </section>

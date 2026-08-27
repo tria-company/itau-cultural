@@ -4,6 +4,46 @@ Escrito na madrugada de 22/08/2026, enquanto você dormia.
 
 ---
 
+## Perfil Produtor — 26/08/2026
+
+**Quem alimenta o produto**, que era a metade que o protótipo não mostrava.
+
+O que existe hoje, e onde:
+
+| | |
+|---|---|
+| Contrato | `src/dados/tipos-produtor.ts` — 11 pautas, união discriminada, `impedimentosDe` como função única |
+| Armazém | `src/componentes/produtor-estado.ts` — chave `produtor.v1`, absorve `studio.v1` sem apagá-la |
+| Semente | `src/dados/mock/seed-produtor.ts` — 16 registros, determinística, todos de entidades reais |
+| Painel | `/studio` — a tela P1, que nunca existiu |
+| Fichas | agenda (8 atos, 8 rotas), play, cast, museu, cursos, editorial, curadoria, programa, editais, espaços, mídia |
+| Telas novas | `/studio` (P1), `/studio/comercial` (P7, que `tipos-acesso.ts:643` já referenciava), `/studio/natureza`, `/studio/catalogos` |
+| Primitivas | `base/`: ficha em atos, folha, seletor de catálogo, campo com proposta, ato de declarar, ficha de acessibilidade, impedimentos, visibilidade, campo de imagem, seletores de tempo, prévia, editor de blocos, barra de ação |
+| Folha | `src/estilos/studio-produtor.css` — prefixo `.prod-*` (o nome `produtor.css` já é da página pública `/produtor/[slug]`) |
+| Portão | `npm run verificar-produtor` · 36 verdes · `--provar-ausencias` com 5 defeitos |
+
+**As três decisões que mudaram o produto:**
+
+1. **D-67 invertido para o Studio.** Ele é mobile-first e abre no telefone; as outras cinco
+   superfícies de bastidor continuam web-only, cada uma com o próprio layout. Os dois
+   portões que afirmavam a regra antiga foram REESCRITOS e passaram a medir mais — antes,
+   uma afirmação; agora, duas.
+
+2. **Publicação direta.** O produtor publica e o registro vai ao ar. A Moderação virou
+   fiscalização posterior, e a fila declara isso na própria tela.
+
+3. **A Organização foi separada.** Sete das dez telas dela descreviam ações que ela não fará
+   — espaço, mídia, programa, formação, editais, lote, alcance — e passaram ao Produtor.
+   Ficam com ela a ficha da instituição, a verificação, a equipe e as alçadas. Cada tela
+   declara de que lado ficou. **A forma nova da Organização não está desenhada.**
+
+**O que a demonstração NÃO sustenta, e diz que não sustenta:** não há banco, não há
+autenticação e não há usuários. O que o produtor publica vive no `localStorage` deste
+navegador e aparece na vitrine numa seção que declara isso. O número de «pessoas que serão
+avisadas» é autorado e determinístico.
+
+---
+
 ## O que está pronto
 
 **Fase 1 — Fundação: concluída e verificada.**

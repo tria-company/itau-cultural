@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Casca } from "@/componentes/casca";
+import { PapelProvider } from "@/contexto/papel";
 import { SessaoProvider } from "@/contexto/sessao";
 import { ViewProvider } from "@/contexto/visao";
 import { HEROIS } from "@/dados/heroi";
@@ -9,7 +10,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Itaú Cultural",
   description:
-    "Protótipo de agenda cultural brasileira sobre o acervo do Itaú Cultural — uma visão app e uma visão web, do mesmo conjunto de componentes.",
+    "Protótipo de agenda cultural brasileira sobre o acervo do Itaú Cultural: uma visão app e uma visão web, do mesmo conjunto de componentes.",
   appleWebApp: {
     capable: true,
     title: "Itaú Cultural",
@@ -58,7 +59,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script src="/antes-da-pintura.js" />
         <ViewProvider>
           <SessaoProvider>
-            <Casca>{children}</Casca>
+            {/* O papel entra DENTRO da sessão e FORA da casca: ele não depende de
+                persona, e a casca já é o primeiro consumidor — o menu lateral que ela
+                monta filtra o grupo de bastidor por papel. */}
+            <PapelProvider>
+              <Casca>{children}</Casca>
+            </PapelProvider>
           </SessaoProvider>
         </ViewProvider>
       </body>

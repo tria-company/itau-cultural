@@ -7,8 +7,8 @@ import {
   ICONE_SETA,
   ICONE_TOCAR,
 } from "@/componentes/base/icones";
+import { HubBastidor } from "@/componentes/hub-bastidor";
 import {
-  ATALHOS_BASTIDOR,
   GRUPOS_APPS,
   TOTAL_APPS,
   type Atalho,
@@ -220,11 +220,12 @@ export function HubApps() {
 
       {/* «Sua conta» saiu daqui em 23/08: salvos, repertório e perfil moram no
           menu do ícone de conta, no alto da tela. Eles não são aplicativos — são
-          o que é da pessoa —, e no fim de uma lista de capas ninguém os achava. */}
-      <section className="hub-grupo hidden desk:block">
-        <h2 className="tipo-titulo-3 font-bold">Bastidor</h2>
-        <ListaAtalhos atalhos={ATALHOS_BASTIDOR} />
-      </section>
+          o que é da pessoa —, e no fim de uma lista de capas ninguém os achava.
+
+          O bastidor virou componente próprio em 2026-08: ele passou a ser recortado pelo
+          PAPEL escolhido, e isso mora no navegador — filtrar aqui marcaria as 34 capas
+          desta prateleira como conteúdo de cliente por causa de quatro links. */}
+      <HubBastidor />
     </div>
   );
 }

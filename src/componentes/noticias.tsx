@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { PublicadoPeloProdutor } from "@/componentes/publicado-pelo-produtor";
 import Link from "next/link";
 import { ICONE_BUSCAR } from "@/componentes/base/icones";
 import { CartaoLeitura, dataCurta, type PorteLeitura } from "@/componentes/cartao-leitura";
@@ -169,6 +170,12 @@ export function NoticiasHub() {
 
   return (
     <div className="noticias">
+      {/* O QUE ESTE NAVEGADOR PUBLICOU pelo Studio. Fica ACIMA do conteúdo do build e
+          declara que não está no acervo: o protótipo é um artefato estático e não tem
+          servidor para receber publicação. Sem este bloco, a jornada do produtor terminaria
+          no vazio — ele aperta publicar e a vitrine não muda. */}
+      <PublicadoPeloProdutor pauta="editorial" titulo="Publicado por você nesta demonstração" />
+
       <Expediente
         titulo="Notícias"
         meta={dataDaCapa ? `Capa de ${dataDaCapa}` : "Capa editorial"}

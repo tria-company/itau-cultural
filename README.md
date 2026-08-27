@@ -28,9 +28,49 @@ npx http-server out -p 3000
 **Um controle no canto inferior direito.** O par **App / Web** alterna as duas visões ao
 vivo. O tema acompanha o sistema operacional — claro ou escuro, sem botão.
 
-**Comece por `/roteiro`** (visão Web). É a tela feita para conduzir uma apresentação: os cinco
+**Comece por `/roteiro`** (visão Web). É a tela feita para conduzir uma apresentação: os
 cenários do RFP, cada um com um botão que põe a visão certa, semeia a persona e leva à
 primeira tela.
+
+---
+
+## O perfil Produtor (2026-08)
+
+**Quem alimenta o produto.** Até aqui o protótipo mostrava o que o público vê e o que o
+acervo sustenta. O perfil Produtor mostra a outra metade: **como o conteúdo chega lá.**
+
+```
+/entrar  →  «Perfis de demonstração»  →  Produtor  →  /studio
+```
+
+**Onze pautas, um Studio.** Agenda, Play, Cast, Museu, Cursos, Editorial, Curadoria,
+Programa, Editais, Espaços e Mídia — cada uma com ficha própria, e todas com os mesmos três
+atos: identidade, acessibilidade e publicação.
+
+**Publicação direta, fiscalização posterior.** O produtor publica e o registro vai ao ar; a
+Moderação passou a decidir sobre o que já está público — por amostragem, duplicata e
+denúncia. Suspender e vetar continuam cobrando motivo escrito, e agora isso pesa mais:
+suspender tira do ar algo que o público já viu.
+
+**O Studio é mobile-first**, e é a única exceção a D-67: quem produz cultura no Brasil
+produz do telefone. Moderação, Redação, Observatório e Administração continuam sendo
+superfícies de desktop, e continuam declarando isso. Ver `docs/ARQUITETURA.md` §2.
+
+**Sem banco.** Tudo vive no `localStorage`, sob a chave `produtor.v1`, com semente
+determinística e um botão de **reiniciar demonstração** — uma apresentação roda duas vezes.
+O que o produtor publica aparece na vitrine numa seção que DECLARA o que é: «publicado por
+você nesta demonstração — não está no acervo». O artefato é estático e não há servidor para
+receber publicação; dizer isso é melhor do que fingir.
+
+**O que ele NÃO faz:** reescrever verbete de artista real na Enciclopédia. Ali ele
+referencia, vincula com papel e propõe — e quem decide é a Moderação. É regra ética, não
+limitação técnica.
+
+| Portão | O que mede |
+|---|---|
+| `npm run verificar-produtor` | D-67 nas duas metades · nenhum `fixed` na moldura · a dobra · a dupla trava de publicar · a colisão da grade forçada · cada pauta chegando à sua vitrine · determinismo e reinício · console limpo |
+| `npm run verificar-produtor -- --provar-ausencias` | injeta cinco defeitos, um a um, reconstrói e confere que cada gate fica VERMELHO. Custa um `next build` por defeito |
+| `npm run testar-semente-produtor` | a semente é byte a byte igual em duas leituras, cobre as onze pautas, e nada semeado como «publicado» tem impedimento |
 
 ---
 
@@ -42,7 +82,7 @@ primeira tela.
 | Páginas exportadas | 2.463 |
 | Entidades no grafo | 7.810 em 19 classes |
 | Arestas | 66.563, todas com motivo legível |
-| Portões de verificação | 468 verdes em cinco suítes |
+| Portões de verificação | mais de 500 verdes em seis suítes |
 | Requisições externas em execução | **zero** |
 | Acervo coletado | 2.534 do site + 110.390 da Enciclopédia |
 

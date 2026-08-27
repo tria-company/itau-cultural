@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PublicadoPeloProdutor } from "@/componentes/publicado-pelo-produtor";
 import { useEffect, useMemo, useState } from "react";
 import { AcoesDoCartaz } from "@/componentes/base/acoes-do-cartaz";
 import { Chip, Estante } from "@/componentes/base/chip";
@@ -305,6 +306,12 @@ export function Cast({
 
   return (
     <section data-cast className="cast">
+      {/* O QUE ESTE NAVEGADOR PUBLICOU pelo Studio. Fica ACIMA do conteúdo do build e
+          declara que não está no acervo: o protótipo é um artefato estático e não tem
+          servidor para receber publicação. Sem este bloco, a jornada do produtor terminaria
+          no vazio — ele aperta publicar e a vitrine não muda. */}
+      <PublicadoPeloProdutor pauta="cast" titulo="Publicado por você nesta demonstração" />
+
       {/* PEQUENA DE PROPÓSITO: a referência abre com as pílulas e o conteúdo
           logo abaixo. Um cabeçalho alto empurraria a primeira capa para fora da
           dobra. */}

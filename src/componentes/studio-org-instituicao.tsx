@@ -20,20 +20,20 @@ import type {
 } from "@/dados/organizacao";
 
 /**
- * studio-org-instituicao.tsx — O1 · Ficha da instituição (funcionalidades 141 e parte da
+ * studio-org-instituicao.tsx, O1 · Ficha da instituição (funcionalidades 141 e parte da
  * 142): a identidade que responde pelo que a organização publica.
  *
  * ELA HERDA O PADRÃO DA O2, e não o contrário. Começar pela ficha da instituição parece
  * natural e é um erro: é a tela de espaços que fixa o ato explícito de declarar ausência,
  * e a instituição copia o padrão já resolvido. Por isso o editor da ficha aqui é
- * literalmente o mesmo componente — `EditorDeAcessibilidade` —, e não uma segunda
+ * literalmente o mesmo componente, `EditorDeAcessibilidade`,, e não uma segunda
  * implementação com os mesmos treze campos.
  *
  * O QUE ELA NÃO FAZ, e a ausência é o argumento:
  *
  *  - **Não se verifica.** Quem verifica é o Admin (92). A tela encaminha, mostra o que
  *    falta para o pedido ser aceito, e para aí. Uma organização que atestasse a si mesma
- *    produziria um selo que não afirma nada — e a tela diz isso em vez de esconder.
+ *    produziria um selo que não afirma nada, e a tela diz isso em vez de esconder.
  *  - **Não reescreve o verbete.** As 246 instituições são 100% `ic`: nome, resumo e
  *    linguagem vêm da Enciclopédia, e o Studio referencia e propõe, nunca edita o verbete
  *    de um agente real. O que a O1 escreve é o que o verbete NÃO tem.
@@ -151,7 +151,7 @@ export function StudioOrgInstituicao({
         ))}
       </section>
 
-      {/* O seletor fica ACIMA das duas colunas porque troca o assunto da tela inteira —
+      {/* O seletor fica ACIMA das duas colunas porque troca o assunto da tela inteira,
           enterrá-lo numa coluna faria parecer um filtro daquela coluna. */}
       <div className="studio-seletor">
         <label className="studio-seletor-campo">
@@ -174,14 +174,14 @@ export function StudioOrgInstituicao({
             {opcoes.map((i) => (
               <option key={i.id} value={i.id}>
                 {i.titulo}
-                {i.eventosRealizados > 0 ? ` — realiza ${i.eventosRealizados}` : ""}
+                {i.eventosRealizados > 0 ? `, realiza ${i.eventosRealizados}` : ""}
               </option>
             ))}
           </select>
         </label>
         <p className="studio-campo-nota">
           O acervo não tem instituição chamada «{organizacao}»: as {numeros.total} vêm da
-          Enciclopédia, e a demonstração abre por REGRA — a primeira em ordem de título entre
+          Enciclopédia, e a demonstração abre por REGRA, a primeira em ordem de título entre
           as {numeros.queRealizam} que realizam evento. Escolha manual aqui seria mais um
           lugar dependendo de alguém lembrar de atualizar depois de uma regeração do grafo.
         </p>
@@ -212,7 +212,7 @@ export function StudioOrgInstituicao({
                 <p className="studio-nota">{atual.resumo}</p>
               ) : (
                 <p className="studio-nota">
-                  O verbete desta instituição não traz resumo — {numeros.comResumo} de{" "}
+                  O verbete desta instituição não traz resumo, {numeros.comResumo} de{" "}
                   {numeros.total} trazem.
                 </p>
               )}
@@ -255,7 +255,7 @@ export function StudioOrgInstituicao({
               <p className="studio-nota">
                 {atual.temCoordenada
                   ? "Esta instituição tem coordenada própria."
-                  : `Esta instituição não tem coordenada própria — nenhuma das ${numeros.total} tem. Ela ainda pode aparecer no mapa por herança do município; o que falta é o ponto ser da porta e não da cidade.`}
+                  : `Esta instituição não tem coordenada própria, nenhuma das ${numeros.total} tem. Ela ainda pode aparecer no mapa por herança do município; o que falta é o ponto ser da porta e não da cidade.`}
               </p>
 
               <label className="studio-campo">
@@ -313,7 +313,7 @@ export function StudioOrgInstituicao({
                       />
                       <span className="studio-campo-nota">
                         Esta é uma das {numeros.comImagemSemCredito} instituições com imagem e
-                        sem crédito. Nenhuma imagem publica sem crédito (165) — enquanto o
+                        sem crédito. Nenhuma imagem publica sem crédito (165), enquanto o
                         campo estiver vazio, esta não publica.
                       </span>
                     </label>
@@ -321,7 +321,7 @@ export function StudioOrgInstituicao({
                 </>
               ) : (
                 <p className="studio-nota">
-                  Esta instituição não tem imagem no acervo — {numeros.comImagem} de{" "}
+                  Esta instituição não tem imagem no acervo, {numeros.comImagem} de{" "}
                   {numeros.total} têm. Não há upload neste protótipo, e a tela diz isso em vez
                   de simular um.
                 </p>
@@ -373,7 +373,7 @@ export function StudioOrgInstituicao({
               </div>
               {ficha?.verificacao === "solicitada" ? (
                 <p className="studio-travado">
-                  O pedido está com o Admin (92). Esta tela não tem como marcar «verificada» —
+                  O pedido está com o Admin (92). Esta tela não tem como marcar «verificada»,
                   e não ter é o ponto.
                 </p>
               ) : null}

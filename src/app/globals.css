@@ -12,6 +12,8 @@
 
 /* A navegação da visão web: o trilho lateral. */
 @import "../estilos/menu-lateral.css";
+/* O seletor de tipo de acesso, presente em toda tela de perfil. */
+@import "../estilos/acesso.css";
 
 /* A navegação da visão app: quatro abas numa pílula flutuante + o quinto botão
  * que abre `/apps`, e a folha do hub que ele abre. */
@@ -127,6 +129,16 @@
  * duas colunas de `web.css` — as duas entram antes. Ela NÃO toca `studio.css`,
  * que é da S7 · Produtor, com quem esta sessão divide a pasta. */
 @import "../estilos/organizacao.css";
+
+/* A folha do perfil PRODUTOR (2026-08): o Studio mobile-first, com trilho de pautas,
+ * painel, ficha em atos e barra de ação. Vem DEPOIS de `studio.css` e de
+ * `organizacao.css` porque acrescenta sobre as duas — o compartilhado sempre antes do
+ * específico, como a fase 4 fixou — e nunca redefine as seis classes públicas de lá.
+ *
+ * O nome tem prefixo `studio-` porque `produtor.css` já existe e é OUTRA TELA: a página
+ * pública `/produtor/[slug]`, com o prefixo `.pr-*`. As duas convivem; o prefixo daqui é
+ * `.prod-*`. */
+@import "../estilos/studio-produtor.css";
 
 /* ---------------------------------------------------------------------------
  * A base visual (camada base tipográfica, moldura D-03, cartão)

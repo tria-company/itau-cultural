@@ -12,16 +12,16 @@ import {
 } from "@/dados/duplicatas";
 
 /**
- * Studio — resolução de duplicatas (tela 31, STUD-01). **Cenário 3 do RFP.**
+ * Studio, resolução de duplicatas (tela 31, STUD-01). **Cenário 3 do RFP.**
  *
  * Página de SERVIDOR. Ela é quem chama `@/dados/duplicatas` por valor, no build, e passa
  * adiante DTOs só de primitivo. O componente de cliente recebe os DTOs e importa o módulo
- * apenas por tipo — é essa fronteira, e só ela, que impede 23 MB de grafo de atravessar
+ * apenas por tipo, é essa fronteira, e só ela, que impede 23 MB de grafo de atravessar
  * para o navegador (DP-F).
  *
  * A FILA INTEIRA VAI JUNTO, e é decisão e não descuido. São 84 grupos já achatados em
- * registro de comparação — título, chave, procedência, contagem de ocorrências, período e
- * variação —, e nenhuma `Entidade` inteira. É esse achatamento que permite trocar de grupo
+ * registro de comparação, título, chave, procedência, contagem de ocorrências, período e
+ * variação, e nenhuma `Entidade` inteira. É esse achatamento que permite trocar de grupo
  * sem navegar: uma rota por grupo geraria 84 páginas e faria quem opera perder o lugar na
  * fila a cada clique.
  *

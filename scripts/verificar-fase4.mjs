@@ -1056,12 +1056,26 @@ async function gateContratoNoHtml() {
 }
 
 // ---------------------------------------------------------------------------
-// (c) A CASCA NA VISÃO WEB — D-67 e D-78.
+// (c) A CASCA NA VISÃO WEB — D-67 e D-78, REESCRITO EM 2026-08.
 //
-// As três telas desta fase são as primeiras densas do lado WEB. O aviso de superfície de
-// desktop aparece na visão app nas três rotas, e o botão que troca a visão é exercitado
-// POR CLIQUE em cada uma — não por escrita em `localStorage`. Um botão que existe e não
-// funciona é a forma de defeito que só o clique pega.
+// O QUE MUDOU, E POR QUE NÃO É AFROUXAMENTO. Até aqui este bloco afirmava uma coisa só:
+// «nas três rotas da fase, na visão app, o conteúdo de bastidor está invisível». Isso valia
+// enquanto `(bastidor)/layout.tsx` escondia as 52 rotas com um `app:hidden` só.
+//
+// O perfil Produtor inverteu a regra para UMA superfície. O Studio passou a ser
+// mobile-first — quem produz cultura no Brasil produz do telefone, e uma ferramenta de
+// publicação que só existe no computador não é usada. Moderação, Redação, Observatório,
+// Administração e o roteiro continuam web-only.
+//
+// ENTÃO O PORTÃO PASSA A MEDIR AS DUAS METADES, e é por isso que ele mede MAIS do que
+// media: onde havia uma afirmação («escondido»), agora há duas — «escondido onde a regra
+// diz escondido» E «visível onde a regra diz visível». A segunda metade é nova, e é ela que
+// pega o defeito que a versão anterior não pegaria: um `app:hidden` esquecido no Studio
+// deixaria a superfície inteira invisível no telefone, e o gate antigo daria verde.
+//
+// O botão que troca a visão continua exercitado POR CLIQUE nas rotas que o têm — não por
+// escrita em `localStorage`. Um botão que existe e não funciona é a forma de defeito que só
+// o clique pega.
 // ---------------------------------------------------------------------------
 
 async function gatesDaCasca(cdp, base) {
@@ -1085,8 +1099,17 @@ async function gatesDaCasca(cdp, base) {
 
   const visaoAtual = () => cdp.avaliar("document.querySelector('[data-view]').getAttribute('data-view')");
 
-  // O aviso, e o botão POR CLIQUE, nas três rotas.
+  // Cada rota da fase declara qual metade da regra ela representa. A lista mora aqui e
+  // não em `ROTAS_DA_FASE_4` porque a constante é lida por outros blocos, que não têm nada
+  // a ver com D-67.
+  const REGRA_DE_SUPERFICIE = {
+    "/studio/duplicatas/": "visivel-no-app",
+    "/studio/ocorrencias/": "visivel-no-app",
+    "/roteiro/": "so-web",
+  };
+
   for (const rota of ROTAS_DA_FASE_4) {
+    const regra = REGRA_DE_SUPERFICIE[rota];
     await cdp.avaliar(`localStorage.setItem('agenda-cultural:visao', 'mobile')`);
     await irPara(cdp, `${base}${rota}`);
     const naApp = await cdp.avaliar(
@@ -1102,27 +1125,62 @@ async function gatesDaCasca(cdp, base) {
         };
       `),
     );
+
+    if (regra === "so-web") {
+      // A METADE ANTIGA, intacta: a superfície declara que o trabalho é de tela grande, e
+      // o conteúdo denso não aparece espremido em 390px.
+      exigir(
+        naApp.view === "mobile" && naApp.avisoVisivel && naApp.botaoVisivel && !naApp.conteudoVisivel,
+        `D-67/D-78 · ${rota} continua web-only e DECLARA isso na visão app`,
+        `view=${naApp.view} · «${naApp.aviso}» · botão visível: ${naApp.botaoVisivel} · conteúdo de bastidor visível: ${naApp.conteudoVisivel}`,
+        "aviso e botão visíveis, conteúdo escondido",
+      );
+
+      await cdp.clicar(
+        `Array.from(document.querySelectorAll('button')).find(b => /Trocar para a visão Web/i.test(b.textContent || ''))`,
+      );
+      await respirar(500);
+      const depois = await cdp.avaliar(
+        naPagina4(`return {
+          view: document.querySelector('[data-view]').getAttribute('data-view'),
+          conteudoVisivel: contaVisiveis('[data-fila-duplicatas], [data-evento-imutavel], [data-roteiro]') > 0,
+        };`),
+      );
+      exigir(
+        depois.view === "web" && depois.conteudoVisivel,
+        `o botão do aviso troca a visão POR CLIQUE em ${rota}`,
+        `view=${depois.view} · conteúdo de bastidor visível: ${depois.conteudoVisivel}`,
+        "web, com o conteúdo aparecendo",
+      );
+      continue;
+    }
+
+    // A METADE NOVA. O Studio é mobile-first: na visão app o conteúdo APARECE, e o aviso
+    // de superfície de desktop NÃO existe — o layout dele não monta `SuperficieSoWeb`.
+    //
+    // As duas condições são afirmadas juntas de propósito. Só «conteúdo visível» deixaria
+    // passar uma tela que mostra o conteúdo E o aviso ao mesmo tempo, que é contraditório;
+    // só «sem aviso» deixaria passar uma tela invisível por outro motivo.
     exigir(
-      naApp.view === "mobile" && naApp.avisoVisivel && naApp.botaoVisivel && !naApp.conteudoVisivel,
-      `D-67/D-78 · ${rota} na visão app declara que o trabalho é de tela grande`,
-      `view=${naApp.view} · «${naApp.aviso}» · botão visível: ${naApp.botaoVisivel} · conteúdo de bastidor visível: ${naApp.conteudoVisivel}`,
-      "aviso e botão visíveis, conteúdo escondido",
+      naApp.view === "mobile" && naApp.conteudoVisivel && !naApp.avisoVisivel,
+      `D-67 invertido · ${rota} é mobile-first e ABRE na visão app`,
+      `view=${naApp.view} · conteúdo visível: ${naApp.conteudoVisivel} · aviso de desktop visível: ${naApp.avisoVisivel}`,
+      "conteúdo visível, sem aviso de superfície de desktop",
     );
 
-    await cdp.clicar(
-      `Array.from(document.querySelectorAll('button')).find(b => /Trocar para a visão Web/i.test(b.textContent || ''))`,
-    );
-    await respirar(500);
-    const depois = await cdp.avaliar(
+    // E ele continua funcionando na web: a inversão não trocou uma visão pela outra.
+    await cdp.avaliar(`localStorage.setItem('agenda-cultural:visao', 'web')`);
+    await irPara(cdp, `${base}${rota}`);
+    const naWeb = await cdp.avaliar(
       naPagina4(`return {
         view: document.querySelector('[data-view]').getAttribute('data-view'),
         conteudoVisivel: contaVisiveis('[data-fila-duplicatas], [data-evento-imutavel], [data-roteiro]') > 0,
       };`),
     );
     exigir(
-      depois.view === "web" && depois.conteudoVisivel,
-      `o botão do aviso troca a visão POR CLIQUE em ${rota}`,
-      `view=${depois.view} · conteúdo de bastidor visível: ${depois.conteudoVisivel}`,
+      naWeb.view === "web" && naWeb.conteudoVisivel,
+      `${rota} continua respondendo na visão web — a inversão não trocou uma pela outra`,
+      `view=${naWeb.view} · conteúdo visível: ${naWeb.conteudoVisivel}`,
       "web, com o conteúdo aparecendo",
     );
   }

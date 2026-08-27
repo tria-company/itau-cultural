@@ -7,18 +7,18 @@ import { O_QUE_O_ALCANCE_NAO_SUSTENTA, REGRA_DO_ALCANCE } from "@/dados/tipos-or
 import type { EventoParaPrograma, InstituicaoDoAcervo } from "@/dados/organizacao";
 
 /**
- * studio-org-alcance.tsx — O9 · Alcance consolidado (funcionalidade 152).
+ * studio-org-alcance.tsx, O9 · Alcance consolidado (funcionalidade 152).
  *
  * É A TELA ONDE É MAIS FÁCIL MENTIR, e por isso metade dela é a lista do que ela se recusa a
  * exibir. Sinal de público real não existe no acervo: nenhuma ocorrência declara lotação,
  * bilheteria ou contagem de porta, e o contador de reprodução mora no serviço que serve o
- * arquivo — não há um. Um painel institucional com número de alcance inventado destrói o
+ * arquivo, não há um. Um painel institucional com número de alcance inventado destrói o
  * argumento de procedência da proposta inteira, e num painel assim ninguém confere: é
  * exatamente isso que torna a mentira barata.
  *
  * O QUE ELA EXIBE É O QUE ELA CONTA. Eventos realizados, sessões somadas, linguagens e
  * territórios cobertos são arestas do grafo. O que não se conta aparece NOMEADO, com o
- * motivo, na mesma coluna e no mesmo tamanho do que se conta — porque a recusa é o conteúdo,
+ * motivo, na mesma coluna e no mesmo tamanho do que se conta, porque a recusa é o conteúdo,
  * e não uma ressalva de rodapé.
  *
  * A INSTITUIÇÃO É A QUE A O1 ESCOLHEU. As duas telas leem o mesmo campo do mesmo estado, e
@@ -152,7 +152,7 @@ export function StudioOrgAlcance({
               </p>
               <p className="studio-campo-nota">
                 «Realiza» é de MUITOS PARA MUITOS no acervo: o mesmo evento costuma ser
-                realizado por várias instituições, e estes números são a fatia desta — não uma
+                realizado por várias instituições, e estes números são a fatia desta, não uma
                 fatia exclusiva. Um campo único de realizador faria as outras instituições do
                 mesmo evento verem zero aqui, cada uma achando que não realiza nada.
               </p>
@@ -162,7 +162,7 @@ export function StudioOrgAlcance({
               <h2 className="studio-painel-nome">Por linguagem</h2>
               {porLinguagem.length === 0 ? (
                 <p className="studio-campo-nota">
-                  Esta instituição não realiza evento nenhum no acervo — e são {semEventos} de{" "}
+                  Esta instituição não realiza evento nenhum no acervo, e são {semEventos} de{" "}
                   {instituicoes.length} nessa situação.
                 </p>
               ) : (
@@ -209,7 +209,7 @@ export function StudioOrgAlcance({
                   {ocorrenciasComEspaco} de {ocorrencias}
                 </strong>{" "}
                 ocorrências do acervo declaram espaço. Não é «ainda não há dado nesta
-                instituição» — é a ausência que a tela de espaços existe para converter.
+                instituição», é a ausência que a tela de espaços existe para converter.
               </p>
             </section>
           </div>
@@ -235,7 +235,7 @@ export function StudioOrgAlcance({
                 {O_QUE_O_ALCANCE_NAO_SUSTENTA.map((m) => (
                   <li key={m.medida} className="org-falta-item" data-bloqueia="sim">
                     <span>
-                      <strong>{m.medida}</strong> — {m.porque}
+                      <strong>{m.medida}</strong>, {m.porque}
                     </span>
                   </li>
                 ))}

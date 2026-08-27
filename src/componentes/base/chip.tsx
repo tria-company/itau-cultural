@@ -15,20 +15,20 @@ import {
 import { ICONE_CHEVRON_DIREITA, ICONE_CHEVRON_ESQUERDA } from "@/componentes/base/icones";
 
 /**
- * chip.tsx — a primeira primitiva de `base/`, e a que o projeto mais devia.
+ * chip.tsx, a primeira primitiva de `base/`, e a que o projeto mais devia.
  *
  * O QUE ELA SUBSTITUI. Havia OITO vocabulários de pílula no projeto, cada um com
  * seu raio, seu padding, seu tamanho de fonte e sua ideia do que «selecionado»
  * parece: contorno laranja em `/buscar`, fundo laranja em `/play`, fundo preto
  * na estrelinha. Sete deles empilhavam em `flex flex-wrap`, então dentro da
- * moldura de 390px o trilho de filtros quebrava em duas ou três linhas tortas —
+ * moldura de 390px o trilho de filtros quebrava em duas ou três linhas tortas,
  * a «linha quebrada feia» que abriu esta reformulação. Este arquivo é o único
  * vocabulário, e `docs/DESIGN-SYSTEM.md` §4 já o especificava desde agosto.
  *
  * SELECIONADO É PRETO CHEIO, e a razão não é gosto. Branco sobre o laranja da
  * marca mede 2,64:1 e reprova o mínimo de 4,5:1; a tinta sobre o papel mede
  * 21:1 no escuro e 18,7:1 no claro. O chip preto também deixa o laranja livre
- * para significar só AÇÃO — que é o princípio 2 do design system.
+ * para significar só AÇÃO, que é o princípio 2 do design system.
  *
  * A CONTAGEM É SEMPRE O ÚLTIMO FILHO. Não é detalhe de layout: o portão de
  * `/play` lê `chip.innerText.match(/(\d+)\s*$/)` para conferir que o número
@@ -49,7 +49,7 @@ type PropsComuns = {
    * Aceita nó para casos como «3 de 113», que o portão de /play lê inteiro.
    */
   contagem?: ReactNode;
-  /** Vira `data-denominador` no span da contagem — os portões procuram por ele. */
+  /** Vira `data-denominador` no span da contagem, os portões procuram por ele. */
   chaveDaContagem?: string;
   /**
    * O NOME DO TOKEN de cor vindo do dado (`"--ic-lilas"`), nunca um hex e nunca
@@ -70,7 +70,7 @@ type PropsComuns = {
 type PropsBotao = PropsComuns &
   Omit<ComponentPropsWithoutRef<"button">, "children" | "className" | "color"> & {
     /** Vira `aria-pressed`. O desenho sai do atributo de acessibilidade, nunca de
-     *  uma classe paralela — assim não há como o visual e o anunciado divergirem. */
+     *  uma classe paralela, assim não há como o visual e o anunciado divergirem. */
     selecionado?: boolean;
     href?: never;
   };
@@ -88,7 +88,7 @@ export type PropsChip = PropsBotao | PropsLink;
 /**
  * Se o primeiro filho é um SVG, ele é o glifo; o resto é o rótulo.
  * Passar o ícone como filho (e não como prop) deixa o cartão usável a partir
- * de um Server Component — JSX nomeado na prop não atravessa a fronteira.
+ * de um Server Component, JSX nomeado na prop não atravessa a fronteira.
  */
 function partirIcone(children: ReactNode): { icone: ReactNode; rotulo: ReactNode } {
   const itens = Children.toArray(children);
@@ -188,11 +188,11 @@ export function Chip(props: PropsChip) {
 /**
  * O trilho: uma fileira que ROLA na horizontal em vez de quebrar linha.
  *
- * Na visão web ele volta a quebrar linha — lá há largura de sobra e rolagem
+ * Na visão web ele volta a quebrar linha, lá há largura de sobra e rolagem
  * horizontal seria pior. Isso mora no CSS, sob `[data-view="web"]`, e não num
  * ramo de JavaScript: mesma árvore de JSX, outra medida (D-05).
  *
- * `setas` desenha os botões circulares de avançar/voltar — o mesmo recado
+ * `setas` desenha os botões circulares de avançar/voltar, o mesmo recado
  * visual da máscara, em controle. Só aparece quando a fileira realmente
  * transborda; sem overflow o botão mentiria que há mais.
  */
@@ -306,14 +306,14 @@ export function TrilhoDeChips({
   );
 }
 
-/** Porta à direita da estante — só existe quando leva a algum lugar. */
+/** Porta à direita da estante, só existe quando leva a algum lugar. */
 export type PortaDaEstante =
   | { href: string; rotulo: string }
   | { onClick: () => void; rotulo: string };
 
 /**
  * O painel do explorador: título, porta opcional («Ver todas» só quando há
- * destino), trilho com seta. Sem porta o recorte inteiro já está no trilho —
+ * destino), trilho com seta. Sem porta o recorte inteiro já está no trilho,
  * inventar um «ver todas» que não leva a lugar nenhum seria mentira.
  */
 export function Estante({

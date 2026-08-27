@@ -59,6 +59,21 @@ import type { Entidade } from "@/dados/tipos";
 // Falha alta e nomeada — o mesmo molde de `alerta.ts`
 // ---------------------------------------------------------------------------
 
+/**
+ * Quantos cenários vêm do RFP, e quantos são nossos.
+ *
+ * OS CINCO DO RFP SÃO EXIGÊNCIA DO CLIENTE, e o número é fixo: um sexto entrando naquele
+ * grupo seria um cenário inventado passando por pedido da banca. O sexto é NOSSO — ele
+ * responde a pergunta que vem depois dos cinco, sobre quem alimenta a plataforma —, e por
+ * isso é contado à parte.
+ *
+ * As duas constantes existem separadas para a guarda poder dizer QUAL grupo divergiu. Um
+ * total só («seis») deixaria de acusar o caso que importa: cinco viraram quatro e alguém
+ * acrescentou dois nossos para fechar a conta.
+ */
+const CENARIOS_DO_RFP = 5;
+const CENARIOS_NOSSOS = 1;
+
 function romper(detalhe: string): never {
   throw new Error(
     `roteiro.ts: ${detalhe}. O roteiro é o percurso que a banca vai percorrer; ele quebra ` +
@@ -839,9 +854,147 @@ export function montarRoteiro(): RoteiroDTO {
           `cenário já abre traduzida — ninguém precisa digitar nada sob pressão.`,
       },
     },
+
+    // -----------------------------------------------------------------------
+    // CENÁRIO 6, o único que não é sobre quem CONSOME, e sim sobre quem ALIMENTA.
+    //
+    // Os cinco anteriores respondem perguntas do RFP sobre a experiência do público. Este
+    // responde a pergunta que vem depois dela, e que decide se a plataforma existe daqui a
+    // um ano: quem põe o conteúdo lá dentro, e com que trabalho.
+    //
+    // ELE É O ÚNICO QUE TERMINA NUMA TELA PÚBLICA VINDO DO BASTIDOR. É de propósito: o que
+    // ele prova não é uma tela de formulário, é o CICLO, o registro sai do Studio e chega
+    // à vitrine, e o percurso inteiro cabe numa demonstração.
+    // -----------------------------------------------------------------------
+    {
+      numero: 6,
+      titulo: "Quem alimenta a plataforma, e com que trabalho",
+      pergunta:
+        "Depois de provar a experiência do público, sobra a pergunta que decide se ela " +
+        "existe daqui a um ano: quem publica o conteúdo, quanto custa fazer isso, e o que " +
+        "impede alguém de publicar coisa incompleta?",
+      visao: "mobile",
+      visaoRotulo: "visão app",
+      passos: [
+        {
+          ordem: 1,
+          tela: "Entrada, perfis de demonstração",
+          rota: "/entrar/",
+          comoChegar: "digitando",
+          provar:
+            "há cinco perfis, e a tela diz com todas as letras que isto NÃO é autenticação: " +
+            "escolher grava uma preferência no navegador e muda o que a navegação oferece. " +
+            "Num artefato estático toda rota continua abrindo por URL, e não há como não abrir.",
+        },
+        {
+          ordem: 2,
+          tela: "Studio, o painel do produtor",
+          rota: "/studio/",
+          comoChegar: "pelo-botao",
+          provar:
+            "o Studio abre DENTRO DO TELEFONE, é a única superfície de bastidor que faz " +
+            "isso, porque quem produz cultura no Brasil produz do telefone. Onze pautas num " +
+            "trilho só, o que está pendente de você primeiro, e cada pendência com o nível " +
+            "responsável e a saída sem esperar por ele.",
+        },
+        {
+          ordem: 3,
+          tela: "Ficha do evento, identidade",
+          rota: "/studio/publicar/",
+          comoChegar: "pelo-botao",
+          provar:
+            "um ato por tela, e a chave de identidade acendendo: título + agente realizador " +
+            "+ obra. O agente é CARIMBO e não campo, quem publica é quem realiza. O aviso " +
+            "de registro parecido dispara ANTES de salvar e PERMANECE enquanto o título " +
+            "continuar parecido.",
+        },
+        {
+          ordem: 4,
+          tela: "Ficha do evento, grade de sessões",
+          rota: "/studio/grade/",
+          comoChegar: "pelo-botao",
+          provar:
+            "ninguém digita 261 sessões: o gerador diz quantas vai criar e quantas COLIDEM " +
+            "antes de aplicar. Colisão é mesma temporada, mesmo início e mesmo espaço, a " +
+            "chave de ocorrência da ontologia, e não parecença de texto.",
+        },
+        {
+          ordem: 5,
+          tela: "Ficha do evento, publicação",
+          rota: "/studio/revisar/",
+          comoChegar: "pelo-botao",
+          provar:
+            "o botão de publicar está DESABILITADO e diz por quê, item a item, cada um com " +
+            "link para o ato que resolve. E a função recusa por conta própria: são duas " +
+            "travas, não uma aparência de trava.",
+        },
+        {
+          ordem: 6,
+          tela: "Acontece, o publicado no ar",
+          rota: "/acontece/",
+          comoChegar: "digitando",
+          provar:
+            "o evento publicado aparece na agenda, numa seção que DECLARA o que é: está " +
+            "gravado neste navegador e não no acervo. O protótipo é estático e não tem " +
+            "servidor para receber publicação, dizer isso é melhor do que fingir.",
+        },
+      ],
+      sustenta: [
+        "Onze pautas alimentadas pelo mesmo perfil, com as mesmas primitivas: agenda, play, cast, museu, cursos, editorial, curadoria, programa, editais, espaços e mídia.",
+        "Publicação direta, no modelo do Sympla: quem produz publica, e a fiscalização é posterior, a Moderação decide sobre o que já está no ar.",
+        "Toda alteração de sessão publicada diz, ANTES de confirmar, quantas pessoas serão avisadas; cancelar exige motivo escrito.",
+        "Dezesseis catálogos modeláveis, com o alcance de cada termo medido antes de renomear, fundir ou arquivar, e três fechados, cada um dizendo por quê.",
+      ],
+      naoSustenta: {
+        texto:
+          "NÃO HÁ BANCO, NÃO HÁ AUTENTICAÇÃO E NÃO HÁ USUÁRIOS. O que o produtor publica " +
+          "vive no `localStorage` deste navegador, sob a chave `produtor.v1`, e some ao " +
+          "limpar o armazenamento. O número de «pessoas que serão avisadas» é autorado e " +
+          "determinístico, não existe servidor para contar quem salvou o quê. O que a " +
+          "demonstração prova é o MECANISMO: a consequência medida e dita antes de " +
+          "confirmar, a dupla trava da publicação, e o ciclo fechando do bastidor à vitrine.",
+        numeros: ["0", "11", "16"],
+        origem: "autorado · declarado nas próprias telas do Studio",
+      },
+      semeadura: {
+        visao: "mobile",
+        personaId: null,
+        personaNome: null,
+        disposicoes: null,
+        disposicoesRotulos: [],
+        ocorrenciasSalvas: [],
+        descricao:
+          "Põe a visão app e leva à entrada. Este cenário não usa persona: quem entra aqui " +
+          "não é o público, é quem alimenta o produto.",
+      },
+    },
   ];
 
-  if (cenarios.length !== 5) romper(`o RFP tem 5 cenários e este módulo montou ${cenarios.length}`);
+  // ---------------------------------------------------------------------------
+  // A GUARDA DISTINGUE O QUE É DO RFP DO QUE É NOSSO, e a distinção é o ponto.
+  //
+  // Ela dizia `cenarios.length !== 5`, e estava certa: o RFP tem CINCO cenários, e um sexto
+  // aparecendo ali seria um cenário inventado passando por exigência do cliente — que é
+  // exatamente o tipo de coisa que este módulo quebra o build para impedir.
+  //
+  // O Cenário 6 não é do RFP. Ele responde a pergunta que vem DEPOIS dos cinco — quem
+  // alimenta a plataforma —, e a guarda agora conta os dois grupos separados: os cinco do
+  // RFP têm de continuar sendo cinco, e os nossos são declarados à parte. Somar tudo num
+  // número só teria feito a checagem parar de dizer o que ela existe para dizer.
+  // ---------------------------------------------------------------------------
+  const doRfp = cenarios.filter((c) => c.numero <= CENARIOS_DO_RFP);
+  const nossos = cenarios.filter((c) => c.numero > CENARIOS_DO_RFP);
+
+  if (doRfp.length !== CENARIOS_DO_RFP) {
+    romper(
+      `o RFP tem ${CENARIOS_DO_RFP} cenários e este módulo montou ${doRfp.length} deles`,
+    );
+  }
+  if (nossos.length !== CENARIOS_NOSSOS) {
+    romper(
+      `este módulo declara ${CENARIOS_NOSSOS} cenário(s) fora do RFP e montou ${nossos.length}`,
+    );
+  }
   for (const c of cenarios) {
     if (!c.naoSustenta.numeros.length) {
       romper(`o Cenário ${c.numero} declara o limite do acervo sem nenhum número medido (D-77)`);
@@ -855,9 +1008,11 @@ export function montarRoteiro(): RoteiroDTO {
     numeros: n,
     constantesDaOnda: CONSTANTES_DA_ONDA,
     fecho:
-      "Os cinco cenários se resolvem com o MESMO núcleo — a ontologia, o grafo e a " +
+      "Os cinco cenários do RFP se resolvem com o MESMO núcleo — a ontologia, o grafo e a " +
       "procedência. Não são cinco truques independentes: é uma coisa só, vista de cinco " +
-      "ângulos, e é isso que esta demonstração está provando.",
+      "ângulos, e é isso que esta demonstração está provando. O sexto não é do RFP: ele " +
+      "responde a pergunta que vem depois, e que decide se a plataforma existe daqui a um " +
+      "ano — quem põe o conteúdo lá dentro, e com que trabalho.",
     limiteDoRoteiro:
       "Este roteiro não é slide e não substitui as telas. Tudo que ele afirma está a um " +
       "clique de ser conferido no próprio app, e essa é a única forma de guia que este " +

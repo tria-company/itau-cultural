@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * studio-org-estado.ts — o estado do nível 6 · Organização, no navegador.
+ * studio-org-estado.ts, o estado do nível 6 · Organização, no navegador.
  *
  * POR QUE ELE NÃO É `useStudio()`. A loja da S7 existe e o padrão dela é reusado aqui
- * linha a linha — loja de módulo, `useSyncExternalStore`, hidratação dentro de
+ * linha a linha, loja de módulo, `useSyncExternalStore`, hidratação dentro de
  * `useEffect`, validação estreita do que veio do armazenamento. O que NÃO dá para reusar é
  * a instância: `useStudio()` guarda `RascunhoDoProdutor` sob a chave `studio.v1`, e a
- * Organização escreve outras entidades — espaço, instituição, mídia, colaborador, edital,
+ * Organização escreve outras entidades, espaço, instituição, mídia, colaborador, edital,
  * lote. Duas sessões gravando sob a mesma chave apagariam o trabalho uma da outra no
  * primeiro salvamento, e o defeito só apareceria com as duas telas abertas.
  *
@@ -16,7 +16,7 @@
  *
  * `localStorage` SÓ DEPOIS DE MONTAR. O estado nasce `null` e só vira objeto quando
  * `hidratar` roda dentro de um `useEffect`. Ler o armazenamento durante o render faria o
- * HTML exportado e a página hidratada divergirem — e o conteúdo divergente seria o
+ * HTML exportado e a página hidratada divergirem, e o conteúdo divergente seria o
  * trabalho de quem está cadastrando.
  *
  * SEM RELÓGIO. O carimbo é a data de referência do build, que chega junto com o contexto.
@@ -55,7 +55,7 @@ import type {
  *
  * Versionada porque a forma do cadastro vai crescer a cada tela desta sessão, e um estado
  * antigo lido com forma nova quebraria a demonstração em silêncio no navegador de quem já
- * tinha aberto a página — que é pior do que quebrar alto, porque ninguém veria.
+ * tinha aberto a página, que é pior do que quebrar alto, porque ninguém veria.
  */
 export const CHAVE_DA_ORGANIZACAO = "studio.org.v1";
 
@@ -71,24 +71,24 @@ interface EstadoPersistido {
    *  113 páginas. */
   atualId: string | null;
   /**
-   * As fichas institucionais, por id — a O1.
+   * As fichas institucionais, por id, a O1.
    *
    * ENTROU POR EXTENSÃO ADITIVA, e a versão NÃO subiu junto: quem já tinha estado gravado
    * pela tela de espaços continua com o cadastro dele, e o campo novo nasce vazio. Subir a
    * versão aqui apagaria o trabalho de quem estava no meio da demonstração para acrescentar
-   * um campo que ninguém tinha preenchido ainda — o custo seria real e o ganho, nenhum.
+   * um campo que ninguém tinha preenchido ainda, o custo seria real e o ganho, nenhum.
    * A versão sobe quando a forma de um campo EXISTENTE mudar, que é quando ler o antigo com
    * o código novo quebra de verdade.
    */
   instituicoes: Record<string, CadastroDeInstituicao>;
   atualInstituicaoId: string | null;
-  /** A equipe e o histórico dela — a O7. Também aditivo, também sem subir a versão. */
+  /** A equipe e o histórico dela, a O7. Também aditivo, também sem subir a versão. */
   equipe: Colaborador[];
   historicoDaEquipe: EntradaDeEquipe[];
-  /** O acervo de ativos — a O5. Aditivo, como os anteriores. */
+  /** O acervo de ativos, a O5. Aditivo, como os anteriores. */
   midias: Record<string, CadastroDeMidia>;
   atualMidiaId: string | null;
-  /** Os programas criados na demonstração — a O3. Lista e não mapa: eles NASCEM aqui, e
+  /** Os programas criados na demonstração, a O3. Lista e não mapa: eles NASCEM aqui, e
    *  não existe id de acervo para servir de chave. */
   programas: Programa[];
   atualProgramaId: string | null;
@@ -96,7 +96,7 @@ interface EstadoPersistido {
   formacoes: Record<string, CadastroDeFormacao>;
   atualFormacaoId: string | null;
   visitas: VisitaEducativa[];
-  /** Os editais — a O6. Lista, como os programas: eles NASCEM aqui, porque a classe não
+  /** Os editais, a O6. Lista, como os programas: eles NASCEM aqui, porque a classe não
    *  existe no acervo. */
   editais: Edital[];
   atualEditalId: string | null;
@@ -112,7 +112,7 @@ export interface ContextoDaOrganizacao {
 }
 
 // ---------------------------------------------------------------------------
-// A loja — módulo, e não `useState` por tela
+// A loja, módulo, e não `useState` por tela
 // ---------------------------------------------------------------------------
 
 let estado: EstadoPersistido | null = null;
@@ -195,8 +195,8 @@ function pareceEstado(v: unknown): v is EstadoPersistido {
   if (o.versao !== VERSAO) return false;
   if (o.atualId !== null && typeof o.atualId !== "string") return false;
   if (typeof o.cadastros !== "object" || o.cadastros === null) return false;
-  // `instituicoes` é o campo aditivo: ausente é legítimo — é o estado que a tela de espaços
-  // gravou antes de a O1 existir —, mas presente com forma errada não é.
+  // `instituicoes` é o campo aditivo: ausente é legítimo, é o estado que a tela de espaços
+  // gravou antes de a O1 existir,, mas presente com forma errada não é.
   if (o.instituicoes !== undefined && (typeof o.instituicoes !== "object" || o.instituicoes === null)) {
     return false;
   }
@@ -253,7 +253,7 @@ function gravar(proximo: EstadoPersistido) {
     window.localStorage.setItem(CHAVE_DA_ORGANIZACAO, JSON.stringify(proximo));
   } catch (erro) {
     // Não engolir: em janela anônima ou com cota estourada a gravação falha, e a tela
-    // continua funcionando NA SESSÃO — o que se perde é o «recarregar preserva». Quem
+    // continua funcionando NA SESSÃO, o que se perde é o «recarregar preserva». Quem
     // depura precisa ver isso; quem apresenta não pode ser interrompido por um alerta.
     console.error("Organização: não foi possível gravar o cadastro.", erro);
   }
@@ -262,7 +262,7 @@ function gravar(proximo: EstadoPersistido) {
 
 /**
  * Lê o armazenamento e liga a loja. Idempotente: chamar de novo não relê nem sobrescreve
- * — as dez telas montam o mesmo gancho, e a segunda não pode desfazer o que a primeira leu.
+ *, as dez telas montam o mesmo gancho, e a segunda não pode desfazer o que a primeira leu.
  */
 function hidratar(contextoNovo: ContextoDaOrganizacao, semente: SementeDaOrganizacao) {
   contexto = contextoNovo;
@@ -388,7 +388,7 @@ function comFicha(
  * Aplica uma mudança na equipe E registra a linha de histórico no MESMO passo.
  *
  * As duas coisas juntas, e não em dois métodos, porque separá-las tornaria possível mudar
- * alçada sem deixar rastro — e §3 da ontologia proíbe escrita sem autor. Uma concessão que
+ * alçada sem deixar rastro, e §3 da ontologia proíbe escrita sem autor. Uma concessão que
  * não aparece no histórico não é registro, é rumor.
  */
 function comEquipe(
@@ -406,7 +406,7 @@ function comEquipe(
   });
 }
 
-/** O próximo id, determinístico: o maior sufixo numérico usado, mais um. Nada de sorteio —
+/** O próximo id, determinístico: o maior sufixo numérico usado, mais um. Nada de sorteio,
  *  dois navegadores rodando a mesma demonstração produzem a mesma sequência. */
 function proximoIdDeColaborador(equipe: Colaborador[]): string {
   let maior = 0;
@@ -506,7 +506,7 @@ export interface Organizacao {
   /** Altera o cadastro de um espaço. Cria em branco se ainda não existir. */
   alterar: (espacoId: string, mudanca: Partial<Omit<CadastroDeEspaco, "espacoId">>) => void;
   /** O ATO: declara que o espaço não oferece nenhum dos recursos. Zera as treze caixas e
-   *  marca `declarada` — as duas coisas juntas, porque «declarei que não tem» com uma
+   *  marca `declarada`, as duas coisas juntas, porque «declarei que não tem» com uma
    *  caixa marcada seria uma contradição gravada. */
   declararSemRecursos: (espacoId: string) => void;
   /** O outro lado do ato: marcar qualquer recurso também declara a ficha, porque quem
@@ -525,7 +525,7 @@ export interface Organizacao {
   ) => void;
   declararInstituicaoSemRecursos: (id: string) => void;
   alterarAcessibilidadeDaInstituicao: (id: string, ficha: AcessibilidadeDeEspaco) => void;
-  /** Encaminha a verificação ao Admin (92). A Organização NÃO se verifica — este método
+  /** Encaminha a verificação ao Admin (92). A Organização NÃO se verifica, este método
    *  não sabe escrever `"verificada"`, e essa impossibilidade é o ponto. */
   solicitarVerificacao: (id: string) => void;
 

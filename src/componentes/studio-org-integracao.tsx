@@ -20,21 +20,21 @@ import type {
 } from "@/dados/organizacao";
 
 /**
- * studio-org-integracao.tsx — O8 · Integração (funcionalidades 150 e 151).
+ * studio-org-integracao.tsx, O8 · Integração (funcionalidades 150 e 151).
  *
  * COMO UMA INSTITUIÇÃO COM CMS PRÓPRIO ALIMENTA A PLATAFORMA SEM DIGITAR DUAS VEZES. E o que
  * a tela faz de diferente de um importador comum é dizer, antes de aplicar, **o que o lote
  * não traz**: espaço cadastrado, elenco com papel, preço e ficha de acessibilidade não vêm em
  * nenhum formato de agenda. Um importador que só mostrasse «12 eventos importados» faria
- * parecer que o trabalho acabou — o que acabou foi a digitação.
+ * parecer que o trabalho acabou, o que acabou foi a digitação.
  *
  * A PRÉVIA VEM SEMPRE, e não é cautela genérica. O lote é a origem clássica de duplicata, e o
  * critério de identidade roda ANTES de gravar, contra os títulos normalizados dos eventos
- * REAIS do acervo — a mesma normalização do índice de busca, importada e não reescrita.
+ * REAIS do acervo, a mesma normalização do índice de busca, importada e não reescrita.
  *
  * A CHAVE VEM DO ADMIN, E SÓ A REVOGAÇÃO É DAQUI. Não existe `emitirChave` em módulo nenhum
  * desta sessão, e a ausência é a segregação: emitir a própria credencial e definir o próprio
- * teto seria a organização se autorizando — o mesmo defeito de ela se verificar. É a terceira
+ * teto seria a organização se autorizando, o mesmo defeito de ela se verificar. É a terceira
  * segregação da sessão, e as três moram no código e não num aviso.
  *
  * NÃO HÁ UPLOAD NESTE PROTÓTIPO, e a tela diz isso em vez de simular um: o conteúdo é colado.
@@ -145,13 +145,13 @@ export function StudioOrgIntegracao({
             <span className="web-denominador-numero">
               {numeros.ocorrenciasComEspaco}/{numeros.ocorrencias}
             </span>
-            <span className="web-denominador-rotulo">sessões com espaço — o lote não move</span>
+            <span className="web-denominador-rotulo">sessões com espaço, o lote não move</span>
           </li>
         </ul>
         <div className="web-declaracao">
           <strong>O que a importação não inventa</strong>
           {/* `ul` direto e não dentro de um `span`: lista é bloco, e bloco dentro de
-              elemento em linha é HTML inválido — o navegador reestrutura a árvore na
+              elemento em linha é HTML inválido, o navegador reestrutura a árvore na
               hidratação e o React acusa divergência. */}
           <ul className="org-falta">
             {O_QUE_O_LOTE_NAO_TRAZ.map((t) => (
@@ -205,7 +205,7 @@ export function StudioOrgIntegracao({
                 <span className="studio-campo-nota">
                   Não há upload neste protótipo, e a tela diz isso em vez de simular um: o
                   conteúdo é colado. O leitor pega título, início, fim e local, e ignora o
-                  resto — fingir que lê um iCal completo seria prometer o que não existe.
+                  resto, fingir que lê um iCal completo seria prometer o que não existe.
                 </span>
               </label>
 
@@ -223,13 +223,13 @@ export function StudioOrgIntegracao({
                       data-bloqueia={!linhaGravavel(l) || l.colideCom ? "sim" : "nao"}
                     >
                       <span>
-                        {l.titulo || "— sem título —"}
+                        {l.titulo || ", sem título,"}
                         {l.inicio ? ` · ${l.inicio}` : ""}
                         {l.local ? ` · ${l.local}` : ""}
                       </span>
                       <span className="org-falta-dono">
                         {!linhaGravavel(l)
-                          ? "sem título, não grava — a chave de identidade começa nele"
+                          ? "sem título, não grava, a chave de identidade começa nele"
                           : l.colideCom
                             ? `colide com «${l.colideCom}» do acervo`
                             : l.vazios.length > 0
@@ -266,7 +266,7 @@ export function StudioOrgIntegracao({
               <h2 className="studio-painel-nome">O que ficou vazio</h2>
               {vaziosPorCampo.length === 0 ? (
                 <p className="studio-campo-nota">
-                  Nenhum campo vazio nesta prévia — o que não quer dizer completo: espaço,
+                  Nenhum campo vazio nesta prévia, o que não quer dizer completo: espaço,
                   elenco, preço e acessibilidade continuam faltando, porque o formato não os
                   carrega.
                 </p>
@@ -275,7 +275,7 @@ export function StudioOrgIntegracao({
                   {vaziosPorCampo.map(([campo, quantos]) => (
                     <li key={campo} className="org-caixa" data-estado="declarado-ausente">
                       <span>
-                        {campo} — {quantos} de {previa.length}
+                        {campo}, {quantos} de {previa.length}
                       </span>
                     </li>
                   ))}

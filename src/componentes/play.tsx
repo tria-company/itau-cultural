@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PublicadoPeloProdutor } from "@/componentes/publicado-pelo-produtor";
 import {
   cloneElement,
   isValidElement,
@@ -428,6 +429,12 @@ export function Play({
 
   return (
     <section data-play className="play">
+      {/* O QUE ESTE NAVEGADOR PUBLICOU pelo Studio. Fica ACIMA do conteúdo do build e
+          declara que não está no acervo: o protótipo é um artefato estático e não tem
+          servidor para receber publicação. Sem este bloco, a jornada do produtor terminaria
+          no vazio — ele aperta publicar e a vitrine não muda. */}
+      <PublicadoPeloProdutor pauta="play" titulo="Publicado por você nesta demonstração" />
+
       {/* ------------------------------------------------------------------ o destaque */}
       <section data-destaque={destaque.slug} className="play-destaque">
         {destaque.imagem ? (

@@ -11,18 +11,18 @@ import type {
 } from "@/dados/organizacao";
 
 /**
- * studio-org-programa.tsx — O3 · Programa (funcionalidade 143): a camada acima do evento.
+ * studio-org-programa.tsx, O3 · Programa (funcionalidade 143): a camada acima do evento.
  *
  * É A ÚNICA TELA DA SESSÃO SEM LISTA PARA EDITAR, e a razão é medida: `programa` tem ZERO
- * instâncias em 7.810 entidades. Ela é a única das 20 classes da ontologia nessa situação —
+ * instâncias em 7.810 entidades. Ela é a única das 20 classes da ontologia nessa situação,
  * está declarada em `tipos.ts`, o motor de caminhada a percorre, e nada no acervo a popula.
  *
  * O QUE ISSO EXIGE DA TELA. Um catálogo vazio com um botão «criar» leria como tela nova sem
  * dado ainda. O que ela precisa dizer é outra coisa: **o zero é o achado**, e vem com
- * denominador, antes de qualquer formulário. Depois disso ela cria — e o que cria é
+ * denominador, antes de qualquer formulário. Depois disso ela cria, e o que cria é
  * autorado, e ela diz que é.
  *
- * A MISTURA É O DESENHO. O guarda-chuva é autorado; os eventos que ele reúne são REAIS —
+ * A MISTURA É O DESENHO. O guarda-chuva é autorado; os eventos que ele reúne são REAIS,
  * 300 no acervo, 260 da fonte. É essa mistura que deixa ver o que a classe faria se alguém
  * a povoasse, sem fabricar um programa «do Itaú Cultural» que ninguém publicou.
  *
@@ -85,7 +85,7 @@ export function StudioOrgPrograma({
           <h1 className="studio-titulo">Programa</h1>
         </div>
         <p className="studio-objetivo">
-          A camada acima do evento — Rumos, uma temporada, um festival com edições.{" "}
+          A camada acima do evento, Rumos, uma temporada, um festival com edições.{" "}
           {organizacao} · {autor} · medido em {dataDeReferencia}.
         </p>
         <p className="studio-nota">{gestorEAutorado}</p>
@@ -93,7 +93,7 @@ export function StudioOrgPrograma({
       </header>
 
       {/* O zero vem ANTES do formulário. Ele é o achado, não o estado inicial de uma tela
-          nova — e a diferença entre as duas leituras é tudo o que esta tela tem a dizer. */}
+          nova, e a diferença entre as duas leituras é tudo o que esta tela tem a dizer. */}
       <section className="studio-painel">
         <div className="studio-painel-cabeca">
           <h2 className="studio-painel-nome">A classe existe e está vazia</h2>
@@ -225,7 +225,7 @@ export function StudioOrgPrograma({
                         <li key={`${ed.rotulo}-${i}`} className="org-falta-item" data-bloqueia="nao">
                           <span>
                             {ed.rotulo}
-                            {ed.inicio || ed.fim ? ` — ${ed.inicio} a ${ed.fim}` : ""}
+                            {ed.inicio || ed.fim ? `, ${ed.inicio} a ${ed.fim}` : ""}
                           </span>
                           <button
                             type="button"
@@ -305,7 +305,7 @@ export function StudioOrgPrograma({
               <section className="studio-painel">
                 <p className="studio-nota">
                   Nenhum programa criado ainda. Crie um à esquerda para reunir eventos embaixo
-                  dele — e note que a lista de programas começa vazia porque o acervo está
+                  dele, e note que a lista de programas começa vazia porque o acervo está
                   vazio, não porque a tela é nova.
                 </p>
               </section>
@@ -336,7 +336,7 @@ export function StudioOrgPrograma({
                             <span className="web-linha-titulo">{e.titulo}</span>
                             <span className="web-linha-meta">
                               {e.realizadoPor.length > 0 ? e.realizadoPor.join(", ") : "sem instituição realizadora"} ·{" "}
-                              {e.ocorrencias} sessões · {e.procedencia} — clique para tirar
+                              {e.ocorrencias} sessões · {e.procedencia}, clique para tirar
                             </span>
                           </button>
                         </li>

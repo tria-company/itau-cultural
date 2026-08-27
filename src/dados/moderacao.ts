@@ -1305,10 +1305,19 @@ export interface DestinoDaAcao {
 export const DESTINOS_DA_ACAO: readonly DestinoDaAcao[] = [
   {
     acao: "aprovar",
+    // O TEXTO MUDOU EM 2026-08, com o perfil Produtor. Ele dizia «o item ENTRA no acervo
+    // público» — e isso deixou de ser verdade quando a publicação passou a ser direta: o
+    // item já estava no ar quando chegou aqui. Aprovar, agora, é a amostragem confirmando
+    // que ele pode continuar.
     doOutroLado:
-      "O item entra no acervo público e passa a aparecer para quem usa o app, com a " +
-      "procedência de quem o submeteu.",
-    rotaDoOutroLado: "/acervo/",
+      "O item CONTINUA no ar. Com a publicação direta, ele já estava público quando chegou " +
+      "à amostragem — aprovar é a fiscalização dizendo que ele pode ficar, com a " +
+      "procedência de quem o publicou.",
+    // `/acervo/` NÃO EXISTE, e nunca existiu: era uma rota escrita a partir do nome do
+    // conceito, não do mapa de rotas. O `<Link>` do histórico a prefetchava e o console
+    // acusava 404 em toda visita — o portão de console limpo pegou. `/descobrir/` é onde o
+    // item de fato aparece para quem usa o app.
+    rotaDoOutroLado: "/descobrir/",
     porqueSemRota: null,
   },
   {

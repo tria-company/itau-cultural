@@ -1,14 +1,14 @@
 /**
- * organizacao.ts — o que as dez telas do nível 6 leem do grafo.
+ * organizacao.ts, o que as dez telas do nível 6 leem do grafo.
  *
  * MÓDULO DE SERVIDOR. Ele lê `@/dados/grafo` por valor, no build, e devolve DTOs só de
- * primitivo. Componente `"use client"` importa daqui APENAS POR TIPO — é essa fronteira,
+ * primitivo. Componente `"use client"` importa daqui APENAS POR TIPO, é essa fronteira,
  * e só ela, que impede os 9,4 MB de `entidades.json` de atravessarem para o navegador
  * (DP-F). Um `import` por valor do outro lado seria invisível no código e mediria megabytes
  * no artefato.
  *
  * NENHUM NÚMERO DIGITADO. Tudo o que este arquivo afirma sobre o acervo é CONTADO aqui,
- * sobre o grafo carregado — «113 espaços», «100% derivado», «2.425 sem espaço declarado».
+ * sobre o grafo carregado, «113 espaços», «100% derivado», «2.425 sem espaço declarado».
  * Um literal digitado passaria a mentir na primeira regeração do grafo, e mentiria em
  * silêncio, que é a única forma de mentira que este produto não pode se permitir: o
  * argumento inteiro da proposta é que os números da tela são medidos.
@@ -24,7 +24,7 @@ import type { Entidade, MetodoCoordenada, Procedencia, Vocabulario } from "./tip
 
 const vocabulario = vocabularioJson as Vocabulario;
 
-/** Quem opera a superfície na demonstração. Autorado, e a tela diz que é — no mesmo
+/** Quem opera a superfície na demonstração. Autorado, e a tela diz que é, no mesmo
  *  padrão de `OPERADOR_DO_STUDIO` e de `PRODUTOR_DA_DEMONSTRACAO`. */
 export const ORGANIZACAO_DA_DEMONSTRACAO = "Itaú Cultural";
 
@@ -32,7 +32,7 @@ export const GESTOR_DA_ORGANIZACAO = "Gestão institucional (perfil autorado)";
 
 export const GESTOR_E_AUTORADO =
   "O perfil de quem opera esta tela é autorado para a demonstração: não há autenticação " +
-  "real no protótipo. O que NÃO é autorado é o carimbo — toda escrita registra este " +
+  "real no protótipo. O que NÃO é autorado é o carimbo, toda escrita registra este " +
   "nome, porque §3 da ontologia proíbe escrita anônima, admin incluído.";
 
 // ---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ export interface EspacoDoAcervo {
   slug: string;
   titulo: string;
   /** O verbete que a Enciclopédia publica. É ele que explica de ONDE o espaço foi
-   *  inferido — e é por isso que a tela o mostra em vez de esconder a derivação. */
+   *  inferido, e é por isso que a tela o mostra em vez de esconder a derivação. */
   resumo: string;
   cidade: string;
   estado: string;
@@ -80,7 +80,7 @@ function entidadesDe(classe: Parameters<typeof slugsPorTipo>[0]): Entidade[] {
  * A LISTA INTEIRA VAI JUNTO, e é decisão e não descuido: são 113 registros de treze
  * campos de primitivo, e a tela precisa deixar trocar de espaço sem navegar. Uma rota por
  * espaço geraria 113 páginas e faria quem cadastra perder o lugar na lista a cada clique
- * — o mesmo raciocínio que a fila de duplicatas já fez para 84 grupos.
+ *, o mesmo raciocínio que a fila de duplicatas já fez para 84 grupos.
  *
  * Ordem por título e não por id: quem procura um espaço procura pelo nome.
  */
@@ -137,7 +137,7 @@ export interface NumerosDosEspacos {
  *
  * `ocorrenciasComEspaco` é contado percorrendo os eventos e não lendo `ocorrencias.json`
  * direto: o arquivo é indexado por evento e a casa já decidiu que o acesso passa por
- * `grafo.ts` (D-47). São 300 eventos e 2.425 sessões — a conta roda uma vez, no build.
+ * `grafo.ts` (D-47). São 300 eventos e 2.425 sessões, a conta roda uma vez, no build.
  */
 export function numerosDosEspacos(): NumerosDosEspacos {
   const espacos = entidadesDe("espaco");
@@ -175,7 +175,7 @@ export function numerosDosEspacos(): NumerosDosEspacos {
 }
 
 // ---------------------------------------------------------------------------
-// As declarações — frases que CITAM os números, em vez de repeti-los à mão
+// As declarações, frases que CITAM os números, em vez de repeti-los à mão
 // ---------------------------------------------------------------------------
 
 export interface DeclaracaoDaTela {
@@ -196,7 +196,7 @@ export function declaracoesDosEspacos(n: NumerosDosEspacos): DeclaracaoDaTela[] 
       titulo: "Nenhum espaço do acervo vem da fonte",
       texto:
         `Os ${n.total} espaços são ${n.derivados} derivados e ${n.daFonte} da fonte. Todos ` +
-        `foram INFERIDOS por regra a partir do campo territorial da Enciclopédia — o Itaú ` +
+        `foram INFERIDOS por regra a partir do campo territorial da Enciclopédia, o Itaú ` +
         `Cultural não publica um cadastro de espaços. É por isso que esta tela é a segunda ` +
         `maior conversão de procedência do sistema, atrás só das ocorrências.`,
     },
@@ -205,7 +205,7 @@ export function declaracoesDosEspacos(n: NumerosDosEspacos): DeclaracaoDaTela[] 
       texto:
         `${n.declaramAcessibilidade} de ${n.total} espaços declaram a ficha. A funcionalidade ` +
         `de ficha de acessibilidade está no ar no app público e, do lado do espaço, não tem ` +
-        `nenhum dado — e é a ficha do espaço que decide se alguém consegue chegar. Só a ` +
+        `nenhum dado, e é a ficha do espaço que decide se alguém consegue chegar. Só a ` +
         `Organização pode declarar isso.`,
     },
     {
@@ -213,8 +213,8 @@ export function declaracoesDosEspacos(n: NumerosDosEspacos): DeclaracaoDaTela[] 
       texto:
         `${n.ocorrenciasComEspaco} de ${n.ocorrencias} ocorrências têm espaço declarado. Este é ` +
         `o denominador que explica a tela: enquanto não houver espaço cadastrado, o produtor ` +
-        `não tem o que escolher, e a chave de identidade da sessão — temporada + início + ` +
-        `espaço — fica sem um terço.`,
+        `não tem o que escolher, e a chave de identidade da sessão, temporada + início + ` +
+        `espaço, fica sem um terço.`,
     },
   ];
 
@@ -223,7 +223,7 @@ export function declaracoesDosEspacos(n: NumerosDosEspacos): DeclaracaoDaTela[] 
     saida.push({
       titulo: "A coordenada é derivada, e continua",
       texto:
-        `Os ${n.total} espaços têm coordenada, e ${m.quantos} deles por «${m.metodo}» — uma ` +
+        `Os ${n.total} espaços têm coordenada, e ${m.quantos} deles por «${m.metodo}», uma ` +
         `regra de deslocamento, não um endereço geocodificado. Cadastrar o endereço nesta ` +
         `tela troca o MÉTODO da derivação e não a procedência dela: latitude digitada não ` +
         `existe neste produto.`,
@@ -234,11 +234,11 @@ export function declaracoesDosEspacos(n: NumerosDosEspacos): DeclaracaoDaTela[] 
 }
 
 /** A data contra a qual tudo isto foi medido. Reexportada para a página carimbar a tela
- *  sem importar dois módulos — e para deixar explícito que a medida tem data. */
+ *  sem importar dois módulos, e para deixar explícito que a medida tem data. */
 export const DATA_DA_MEDIDA = DATA_DE_REFERENCIA;
 
 // ---------------------------------------------------------------------------
-// A instituição — O1
+// A instituição, O1
 // ---------------------------------------------------------------------------
 
 export interface LocalDaInstituicao {
@@ -253,7 +253,7 @@ export interface InstituicaoDoAcervo {
   titulo: string;
   resumo: string;
   /** A URL do verbete na Enciclopédia. Obrigatória quando `procedencia === "ic"`, e as 246
-   *  são `ic` — é ela que deixa quem confere abrir a fonte em vez de acreditar na tela. */
+   *  são `ic`, é ela que deixa quem confere abrir a fonte em vez de acreditar na tela. */
   fonte: string | null;
   imagem: string | null;
   creditoImagem: string | null;
@@ -261,8 +261,8 @@ export interface InstituicaoDoAcervo {
   linguagens: string[];
   territorio: string | null;
   locais: LocalDaInstituicao[];
-  /** Quantos eventos ela `realiza`. É a relação organizacional de verdade — `pertence_a` é
-   *  classificação, não hierarquia — e é o segundo terço da chave de identidade do evento. */
+  /** Quantos eventos ela `realiza`. É a relação organizacional de verdade, `pertence_a` é
+   *  classificação, não hierarquia, e é o segundo terço da chave de identidade do evento. */
   eventosRealizados: number;
   temCoordenada: boolean;
   declaraAcessibilidade: boolean;
@@ -332,7 +332,7 @@ export function instituicoesDoAcervo(): InstituicaoDoAcervo[] {
  *
  * REGRA, E NÃO CURADORIA: a primeira em ordem de título entre as que `realiza` pelo menos um
  * evento. Uma escolha manual aqui seria mais um lugar onde a demonstração dependeria de
- * alguém lembrar de atualizar depois de uma regeração do grafo — a mesma disciplina de
+ * alguém lembrar de atualizar depois de uma regeração do grafo, a mesma disciplina de
  * `GRUPO_DO_TRACADOR` em `duplicatas.ts`.
  *
  * Por que «entre as que realizam»: a ficha que importa é a de quem publica. Das 246, só 127
@@ -394,7 +394,7 @@ export function declaracoesDasInstituicoes(n: NumerosDasInstituicoes): Declaraca
       texto:
         `${n.comCoordenada} de ${n.total} instituições têm coordenada PRÓPRIA. Isso não quer ` +
         `dizer que elas sumam do mapa: quem não tem coordenada própria pode ser posicionado ` +
-        `por herança — do município, do estado, do país —, e a diferença entre as duas ` +
+        `por herança, do município, do estado, do país,, e a diferença entre as duas ` +
         `contagens é grande. O que a ausência de coordenada própria significa é que o ponto ` +
         `no mapa é do MUNICÍPIO e não da porta: cadastrar o endereço aqui é o que troca o ` +
         `método da derivação por um mais fino.`,
@@ -409,7 +409,7 @@ export function declaracoesDasInstituicoes(n: NumerosDasInstituicoes): Declaraca
     {
       titulo: "A imagem existe antes do crédito",
       texto:
-        `${n.comImagem} de ${n.total} instituições têm imagem e ${n.comCredito} têm crédito — ` +
+        `${n.comImagem} de ${n.total} instituições têm imagem e ${n.comCredito} têm crédito, ` +
         `${n.comImagemSemCredito} têm imagem SEM crédito. Crédito é bloqueante, então essas ` +
         `${n.comImagemSemCredito} não publicam a imagem até alguém resolver. É trabalho ` +
         `nomeado, e não aviso genérico.`,
@@ -418,8 +418,8 @@ export function declaracoesDasInstituicoes(n: NumerosDasInstituicoes): Declaraca
       titulo: "«realiza» é a relação organizacional de verdade",
       texto:
         `${n.queRealizam} de ${n.total} instituições realizam evento, somando ` +
-        `${n.eventosRealizados} arestas. É esta relação — e não «pertence_a», que é ` +
-        `classificação — que faz a chave de identidade do evento fechar: título normalizado ` +
+        `${n.eventosRealizados} arestas. É esta relação, e não «pertence_a», que é ` +
+        `classificação, que faz a chave de identidade do evento fechar: título normalizado ` +
         `+ AGENTE REALIZADOR + obra. Sem organização cadastrada, o produtor não consegue ` +
         `preencher o segundo terço da chave.`,
     },
@@ -435,7 +435,7 @@ export function declaracoesDasInstituicoes(n: NumerosDasInstituicoes): Declaraca
 }
 
 // ---------------------------------------------------------------------------
-// A mídia — O5
+// A mídia, O5
 // ---------------------------------------------------------------------------
 
 export interface MidiaDoAcervo {
@@ -443,7 +443,7 @@ export interface MidiaDoAcervo {
   slug: string;
   titulo: string;
   resumo: string;
-  /** Onde o CMS publica o item — `podcasts`, `series`, `videos`… NÃO é o formato do
+  /** Onde o CMS publica o item, `podcasts`, `series`, `videos`… NÃO é o formato do
    *  arquivo, e a tela não o trata como se fosse. */
   categoria: string;
   imagem: string | null;
@@ -499,7 +499,7 @@ export function midiasDoAcervo(): MidiaDoAcervo[] {
 }
 
 /** Os rótulos das 8, na ordem do contrato. Espelha `DIMENSOES_DE_ACESSIBILIDADE`, que mora
- *  em `tipos-acesso.ts` — mas este módulo é de servidor e a contagem é feita aqui. */
+ *  em `tipos-acesso.ts`, mas este módulo é de servidor e a contagem é feita aqui. */
 const DIMENSOES_MEDIDAS: readonly { chave: string; rotulo: string }[] = [
   { chave: "audio_description", rotulo: "audiodescrição" },
   { chave: "libras", rotulo: "Libras" },
@@ -547,13 +547,13 @@ export function declaracoesDasMidias(n: NumerosDasMidias): DeclaracaoDaTela[] {
       titulo: `${n.semCredito} itens não publicam`,
       texto:
         `${n.comCredito} de ${n.total} mídias têm crédito. As ${n.semCredito} sem crédito não ` +
-        `publicam a imagem — crédito é bloqueante (165), e isso é trabalho concreto e nomeado: ` +
+        `publicam a imagem, crédito é bloqueante (165), e isso é trabalho concreto e nomeado: ` +
         `esta tela abre por elas, e não em ordem alfabética.`,
     },
     {
       titulo: "A ficha de acessibilidade existe, e está vazia",
       texto:
-        `${n.declaramAcessibilidade} de ${n.total} mídias DECLARAM a ficha — ou seja, o ato foi ` +
+        `${n.declaramAcessibilidade} de ${n.total} mídias DECLARAM a ficha, ou seja, o ato foi ` +
         `feito em 100% do acervo. E ainda assim ${zeradas.length} das 8 dimensões estão em ZERO ` +
         `itens: ${zeradas.map((d) => d.rotulo).join(", ")}. Ficha preenchida não é ficha ` +
         `atendida, e a diferença entre as duas coisas é esta tela.`,
@@ -562,7 +562,7 @@ export function declaracoesDasMidias(n: NumerosDasMidias): DeclaracaoDaTela[] {
       titulo: "Categoria não é formato",
       texto:
         `A maior categoria é «${maior?.categoria ?? "—"}», com ${maior?.quantos ?? 0} de ` +
-        `${n.total} itens. Categoria é ONDE o CMS publica, não O QUE o arquivo é — «séries» tem ` +
+        `${n.total} itens. Categoria é ONDE o CMS publica, não O QUE o arquivo é, «séries» tem ` +
         `vídeo e tem texto. O formato é campo declarado, e enquanto ninguém declarar a tela diz ` +
         `que ninguém declarou.`,
     },
@@ -576,21 +576,21 @@ export function declaracoesDasMidias(n: NumerosDasMidias): DeclaracaoDaTela[] {
 }
 
 // ---------------------------------------------------------------------------
-// O programa — O3
+// O programa, O3
 // ---------------------------------------------------------------------------
 
 export interface EventoParaPrograma {
   id: string;
   titulo: string;
-  /** A MESMA normalização do índice de busca — é contra ela que a duplicata do lote
+  /** A MESMA normalização do índice de busca, é contra ela que a duplicata do lote
    *  importado dispara, e é por isso que ela viaja junto em vez de ser recalculada. */
   normalizado: string;
   /** O período que o CMS publica, quando publica. Texto, como vem. */
   periodo: string | null;
   /**
-   * Quem `realiza` o evento — a relação organizacional de verdade, e ela é de MUITOS PARA
+   * Quem `realiza` o evento, a relação organizacional de verdade, e ela é de MUITOS PARA
    * MUITOS. Medido no acervo: 527 arestas cobrem 41 dos 300 eventos, com 127 instituições
-   * distintas na ponta de origem — cerca de treze instituições por evento realizado. Um
+   * distintas na ponta de origem, cerca de treze instituições por evento realizado. Um
    * campo único aqui devolveria a primeira da lista e faria as outras doze desaparecerem,
    * cada uma vendo zero eventos no próprio painel de alcance.
    */
@@ -623,7 +623,7 @@ export interface NumerosDosProgramas {
  *
  * PLURAL, E NÃO SINGULAR, e a diferença é um defeito que só aparece em tela: `find()`
  * devolveria a primeira da adjacência, e as outras doze instituições do mesmo evento
- * veriam zero no próprio painel de alcance — cada uma achando que não realiza nada.
+ * veriam zero no próprio painel de alcance, cada uma achando que não realiza nada.
  */
 function realizadoresDe(e: Entidade) {
   return vizinhos(e.id, "realiza")
@@ -680,7 +680,7 @@ export function declaracoesDosProgramas(n: NumerosDosProgramas): DeclaracaoDaTel
       texto:
         `«programa» tem ${n.programas} instâncias no acervo. É a única das 20 classes da ` +
         `ontologia nessa situação: ela está declarada em «tipos.ts», o motor de caminhada a ` +
-        `percorre, e nada a popula. Esta tela é a única da sessão sem lista para editar — ela ` +
+        `percorre, e nada a popula. Esta tela é a única da sessão sem lista para editar, ela ` +
         `cria, e diz que cria.`,
     },
     {
@@ -695,7 +695,7 @@ export function declaracoesDosProgramas(n: NumerosDosProgramas): DeclaracaoDaTel
       titulo: "«realiza» é de muitos para muitos, e isso muda a chave",
       texto:
         `${n.eventosComRealizador} de ${n.eventos} eventos têm instituição realizadora, e são ` +
-        `${n.arestasDeRealiza} arestas ao todo — cerca de ` +
+        `${n.arestasDeRealiza} arestas ao todo, cerca de ` +
         `${n.eventosComRealizador > 0 ? Math.round(n.arestasDeRealiza / n.eventosComRealizador) : 0} ` +
         `instituições por evento realizado. A chave de identidade do evento pede «agente ` +
         `realizador» no singular, e o acervo devolve treze: fechar o segundo terço da chave ` +
@@ -705,7 +705,7 @@ export function declaracoesDosProgramas(n: NumerosDosProgramas): DeclaracaoDaTel
 }
 
 // ---------------------------------------------------------------------------
-// A formação e a biblioteca — O4
+// A formação e a biblioteca, O4
 // ---------------------------------------------------------------------------
 
 export interface OfertaDoAcervo {
@@ -760,7 +760,7 @@ export function formacoesDoAcervo(): OfertaDoAcervo[] {
   return saida;
 }
 
-/** A biblioteca — funcionalidade 43, hoje `falta`. São as 46 publicações do acervo. */
+/** A biblioteca, funcionalidade 43, hoje `falta`. São as 46 publicações do acervo. */
 export function publicacoesDoAcervo(): OfertaDoAcervo[] {
   const saida = entidadesDe("publicacao").map(ofertaDe);
   saida.sort((a, b) => a.titulo.localeCompare(b.titulo, "pt-BR"));
@@ -797,7 +797,7 @@ export function declaracoesDasFormacoes(n: NumerosDasFormacoes): DeclaracaoDaTel
       texto:
         `${n.comFicha} de ${n.formacoes} formações declaram a ficha, ${n.comImagem} têm imagem, ` +
         `${n.comCredito} têm crédito e ${n.comImagemAlt} têm descrição alternativa. É a única ` +
-        `classe do acervo com 100% em todas — o modelo do que dado bem preenchido parece, e o ` +
+        `classe do acervo com 100% em todas, o modelo do que dado bem preenchido parece, e o ` +
         `argumento de que, quando a fonte preenche, o produto melhora sem mudar código.`,
     },
     {
@@ -805,7 +805,7 @@ export function declaracoesDasFormacoes(n: NumerosDasFormacoes): DeclaracaoDaTel
       texto:
         `As ${n.formacoes} formações somam ${n.marcacoes} marcações de dimensão em ` +
         `${n.marcacoesPossiveis} possíveis. A ficha foi preenchida em todas e o que ela diz, na ` +
-        `maioria das linhas, é «não oferece». Preencher é o começo — e é o que a plataforma ` +
+        `maioria das linhas, é «não oferece». Preencher é o começo, e é o que a plataforma ` +
         `pode exigir; oferecer é o que ela pode medir.`,
     },
     {
@@ -813,20 +813,20 @@ export function declaracoesDasFormacoes(n: NumerosDasFormacoes): DeclaracaoDaTel
       texto:
         `São ${n.publicacoes} publicações, ${n.publicacoesComFicha} delas com ficha declarada. ` +
         `A consulta ao acervo bibliográfico está listada como faltando no catálogo de ` +
-        `funcionalidades — o dado está aqui, e a tela pública que o mostra é que não existe.`,
+        `funcionalidades, o dado está aqui, e a tela pública que o mostra é que não existe.`,
     },
   ];
 }
 
 // ---------------------------------------------------------------------------
-// O vocabulário dos critérios de edital — O6
+// O vocabulário dos critérios de edital, O6
 // ---------------------------------------------------------------------------
 
 /**
  * As 27 unidades da federação. Constante do país, não do acervo.
  *
  * Ela está aqui, e não derivada do grafo, DE PROPÓSITO: derivá-la faria o campo de critério
- * do edital oferecer só os 25 estados que o acervo já tem — e um edital que não pode mirar
+ * do edital oferecer só os 25 estados que o acervo já tem, e um edital que não pode mirar
  * Sergipe e Tocantins é exatamente o mecanismo pelo qual o deserto se perpetua. A tela
  * compara as duas listas e mostra a diferença.
  */
@@ -868,7 +868,7 @@ export function declaracoesDosEditais(v: VocabularioDoEdital): DeclaracaoDaTela[
       texto:
         `Um grep por edital em «src/dados/» não retorna nada. O produtor RECEBE alerta de ` +
         `edital compatível no catálogo de funcionalidades; nunca existiu quem publica. Esta ` +
-        `tela cria a forma antes de criar a tela, e a forma é aditiva — «tipos.ts» não foi ` +
+        `tela cria a forma antes de criar a tela, e a forma é aditiva, «tipos.ts» não foi ` +
         `tocado.`,
     },
     {
@@ -876,7 +876,7 @@ export function declaracoesDosEditais(v: VocabularioDoEdital): DeclaracaoDaTela[
       texto:
         `As ${v.linguagens.length} linguagens do vocabulário controlado e as 27 unidades da ` +
         `federação são os valores que o edital recorta. Texto livre seria legível para uma ` +
-        `pessoa e mudo para o sistema — e o alerta de edital compatível depende inteiramente ` +
+        `pessoa e mudo para o sistema, e o alerta de edital compatível depende inteiramente ` +
         `de os dois lados falarem o mesmo vocabulário.`,
     },
     {
@@ -884,14 +884,14 @@ export function declaracoesDosEditais(v: VocabularioDoEdital): DeclaracaoDaTela[
       texto:
         `O acervo cobre ${cobertas} das 27 unidades da federação; faltam ` +
         `${v.ufsAusentes.join(" e ")}. A lista de critérios oferece as 27, e não as ` +
-        `${cobertas} — um edital que não pode mirar onde não há acervo é o mecanismo exato ` +
+        `${cobertas}, um edital que não pode mirar onde não há acervo é o mecanismo exato ` +
         `pelo qual o deserto se perpetua.`,
     },
   ];
 }
 
 // ---------------------------------------------------------------------------
-// A integração — O8
+// A integração, O8
 // ---------------------------------------------------------------------------
 
 /**
@@ -899,13 +899,13 @@ export function declaracoesDosEditais(v: VocabularioDoEdital): DeclaracaoDaTela[
  *
  * ELA CHEGA PRONTA, E ISSO É A SEGREGAÇÃO EM FORMA DE DADO. A organização não emite: a chave
  * vem do nível 1 com escopo e limite já definidos, e o único verbo que a O8 tem sobre ela é
- * revogar. Semeá-la aqui, no servidor, é o que impede a tela de ter um caminho de criação —
+ * revogar. Semeá-la aqui, no servidor, é o que impede a tela de ter um caminho de criação,
  * não há função de emitir em lugar nenhum deste módulo.
  */
 export const CHAVE_EMITIDA_PELO_ADMIN = {
   id: "chave-1",
   rotulo: "Integração do CMS institucional",
-  escopo: "agenda — leitura e escrita de evento, temporada e ocorrência",
+  escopo: "agenda, leitura e escrita de evento, temporada e ocorrência",
   limitePorDia: 500,
   emitidaPor: "Admin (97)",
   emitidaEm: DATA_DE_REFERENCIA,
@@ -948,7 +948,7 @@ export function declaracoesDaIntegracao(n: NumerosDaIntegracao): DeclaracaoDaTel
       titulo: "O lote é a origem clássica de duplicata",
       texto:
         `O acervo tem ${n.eventos} eventos e ${n.titulosDistintos} títulos distintos depois de ` +
-        `normalizados — a diferença já existe antes de qualquer importação. Por isso o ` +
+        `normalizados, a diferença já existe antes de qualquer importação. Por isso o ` +
         `critério de identidade roda ANTES de gravar, e não depois: aplicar sem prévia seria ` +
         `deixar a máquina criar os pares que a fila de duplicatas existe para desfazer.`,
     },
@@ -957,14 +957,14 @@ export function declaracoesDaIntegracao(n: NumerosDaIntegracao): DeclaracaoDaTel
       texto:
         `${n.ocorrenciasComEspaco} de ${n.ocorrencias} ocorrências têm espaço declarado. Um ` +
         `arquivo de agenda traz nome de local em texto livre, e nome de local não é espaço ` +
-        `cadastrado — importar não move este número. A tela lista o que ficou vazio em vez de ` +
+        `cadastrado, importar não move este número. A tela lista o que ficou vazio em vez de ` +
         `dizer «12 eventos importados» e deixar parecer que o trabalho acabou.`,
     },
     {
       titulo: "A chave vem do Admin, e só a revogação é daqui",
       texto:
         `A chave de integração é emitida e limitada pelo Admin (97), com escopo e teto já ` +
-        `definidos. A organização vê a própria, usa e revoga — e não há nesta tela caminho ` +
+        `definidos. A organização vê a própria, usa e revoga, e não há nesta tela caminho ` +
         `para criar uma. Emitir a própria credencial seria a organização se autorizando.`,
     },
   ];

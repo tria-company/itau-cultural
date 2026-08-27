@@ -1,17 +1,17 @@
 import type { Acessibilidade, DimensaoAcessibilidade } from "@/dados/tipos";
 
 /**
- * ficha-acessibilidade.tsx — D-43: as 8 dimensões, sempre as 8, em TRÊS estados.
+ * ficha-acessibilidade.tsx, D-43: as 8 dimensões, sempre as 8, em TRÊS estados.
  *
  * O terceiro estado é o ponto inteiro da decisão: **ausência não é negação**. Uma ficha
  * que mostra «Libras ✗» para um registro que simplesmente não fala de Libras afirma, em
  * nome do Itaú Cultural, que o evento não tinha intérprete. Isso é uma alegação factual
- * que a fonte não faz — e que pode ser falsa. «Não declarado» é a única leitura honesta
+ * que a fonte não faz, e que pode ser falsa. «Não declarado» é a única leitura honesta
  * desse dado, e por isso ele é um estado próprio e não uma variação do «não».
  *
  * COMO OS TRÊS ESTADOS SÃO DECIDIDOS, E POR QUE A REGRA É MEDIDA E NÃO ARBITRADA:
  *
- * O tipo `Acessibilidade` é oito booleanos, e um booleano `false` sozinho é ambíguo — não
+ * O tipo `Acessibilidade` é oito booleanos, e um booleano `false` sozinho é ambíguo, não
  * dá para saber se a fonte disse «não» ou se a fonte não disse nada. A desambiguação vem
  * de fora do booleano, do campo `declaraAcessibilidade` da entidade, que o gerador
  * escreve a partir da FORMA do registro de origem:
@@ -19,7 +19,7 @@ import type { Acessibilidade, DimensaoAcessibilidade } from "@/dados/tipos";
  *   - **Registro da agenda do CMS:** dos 100 eventos do CMS, os 100 trazem no JSON bruto o
  *     objeto `accessibility` COMPLETO, com as 8 chaves explícitas (`{"libras": false, …}`).
  *     Nunca parcial: dos 2.534 registros do CMS, 2.514 têm as 8 chaves e 20 não têm o
- *     campo. Onde as 8 vêm, `false` é DECLARAÇÃO DE AUSÊNCIA — a ficha foi preenchida e
+ *     campo. Onde as 8 vêm, `false` é DECLARAÇÃO DE AUSÊNCIA, a ficha foi preenchida e
  *     disse que não.
  *   - **Registro da Enciclopédia:** a Enciclopédia não tem campo de acessibilidade
  *     nenhum. Aqui `false` é o valor padrão da estrutura, e o estado correto é NÃO
@@ -27,7 +27,7 @@ import type { Acessibilidade, DimensaoAcessibilidade } from "@/dados/tipos";
  *
  * ESTE COMENTÁRIO JÁ DESCREVEU OUTRA COISA, e a diferença vale registro. Enquanto
  * `dados/normalizar.py` descartava os `false` (`{k: v for … if v}`), a distinção morria
- * antes de `entidades.json` e esta ficha a RECONSTRUÍA do prefixo do id — «começa com
+ * antes de `entidades.json` e esta ficha a RECONSTRUÍA do prefixo do id, «começa com
  * `evento:cms:`, então declarou». Funcionava por medição, não por dado: valia porque
  * alguém tinha contado que os 100 eventos do CMS declaram. Para os 20 registros do CMS
  * que não trazem o campo, teria afirmado «declarado ausente» em nome do Itaú Cultural
@@ -36,7 +36,7 @@ import type { Acessibilidade, DimensaoAcessibilidade } from "@/dados/tipos";
  *
  * O NÚMERO QUE DÁ SENTIDO À DECISÃO: a fonte declara `libras` em 48 entradas e as outras
  * dimensões em uma ou nenhuma. A ficha vai mostrar sobretudo «declarado ausente» e «não
- * declarado», e esse é o resultado correto — é ele que torna visível, em uma tela, o
+ * declarado», e esse é o resultado correto, é ele que torna visível, em uma tela, o
  * tamanho do buraco de acessibilidade no acervo publicado.
  */
 
@@ -141,7 +141,7 @@ export function FichaDeAcessibilidade({
         ) : (
           <>
             Este registro vem da {fonteDaDeclaracao} e não traz o campo de acessibilidade.
-            Onde se lê <strong>não declarado</strong>, o registro não informa — o que não
+            Onde se lê <strong>não declarado</strong>, o registro não informa, o que não
             quer dizer que o recurso não exista. Ausência de declaração não é negação, e
             não a convertemos em uma.
           </>

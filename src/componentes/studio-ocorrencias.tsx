@@ -12,13 +12,13 @@ import type {
 } from "@/dados/ocorrencias-studio";
 
 /**
- * studio-ocorrencias.tsx — Studio, gestão de ocorrências (`docs/telas.md` tela 32, STUD-02).
- * **A outra metade do Cenário 4** — o lado de quem CAUSA a mudança.
+ * studio-ocorrencias.tsx, Studio, gestão de ocorrências (`docs/telas.md` tela 32, STUD-02).
+ * **A outra metade do Cenário 4**, o lado de quem CAUSA a mudança.
  *
  * A AFIRMAÇÃO QUE ESTA TELA EXISTE PARA TORNAR VISÍVEL (D-73). Alterar uma sessão não
  * invalida o evento. O evento fica no topo, imutável, sem um único controle que o alcance; as
  * sessões ficam abaixo, editáveis uma a uma. Confirmar uma alteração muda UMA linha e deixa a
- * ficha do topo e as outras 52 sessões byte a byte iguais — e isso não é cuidado de
+ * ficha do topo e as outras 52 sessões byte a byte iguais, e isso não é cuidado de
  * implementação, é consequência de Evento, Temporada e Ocorrência serem registros próprios
  * (DADO-02). Num modelo de catálogo, com as datas aninhadas dentro do evento, mudar um
  * horário reescreveria o evento e o aviso só poderia ser do evento inteiro.
@@ -32,7 +32,7 @@ import type {
  * procedência do dado, seria a contradição mais cara da fase.
  *
  * T-04-13. O id que vem de `localStorage` é editável por quem avalia. Ele é RESOLVIDO contra o
- * índice de sessões do build antes de contar — id desconhecido não incrementa o número, é
+ * índice de sessões do build antes de contar, id desconhecido não incrementa o número, é
  * descartado e a quantidade de descartes aparece na tela.
  *
  * DP-F: tudo que vem de `@/dados/ocorrencias-studio` entra como `import type`. O módulo
@@ -41,13 +41,13 @@ import type {
  * provedor de sessão já o importa.
  *
  * D-67: esta superfície só existe na visão web. Na visão app o layout de bastidor mostra o
- * aviso de superfície de desktop — este componente não precisa saber disso, e não sabe.
+ * aviso de superfície de desktop, este componente não precisa saber disso, e não sabe.
  *
  * T-03-10: nenhuma leitura de relógio. O carimbo de tempo vem do build, em `carimbo`.
  */
 
 // ---------------------------------------------------------------------------
-// Helpers de string — sem `Date`, sem locale
+// Helpers de string, sem `Date`, sem locale
 // ---------------------------------------------------------------------------
 
 /** "2026-08-22T12:00" → "22.08.2026". A conversão acontece na SAÍDA; comparar `DD.MM.AAAA`
@@ -60,7 +60,7 @@ function dataCurta(iso: string): string {
 /**
  * A chave de uma ocorrência dentro do índice semeado.
  *
- * A MESMA regra do servidor, dirigida pelo `prefixo` que veio JUNTO com o DTO —
+ * A MESMA regra do servidor, dirigida pelo `prefixo` que veio JUNTO com o DTO,
  * `chaveDeOcorrencia` não pode ser importada aqui porque o módulo dela arrasta `grafo.ts`
  * para o cliente (DP-F). É o mesmo arranjo que `salvos.tsx` já usa, de propósito: uma segunda
  * regra de chave é como o salvo some de uma tela e aparece na outra.
@@ -86,7 +86,7 @@ function plural(n: number, um: string, muitos: string): string {
  *
  * A regra de recomposição é a MESMA do servidor, dirigida pelos dois prefixos que vieram no
  * DTO: `PREFIXO_DA_OCORRENCIA` e o `prefixoLocal` do evento. Escrever aqui uma segunda regra
- * de id — «o id é `ocorrencia:derivado:` mais o sufixo» — seria a mesma armadilha da chave de
+ * de id, «o id é `ocorrencia:derivado:` mais o sufixo», seria a mesma armadilha da chave de
  * ocorrência: funciona até o dia em que um dos dois lados muda.
  */
 function decodificar(
@@ -109,7 +109,7 @@ interface Linha {
   ordem: number;
   inicio: string;
   dataCurta: string;
-  /** A hora VIGENTE — a do acervo, ou a que uma confirmação desta sessão substituiu. */
+  /** A hora VIGENTE, a do acervo, ou a que uma confirmação desta sessão substituiu. */
   hora: string;
   /** A hora original, quando esta linha foi alterada nesta sessão de trabalho. */
   horaOriginal: string | null;
@@ -122,13 +122,13 @@ interface PessoaAvisada {
 }
 
 // ---------------------------------------------------------------------------
-// A ficha imutável do evento — T-04-15
+// A ficha imutável do evento, T-04-15
 // ---------------------------------------------------------------------------
 
 /**
  * O evento, no topo, SEM CAMINHO DE ESCRITA.
  *
- * Não existe aqui nem um `input`, nem um `button` que altere campo do evento — e essa
+ * Não existe aqui nem um `input`, nem um `button` que altere campo do evento, e essa
  * ausência é o conteúdo do bloco, não um esquecimento. A palavra «imutável» está dita e
  * explicada porque a tela inteira é a demonstração dela.
  */
@@ -154,7 +154,7 @@ function FichaDoEvento({ evento }: { evento: EventoDoStudio }) {
         Os campos deste bloco <strong>não são editáveis aqui</strong>, e não porque a tela
         ainda não os implementou: alterar uma sessão não altera o evento. Evento, Temporada e
         Ocorrência são registros próprios, e é essa separação que dá ao aviso alguém a quem
-        ser endereçado — quem salvou uma sessão, e não quem se interessou pelo evento.
+        ser endereçado, quem salvou uma sessão, e não quem se interessou pelo evento.
       </p>
 
       <dl className="oco-ficha-campos">
@@ -206,7 +206,7 @@ function FichaDoEvento({ evento }: { evento: EventoDoStudio }) {
 }
 
 // ---------------------------------------------------------------------------
-// A prévia de impacto — D-74
+// A prévia de impacto, D-74
 // ---------------------------------------------------------------------------
 
 function PreviaDeImpacto({
@@ -242,16 +242,16 @@ function PreviaDeImpacto({
           as outras <strong>{comSeparador(outrasSessoes)}</strong>{" "}
           {plural(outrasSessoes, "sessão deste evento não é tocada", "sessões deste evento não são tocadas")}
           {salvaramOutras === 0 ? (
-            <> — e ninguém salvou nenhuma delas, então não há mais ninguém a avisar</>
+            <>, e ninguém salvou nenhuma delas, então não há mais ninguém a avisar</>
           ) : naoAlcancados > 0 ? (
             <>
-              {" "}— e {naoAlcancados}{" "}
+              {" "}, e {naoAlcancados}{" "}
               {plural(naoAlcancados, "pessoa que salvou", "pessoas que salvaram")} uma delas{" "}
               {plural(naoAlcancados, "não recebe", "não recebem")} nada
             </>
           ) : (
             <>
-              {" "}— {salvaramOutras}{" "}
+              {" "}, {salvaramOutras}{" "}
               {plural(salvaramOutras, "pessoa salvou", "pessoas salvaram")} alguma delas, e{" "}
               {plural(salvaramOutras, "ela já está", "elas já estão")} na conta acima por ter
               salvo também esta sessão
@@ -342,7 +342,7 @@ export function StudioOcorrencias({
   );
 
   /**
-   * T-04-13. Todos os ids de sessão que o build conhece — as 2.425 dos 129 eventos.
+   * T-04-13. Todos os ids de sessão que o build conhece, as 2.425 dos 129 eventos.
    * É contra este conjunto que um id vindo de `localStorage` é resolvido antes de contar.
    */
   const idsConhecidos = useMemo(() => {
@@ -425,12 +425,12 @@ export function StudioOcorrencias({
   );
 
   /**
-   * O contraste — e ele precisa distinguir três situações que um número só achataria.
+   * O contraste, e ele precisa distinguir três situações que um número só achataria.
    *
    * `salvaramOutras` é quem salvou ALGUMA das outras sessões deste evento; `naoAlcancados` é
    * quem, dentre eles, esta alteração não avisa. Os dois podem divergir: se a mesma pessoa
    * salvou esta sessão E uma irmã, ela é avisada por esta e continua sem ser avisada sobre a
-   * irmã — que não mudou. Dizer «e quem salvou uma delas não recebe nada» quando ninguém
+   * irmã, que não mudou. Dizer «e quem salvou uma delas não recebe nada» quando ninguém
    * salvou nenhuma seria afirmar que existe alguém que não existe, numa tela cuja tese é a
    * procedência do número.
    */
@@ -453,13 +453,13 @@ export function StudioOcorrencias({
       return (
         `Ninguém salvou esta sessão. Nenhuma das ${numeros.personas} personas do protótipo a ` +
         `tem no repertório semeado em personas.json, e agenda-cultural:salvos deste navegador ` +
-        `não a contém. O número é 0 porque o estado salvo é 0 — salve esta sessão e ele passa ` +
+        `não a contém. O número é 0 porque o estado salvo é 0, salve esta sessão e ele passa ` +
         `a 1 sem que nada mais mude na tela.`
       );
     }
     return (
       `${avisados.length} de ${numeros.personas} ${plural(numeros.personas, "pessoa", "pessoas")}. ` +
-      avisados.map((p) => `${p.nome} — ${p.origens.join(" e ")}`).join("; ") +
+      avisados.map((p) => `${p.nome}, ${p.origens.join(" e ")}`).join("; ") +
       `. O conjunto é de pessoas, não de salvamentos: quem aparece pelos dois caminhos conta uma vez.`
     );
   }, [linhaEditada, avisados, numeros.personas]);
@@ -491,7 +491,7 @@ export function StudioOcorrencias({
   }, []);
 
   /**
-   * Confirmar — e NADA acontece antes deste clique.
+   * Confirmar, e NADA acontece antes deste clique.
    *
    * A alteração é aplicada à linha editada e a nenhuma outra: o estado é indexado pelo id da
    * OCORRÊNCIA, então não existe caminho pelo qual ela alcance uma sessão irmã. A ficha do
@@ -537,7 +537,7 @@ export function StudioOcorrencias({
    * Salva as DUAS sessões do par com os mesmos ids que `/salvos` semeia, vindos do DTO. Sem
    * ela, quem apresenta teria de sair daqui, achar o evento certo entre 300 e as duas sessões
    * certas entre 53, e voltar. `alternarSalvo` ALTERNA, então salvar o que já está salvo
-   * removeria — daí a conferência antes de cada chamada.
+   * removeria, daí a conferência antes de cada chamada.
    */
   const semear = useCallback(() => {
     for (const id of [par.atingida.id, par.intacta.id]) {
@@ -568,7 +568,7 @@ export function StudioOcorrencias({
         <p className="studio-objetivo">
           O evento fica no topo, imutável. As sessões dele ficam abaixo, editáveis uma a uma.
           Antes de confirmar qualquer alteração, a tela diz quantas pessoas salvaram aquela
-          sessão e serão avisadas — e quantas não serão.
+          sessão e serão avisadas, e quantas não serão.
         </p>
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
           <span className="studio-pastilha studio-pastilha-marca">
@@ -587,7 +587,7 @@ export function StudioOcorrencias({
       </header>
 
       {/* ------------------------------------------------------------------ */}
-      {/* O seletor — trocar de evento NÃO navega                             */}
+      {/* O seletor, trocar de evento NÃO navega                             */}
       {/* ------------------------------------------------------------------ */}
       <section className="oco-seletor">
         <label className="oco-seletor-rotulo" htmlFor="oco-evento">
@@ -607,7 +607,7 @@ export function StudioOcorrencias({
         >
           {opcoes.map((e) => (
             <option key={e.id} value={e.id}>
-              {e.titulo} — {e.totalDeSessoes} {plural(e.totalDeSessoes, "sessão", "sessões")}
+              {e.titulo}, {e.totalDeSessoes} {plural(e.totalDeSessoes, "sessão", "sessões")}
             </option>
           ))}
         </select>
@@ -619,7 +619,7 @@ export function StudioOcorrencias({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* D-73 — a ficha imutável                                             */}
+      {/* D-73, a ficha imutável                                             */}
       {/* ------------------------------------------------------------------ */}
       <FichaDoEvento evento={evento} />
 
@@ -630,9 +630,9 @@ export function StudioOcorrencias({
         <div className="oco-semeadura-texto">
           <strong className="oco-semeadura-titulo">cenário 4, sem sair da tela</strong>
           <p>
-            O botão salva neste navegador as duas sessões do par —{" "}
+            O botão salva neste navegador as duas sessões do par,{" "}
             {par.atingida.dataCurta} às {par.atingida.hora} e {par.intacta.dataCurta} às{" "}
-            {par.intacta.hora}, do mesmo evento —, que são exatamente os mesmos ids que a tela
+            {par.intacta.hora}, do mesmo evento,, que são exatamente os mesmos ids que a tela
             de Salvos semeia. Com elas salvas, a prévia de impacto desta sessão sai de 0 e vai
             a 1: o número acompanha o estado, em vez de estar pintado na tela.
           </p>
@@ -713,7 +713,7 @@ export function StudioOcorrencias({
                     <div className="oco-edicao">
                       <div className="oco-edicao-campos">
                         <span className="studio-rotulo">
-                          {linha.dataCurta} — a data fica; remarcar de dia é outra operação
+                          {linha.dataCurta}, a data fica; remarcar de dia é outra operação
                         </span>
                         <label className="oco-edicao-campo">
                           <span className="studio-rotulo">novo horário</span>
@@ -759,7 +759,7 @@ export function StudioOcorrencias({
                         </button>
                         <span className="oco-acoes-nota">
                           {semMudanca
-                            ? "escolha um horário diferente do atual — confirmar sem mudança não registraria nada"
+                            ? "escolha um horário diferente do atual, confirmar sem mudança não registraria nada"
                             : "nada foi alterado ainda: nem a linha, nem o histórico, até o clique em confirmar"}
                         </span>
                       </div>
@@ -775,7 +775,7 @@ export function StudioOcorrencias({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* D-75 — quem alterou, quando, e o histórico                          */}
+      {/* D-75, quem alterou, quando, e o histórico                          */}
       {/* ------------------------------------------------------------------ */}
       <section className="studio-painel oco-historico" data-historico={historico.length}>
         <div className="studio-painel-cabeca">
@@ -822,7 +822,7 @@ export function StudioOcorrencias({
                   <p className="oco-historico-frase">
                     Registrada nesta sessão de trabalho e mantida em memória do navegador: o
                     protótipo é estático e não escreve em servidor nenhum. O que a tela prova é
-                    que a alteração fica com autor, valor de antes, valor de depois e carimbo —
+                    que a alteração fica com autor, valor de antes, valor de depois e carimbo,
                     e é exatamente esse registro que hoje não existe em lugar nenhum.
                   </p>
                 )}
@@ -832,7 +832,7 @@ export function StudioOcorrencias({
         ) : (
           <p className="studio-nota">
             Nenhuma alteração registrada neste evento. As duas alterações autoradas do protótipo
-            caem em {par.eventoTitulo} e no evento do cancelamento — selecione um deles para vê-las.
+            caem em {par.eventoTitulo} e no evento do cancelamento, selecione um deles para vê-las.
           </p>
         )}
 
@@ -842,7 +842,7 @@ export function StudioOcorrencias({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* O que o acervo NÃO sustenta — produto, e não comentário             */}
+      {/* O que o acervo NÃO sustenta, produto, e não comentário             */}
       {/* ------------------------------------------------------------------ */}
       <section className="studio-painel oco-honesto">
         <div className="studio-painel-cabeca">

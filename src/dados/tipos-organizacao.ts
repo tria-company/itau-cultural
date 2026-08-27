@@ -1,16 +1,16 @@
 /**
- * tipos-organizacao.ts — o contrato do nível 6 · Organização.
+ * tipos-organizacao.ts, o contrato do nível 6 · Organização.
  *
  * MÓDULO DE CLIENTE-SEGURO, e isso é requisito e não acaso (DP-F): nenhum import de dado
  * sai daqui. `Acessibilidade`, `MetodoCoordenada` e `ProcedenciaDePapel` entram como
  * `import type` e somem na compilação, então nenhum byte dos 9,4 MB de `entidades.json`
  * atravessa por causa deste arquivo. É o espelho de `tipos-acesso.ts`, que a S7 escreveu
- * para o nível 7 — e o que aquele arquivo já define, este NÃO redeclara: as 8 dimensões,
+ * para o nível 7, e o que aquele arquivo já define, este NÃO redeclara: as 8 dimensões,
  * `Situacao`, as três portas e o ato de declarar vêm de lá, por import.
  *
  * POR QUE ELE EXISTE EM VEZ DE UMA EDIÇÃO EM `tipos-acesso.ts`. Aquele arquivo é da S7,
  * que está rodando agora na mesma pasta. As duas adições que a jornada da Organização
- * exige — os recursos físicos do lugar e o cadastro que converte um espaço derivado —
+ * exige, os recursos físicos do lugar e o cadastro que converte um espaço derivado,
  * entram aqui por EXTENSÃO, sem tocar o arquivo da outra sessão. A consolidação está
  * registrada como PEDIDO-S6-01 em `.planning/estado/S6.md`.
  *
@@ -25,7 +25,7 @@ import { acessibilidadeVazia } from "./tipos-acesso";
  * A normalização de título vem do ÍNDICE DE BUSCA, e não é reescrita aqui.
  *
  * Ela é a primeira parte do critério de identidade do evento, e a fila de duplicatas dispara
- * contra ela. Uma segunda implementação — ainda que «equivalente» — faria o lote importado
+ * contra ela. Uma segunda implementação, ainda que «equivalente», faria o lote importado
  * gravar chave diferente da que o acervo usa, e o sintoma seria a duplicata que a máquina não
  * acha. `normalizar` é função de string sem dependência de dado: importá-la por valor no
  * cliente não arrasta byte nenhum do grafo, exatamente como `tipos-acesso.ts` já faz.
@@ -33,14 +33,14 @@ import { acessibilidadeVazia } from "./tipos-acesso";
 import { normalizar } from "./indice";
 
 // ---------------------------------------------------------------------------
-// Os recursos físicos do lugar — PEDIDO-S6-01
+// Os recursos físicos do lugar, PEDIDO-S6-01
 // ---------------------------------------------------------------------------
 
 /**
  * Rampa, elevador, banheiro adaptado, piso tátil e vaga reservada.
  *
  * ELES NÃO CABEM NAS 8 DIMENSÕES DE `Acessibilidade`, e é por isso que existem aqui em
- * vez de lá. As oito são de MÍDIA — audiodescrição, Libras, legenda, tradução simultânea,
+ * vez de lá. As oito são de MÍDIA, audiodescrição, Libras, legenda, tradução simultânea,
  * estenotipia. Estas cinco são do LUGAR, e são as que decidem se alguém consegue chegar.
  * Enfiar rampa dentro de `closed_caption` seria fabricar classificação: o mesmo erro que
  * o projeto recusou quando promoveu quatro linguagens em vez de mapear «Rádio →
@@ -81,13 +81,13 @@ export function recursosFisicosVazios(): RecursosFisicos {
 }
 
 // ---------------------------------------------------------------------------
-// A ficha do espaço — as 8 de mídia MAIS as 5 do lugar, com UM ato
+// A ficha do espaço, as 8 de mídia MAIS as 5 do lugar, com UM ato
 // ---------------------------------------------------------------------------
 
 /**
  * A ficha completa de um espaço.
  *
- * `declarada` registra O ATO DE PREENCHER, não o conteúdo — a mesma disciplina de
+ * `declarada` registra O ATO DE PREENCHER, não o conteúdo, a mesma disciplina de
  * `declaraAcessibilidade` em `Entidade` (§10 da ontologia). Treze booleanos em `false`
  * significam «não oferece» e «não declarou» ao mesmo tempo, e é essa ambiguidade que o
  * campo separado existe para desfazer.
@@ -95,7 +95,7 @@ export function recursosFisicosVazios(): RecursosFisicos {
  * UM ATO PARA AS DUAS METADES, e não dois. A pergunta que o ato responde é «esta ficha
  * foi preenchida?», e ela é uma só: quem declara que o espaço não tem rampa está no mesmo
  * gesto declarando que preencheu a ficha do espaço. Dois atos separados criariam um
- * quarto estado — «declarou o lugar mas não a mídia» — que nenhuma tela do produto sabe
+ * quarto estado, «declarou o lugar mas não a mídia», que nenhuma tela do produto sabe
  * exibir.
  */
 export interface AcessibilidadeDeEspaco {
@@ -118,19 +118,19 @@ export function algumRecursoMarcado(f: RecursosFisicos): boolean {
  * SEM SUJEITO NA FRASE, e é decisão: o mesmo ato serve o espaço e a instituição, e «este
  * espaço» no botão da tela de instituição afirmaria a coisa errada. O sujeito vem do título
  * do painel, que já diz de quem é a ficha. É a redação de §10 da ontologia, palavra por
- * palavra — duas telas com duas redações do mesmo ato fariam parecer que são dois atos.
+ * palavra, duas telas com duas redações do mesmo ato fariam parecer que são dois atos.
  */
 export const FRASE_DO_ATO =
   "Declaro que não oferece nenhum destes recursos.";
 
 /** Por que o ato tem peso igual ao de salvar, dito para quem opera a tela. */
 export const POR_QUE_O_ATO =
-  "Sem este botão, treze caixas desmarcadas seriam lidas como «não declarou» — e a " +
+  "Sem este botão, treze caixas desmarcadas seriam lidas como «não declarou», e a " +
   "plataforma se proibiu de interpretar silêncio. Declarar que não oferece é uma " +
   "informação; deixar em branco não é.";
 
 // ---------------------------------------------------------------------------
-// A conversão de procedência — o que a O2 existe para fazer
+// A conversão de procedência, o que a O2 existe para fazer
 // ---------------------------------------------------------------------------
 
 /**
@@ -138,12 +138,12 @@ export const POR_QUE_O_ATO =
  *
  * ESCOLHA REGISTRADA, NÃO INVENTADA. `Procedencia` tem hoje três valores (`ic`,
  * `derivado`, `autorado`) e o PRD §6 prevê seis em produção: os três mais `parceiro`,
- * `produtor`, `ia` e `curador`. Nenhum deles se chama «organização» — e acrescentar um
+ * `produtor`, `ia` e `curador`. Nenhum deles se chama «organização», e acrescentar um
  * sexto valor seria mudança de ontologia, que esta sessão não faz sozinha.
  *
  * Entre os que existem, `parceiro` é o único que descreve uma instituição escrevendo em
  * nome próprio: `produtor` é o nível 7, `curador` é o nível 5 e `ia` é máquina. A escolha
- * está registrada como PEDIDO-S6-05 — se a resposta for outra, muda esta constante e
+ * está registrada como PEDIDO-S6-05, se a resposta for outra, muda esta constante e
  * nada mais, porque nenhuma tela escreve o valor à mão.
  */
 export const PROCEDENCIA_DA_ORGANIZACAO: ProcedenciaDePapel = "parceiro";
@@ -156,7 +156,7 @@ export const FRASE_DA_CONVERSAO =
   "plataforma pode afirmar.";
 
 // ---------------------------------------------------------------------------
-// A coordenada continua derivada — a regra dura desta tela
+// A coordenada continua derivada, a regra dura desta tela
 // ---------------------------------------------------------------------------
 
 /**
@@ -164,13 +164,13 @@ export const FRASE_DA_CONVERSAO =
  *
  * NÃO EXISTE LATITUDE DIGITADA, e essa é a regra mais fácil de quebrar sem perceber: um
  * campo «lat/lon» no formulário pareceria completude e produziria coordenada `autorado`,
- * que o tipo `Coordenada` PROÍBE — `procedencia` ali é o literal `"derivado"`, não um
+ * que o tipo `Coordenada` PROÍBE, `procedencia` ali é o literal `"derivado"`, não um
  * enum. O que o endereço muda é o MÉTODO: um espaço sem endereço é posicionado por
  * deslocamento em torno da cidade; com endereço, o centroide do município passa a ser
  * a derivação declarada.
  *
  * Continua sendo derivação, e a tela diz que continua. Geocodificar de verdade exigiria
- * serviço externo, que o protótipo não tem — e fingir que tem seria pior do que não ter.
+ * serviço externo, que o protótipo não tem, e fingir que tem seria pior do que não ter.
  */
 export const METODO_APOS_ENDERECO: MetodoCoordenada = "centroide-municipio";
 
@@ -181,23 +181,23 @@ export const FRASE_DA_COORDENADA =
   "digitada não existe em lugar nenhum deste produto.";
 
 // ---------------------------------------------------------------------------
-// O cadastro — o que a organização escreve por cima do espaço derivado
+// O cadastro, o que a organização escreve por cima do espaço derivado
 // ---------------------------------------------------------------------------
 
 /**
  * O que a Organização acrescenta a um espaço do acervo.
  *
  * Note o que NÃO está aqui: `titulo`, `cidade`, `estado` e `resumo` continuam vindo do
- * acervo. A O2 não reescreve o que o Itaú Cultural já publicou — ela DECLARA o que
+ * acervo. A O2 não reescreve o que o Itaú Cultural já publicou, ela DECLARA o que
  * faltava. Um formulário que deixasse editar o título produziria, na primeira
  * regeração do grafo, dois nomes para o mesmo lugar e um par novo na fila de duplicatas.
  */
 export interface CadastroDeEspaco {
   espacoId: string;
-  /** Logradouro e número. Texto, porque é o que a organização tem — não é geocódigo. */
+  /** Logradouro e número. Texto, porque é o que a organização tem, não é geocódigo. */
   endereco: string;
   bairro: string;
-  /** Lotação declarada. `null` enquanto ninguém declarou — nunca `0`, que seria «cabe
+  /** Lotação declarada. `null` enquanto ninguém declarou, nunca `0`, que seria «cabe
    *  ninguém» e é uma afirmação diferente de «não sei». */
   capacidade: number | null;
   acessibilidade: AcessibilidadeDeEspaco;
@@ -216,7 +216,7 @@ export function cadastrado(c: CadastroDeEspaco | undefined): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// O que falta, NOMEADO — o padrão da coluna da direita
+// O que falta, NOMEADO, o padrão da coluna da direita
 // ---------------------------------------------------------------------------
 
 /**
@@ -225,7 +225,7 @@ export function cadastrado(c: CadastroDeEspaco | undefined): boolean {
  * `bloqueia` separa o que impede a publicação do que só diminui a qualidade do registro,
  * e a distinção é do produto: crédito de imagem bloqueia (165); ficha de acessibilidade
  * incompleta não. `dono` nomeia o nível responsável quando a falta depende de outro nível
- * — §8 da ontologia proíbe beco sem saída, e uma pendência sem dono é exatamente isso.
+ *, §8 da ontologia proíbe beco sem saída, e uma pendência sem dono é exatamente isso.
  */
 export interface Falta {
   texto: string;
@@ -248,7 +248,7 @@ export function faltasDoEspaco(
 
   if (!cadastrado(c)) {
     saida.push({
-      texto: "endereço — sem ele o espaço continua sendo inferência do acervo",
+      texto: "endereço, sem ele o espaço continua sendo inferência do acervo",
       bloqueia: true,
       dono: null,
     });
@@ -262,13 +262,13 @@ export function faltasDoEspaco(
   if (!c?.acessibilidade.declarada && !declaraNoAcervo) {
     saida.push({
       texto:
-        "ficha de acessibilidade — nem os recursos, nem o ato de declarar que não oferece",
+        "ficha de acessibilidade, nem os recursos, nem o ato de declarar que não oferece",
       bloqueia: false,
       dono: null,
     });
   }
   saida.push({
-    texto: "verificação da organização — o estado é do Admin, e esta tela encaminha",
+    texto: "verificação da organização, o estado é do Admin, e esta tela encaminha",
     bloqueia: false,
     dono: "Admin (92)",
   });
@@ -277,7 +277,7 @@ export function faltasDoEspaco(
 }
 
 // ---------------------------------------------------------------------------
-// A instituição — O1, e ela HERDA o padrão do espaço
+// A instituição, O1, e ela HERDA o padrão do espaço
 // ---------------------------------------------------------------------------
 
 /**
@@ -285,7 +285,7 @@ export function faltasDoEspaco(
  *
  * TRÊS VALORES, E O TERCEIRO É O PONTO. `nao-verificada` é onde estão as 246 hoje;
  * `solicitada` é o que ESTA tela produz; `verificada` é o que só o Admin (92) escreve. A
- * Organização **não se verifica** — se verificasse, a verificação não valeria nada, porque
+ * Organização **não se verifica**, se verificasse, a verificação não valeria nada, porque
  * quem responde pelo dado estaria atestando o próprio dado. A tela encaminha e mostra o
  * estado; ela não decide.
  */
@@ -311,7 +311,7 @@ export const QUEM_VERIFICA =
  * campos faria a mesma pergunta ter duas respostas possíveis no mesmo produto.
  *
  * Note o que NÃO está aqui, de novo: `titulo`, `resumo`, `linguagens` e `fonte` continuam
- * vindo da Enciclopédia. As 246 instituições são 100% `ic` — elas já existem, com verbete
+ * vindo da Enciclopédia. As 246 instituições são 100% `ic`, elas já existem, com verbete
  * escrito. A O1 não reescreve o verbete: ela declara o que o verbete não tem.
  */
 export interface CadastroDeInstituicao {
@@ -340,7 +340,7 @@ export function faltasDaInstituicao(
 
   if (!c || c.endereco.trim().length === 0) {
     saida.push({
-      texto: "endereço — nenhuma das 246 instituições tem coordenada, e sem lugar ela não aparece no mapa",
+      texto: "endereço, nenhuma das 246 instituições tem coordenada, e sem lugar ela não aparece no mapa",
       bloqueia: false,
       dono: null,
     });
@@ -350,14 +350,14 @@ export function faltasDaInstituicao(
   }
   if (temImagem && !temCreditoNoAcervo && (!c || c.creditoImagem.trim().length === 0)) {
     saida.push({
-      texto: "crédito da imagem — a imagem existe e o crédito não, e crédito é bloqueante (165)",
+      texto: "crédito da imagem, a imagem existe e o crédito não, e crédito é bloqueante (165)",
       bloqueia: true,
       dono: null,
     });
   }
   if (!c?.acessibilidade.declarada && !declaraNoAcervo) {
     saida.push({
-      texto: "ficha de acessibilidade — nem os recursos, nem o ato de declarar que não oferece",
+      texto: "ficha de acessibilidade, nem os recursos, nem o ato de declarar que não oferece",
       bloqueia: false,
       dono: null,
     });
@@ -365,7 +365,7 @@ export function faltasDaInstituicao(
   saida.push({
     texto:
       c?.verificacao === "solicitada"
-        ? "a verificação está com o Admin — a organização não se verifica"
+        ? "a verificação está com o Admin, a organização não se verifica"
         : "verificação ainda não solicitada",
     bloqueia: false,
     dono: "Admin (92)",
@@ -375,7 +375,7 @@ export function faltasDaInstituicao(
 }
 
 // ---------------------------------------------------------------------------
-// As dez telas — a navegação da superfície
+// As dez telas, a navegação da superfície
 // ---------------------------------------------------------------------------
 
 /**
@@ -387,7 +387,7 @@ export function faltasDaInstituicao(
  * próprio cabeçalho, como a Redação faz. O acréscimo na raiz está registrado como
  * PEDIDO-S6-03 e é commit da S7.
  *
- * `pronta` NÃO É DECORAÇÃO. Uma tela que ainda não existe vira link para 404 — e um 404 no
+ * `pronta` NÃO É DECORAÇÃO. Uma tela que ainda não existe vira link para 404, e um 404 no
  * meio de uma demonstração ao vivo é pior do que um item apagado, porque quem clicou já
  * perdeu o lugar. Enquanto `pronta` for `false`, o item aparece nomeado e desabilitado: a
  * pessoa vê que a superfície tem dez telas e vê quais já respondem. A bandeira vira `true`
@@ -397,7 +397,7 @@ export interface TelaDaOrganizacao {
   id: string;
   rotulo: string;
   rota: string;
-  /** O que a tela resolve, em uma linha. Vira `title` — quem passa o cursor descobre. */
+  /** O que a tela resolve, em uma linha. Vira `title`, quem passa o cursor descobre. */
   objetivo: string;
   pronta: boolean;
 }
@@ -435,7 +435,7 @@ export const TELAS_DA_ORGANIZACAO: readonly TelaDaOrganizacao[] = [
     id: "programa",
     rotulo: "Programa",
     rota: "/studio/programa",
-    objetivo: "A camada acima do evento — a única classe com zero instâncias",
+    objetivo: "A camada acima do evento, a única classe com zero instâncias",
     pronta: true,
   },
   {
@@ -463,7 +463,7 @@ export const TELAS_DA_ORGANIZACAO: readonly TelaDaOrganizacao[] = [
     id: "alcance",
     rotulo: "Alcance",
     rota: "/studio/alcance",
-    objetivo: "O retorno para quem publica — sem número que o acervo não sustenta",
+    objetivo: "O retorno para quem publica, sem número que o acervo não sustenta",
     pronta: true,
   },
   {
@@ -476,7 +476,7 @@ export const TELAS_DA_ORGANIZACAO: readonly TelaDaOrganizacao[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// A equipe e as alçadas — O7, e a forma é NOVA
+// A equipe e as alçadas, O7, e a forma é NOVA
 // ---------------------------------------------------------------------------
 
 /**
@@ -507,11 +507,11 @@ export const ROTULO_DA_ALCADA: Record<Alcada, string> = {
 };
 
 /** O que cada alçada permite, para quem está concedendo. Um rótulo sozinho faz quem
- *  concede adivinhar — e quem adivinha concede demais. */
+ *  concede adivinhar, e quem adivinha concede demais. */
 export const EXPLICACAO_DA_ALCADA: Record<Alcada, string> = {
   rascunhar: "Cria e edita registros, e para aí. Nada que ela escreve sai do Studio sozinho.",
   publicar: "Envia o registro à moderação em nome da organização. É a alçada que assina.",
-  gerir_espacos: "Cadastra e edita os espaços da organização — a ficha que a ocorrência herda.",
+  gerir_espacos: "Cadastra e edita os espaços da organização, a ficha que a ocorrência herda.",
   subir_midia: "Acrescenta mídia ao acervo da organização, com o crédito obrigatório junto.",
   gerir_equipe: "Convida, remove e concede alçada. Só o titular a tem, e ela não se concede.",
 };
@@ -522,7 +522,7 @@ export const LIMITE_DA_ALCADA =
   "instituição de se dar poderes de governança da plataforma.";
 
 /** Onde o vínculo está. `removido` não some da lista: quem saiu continua no histórico, e o
- *  que ele publicou continua publicado — é exatamente o que a tela existe para provar. */
+ *  que ele publicou continua publicado, é exatamente o que a tela existe para provar. */
 export type EstadoDoVinculo = "convidado" | "ativo" | "removido";
 
 export const ROTULO_DO_VINCULO: Record<EstadoDoVinculo, string> = {
@@ -544,7 +544,7 @@ export interface Colaborador {
   quando: string;
 }
 
-/** Uma linha do histórico da equipe. Toda concessão, remoção e sucessão gera uma — sem
+/** Uma linha do histórico da equipe. Toda concessão, remoção e sucessão gera uma, sem
  *  autor e sem carimbo, «a alçada mudou» não é registro, é rumor. */
 export interface EntradaDeEquipe {
   quando: string;
@@ -555,7 +555,7 @@ export interface EntradaDeEquipe {
 export const EQUIPE_E_AUTORADA =
   "Os vínculos desta tela são autorados para a demonstração: não há autenticação real no " +
   "protótipo, e o acervo do Itaú Cultural não publica quadro de pessoal. Os perfis são " +
-  "PAPÉIS e não pessoas — usar as 575 pessoas reais da Enciclopédia como colaboradoras " +
+  "PAPÉIS e não pessoas, usar as 575 pessoas reais da Enciclopédia como colaboradoras " +
   "fabricaria um vínculo de emprego que ninguém declarou.";
 
 /**
@@ -564,7 +564,7 @@ export const EQUIPE_E_AUTORADA =
  * PAPÉIS, NUNCA NOMES. O acervo tem 575 pessoas reais, e vincular qualquer uma delas a uma
  * instituição como «colaboradora» seria afirmar um fato sobre uma pessoa real que a fonte
  * não afirma. Nomes inventados teriam o problema oposto e igualmente ruim: pareceriam dado.
- * A saída é a mesma que a casa já usa em `OPERADOR_DO_STUDIO` — o papel é o nome.
+ * A saída é a mesma que a casa já usa em `OPERADOR_DO_STUDIO`, o papel é o nome.
  *
  * Os quatro cobrem as combinações que a tela precisa mostrar: o titular, um que publica, um
  * que só rascunha, e um convite ainda não aceito.
@@ -619,7 +619,7 @@ export function equipeAutorada(autor: string, quando: string): Colaborador[] {
  *
  * NÃO, E É A REGRA INTEIRA DA TELA. A funcionalidade 140 existe porque a pessoa sai e a
  * instituição fica: se remover o titular fosse possível, a organização perderia o dono por
- * ABANDONO — ninguém responderia por ela, e o perfil ficaria órfão exatamente como o
+ * ABANDONO, ninguém responderia por ela, e o perfil ficaria órfão exatamente como o
  * estagiário que leva o cadastro embora. A sucessão é o único caminho, e ela é explícita,
  * com autor e carimbo.
  */
@@ -629,7 +629,7 @@ export function podeRemover(c: Colaborador): boolean {
 
 export const POR_QUE_A_SUCESSAO =
   "A titularidade se transfere; ela não se abandona. Remover o titular deixaria a " +
-  "organização sem quem responde por ela, e o perfil ficaria órfão — que é exatamente o " +
+  "organização sem quem responde por ela, e o perfil ficaria órfão, que é exatamente o " +
   "problema que esta tela existe para impedir. Por isso o botão de remover não existe para " +
   "o titular: primeiro se transfere, depois se remove.";
 
@@ -640,21 +640,21 @@ export function faltasDaEquipe(equipe: Colaborador[]): Falta[] {
 
   if (!equipe.some((c) => c.titular && c.estado === "ativo")) {
     saida.push({
-      texto: "a organização está sem titular ativo — ninguém responde por ela",
+      texto: "a organização está sem titular ativo, ninguém responde por ela",
       bloqueia: true,
       dono: null,
     });
   }
   if (!ativos.some((c) => c.alcadas.includes("publicar"))) {
     saida.push({
-      texto: "ninguém com alçada de publicar — a organização não consegue enviar à moderação",
+      texto: "ninguém com alçada de publicar, a organização não consegue enviar à moderação",
       bloqueia: true,
       dono: null,
     });
   }
   if (!ativos.some((c) => c.alcadas.includes("gerir_espacos"))) {
     saida.push({
-      texto: "ninguém com alçada de gerir espaços — a porta que o produtor usa fica sem dono",
+      texto: "ninguém com alçada de gerir espaços, a porta que o produtor usa fica sem dono",
       bloqueia: false,
       dono: null,
     });
@@ -667,7 +667,7 @@ export function faltasDaEquipe(equipe: Colaborador[]): Falta[] {
     });
   }
   saida.push({
-    texto: "promover alguém a moderador ou editor — não é desta tela",
+    texto: "promover alguém a moderador ou editor, não é desta tela",
     bloqueia: false,
     dono: "Admin (87)",
   });
@@ -676,7 +676,7 @@ export function faltasDaEquipe(equipe: Colaborador[]): Falta[] {
 }
 
 // ---------------------------------------------------------------------------
-// A mídia — O5. Ficha técnica e direito de distribuição, as duas formas novas
+// A mídia, O5. Ficha técnica e direito de distribuição, as duas formas novas
 // ---------------------------------------------------------------------------
 
 /**
@@ -684,7 +684,7 @@ export function faltasDaEquipe(equipe: Colaborador[]): Falta[] {
  *
  * Seria fácil mapear «podcasts → áudio» e «videos → vídeo» e preencher os 529 de uma vez.
  * Seria também uma inferência apresentada como declaração: `categoria` é onde o CMS
- * publica o item, não o que o arquivo é — «séries» tem vídeo e tem texto. O formato é campo
+ * publica o item, não o que o arquivo é, «séries» tem vídeo e tem texto. O formato é campo
  * que a organização DECLARA, e enquanto ninguém declarou a tela diz que ninguém declarou.
  */
 export const FORMATOS_DE_MIDIA = ["audio", "video", "texto", "imagem"] as const;
@@ -705,12 +705,12 @@ export interface CapituloDeMidia {
 }
 
 /**
- * A ficha técnica — a lacuna que destrava «player com retomada» (26).
+ * A ficha técnica, a lacuna que destrava «player com retomada» (26).
  *
  * Sem duração declarada não há barra de progresso honesta, e sem capítulo não há retomada
  * que signifique alguma coisa: retomar aos 43% de um podcast de duas horas é retomar no
  * meio de uma frase. É por isso que a funcionalidade 26 está «não sustentada» e não
- * «faltando» — o que falta é dado, não tela.
+ * «faltando», o que falta é dado, não tela.
  */
 export interface FichaTecnicaDeMidia {
   duracao: string;
@@ -723,7 +723,7 @@ export function fichaTecnicaVazia(): FichaTecnicaDeMidia {
 }
 
 /**
- * O direito de distribuição, item a item — a lacuna que destrava «download e offline» (30).
+ * O direito de distribuição, item a item, a lacuna que destrava «download e offline» (30).
  *
  * `declarado` EXISTE PELO MESMO MOTIVO DE `declaraAcessibilidade`, e a repetição é
  * deliberada: dois booleanos em `false` significam «não permite» e «ninguém declarou» ao
@@ -743,14 +743,14 @@ export function direitoVazio(): DireitoDeDistribuicao {
 }
 
 export const FRASE_DO_DIREITO =
-  "Enquanto o direito não for declarado, o item não baixa e não é incorporado — e a razão " +
+  "Enquanto o direito não for declarado, o item não baixa e não é incorporado, e a razão " +
   "não é cautela jurídica genérica: é a mesma regra da acessibilidade. Dois booleanos em " +
   "«false» significam «não permite» e «ninguém declarou» ao mesmo tempo, e tratar silêncio " +
   "como permissão é a leitura mais cara que este produto poderia fazer.";
 
 export const POR_QUE_OFFLINE_IMPORTA =
   "Offline é onde a falta mais dói, e o acervo diz por quê: a maior parte das mídias é " +
-  "podcast, e podcast é o formato que mais se ouve sem rede — no ônibus, no metrô, na rua.";
+  "podcast, e podcast é o formato que mais se ouve sem rede, no ônibus, no metrô, na rua.";
 
 /** O que a Organização escreve sobre um ativo do acervo. */
 export interface CadastroDeMidia {
@@ -759,13 +759,13 @@ export interface CadastroDeMidia {
   creditoImagem: string;
   fichaTecnica: FichaTecnicaDeMidia;
   direito: DireitoDeDistribuicao;
-  /** As 8 dimensões, com o mesmo ato — mídia é onde elas nasceram. */
+  /** As 8 dimensões, com o mesmo ato, mídia é onde elas nasceram. */
   acessibilidade: AcessibilidadeDeEspaco;
   autor: string;
   quando: string;
 }
 
-/** Um item publica? Crédito é a única condição bloqueante — as outras faltas diminuem o
+/** Um item publica? Crédito é a única condição bloqueante, as outras faltas diminuem o
  *  que o item entrega, e não o direito de ele existir no acervo. */
 export function midiaPublica(
   creditoNoAcervo: string | null,
@@ -782,37 +782,37 @@ export function faltasDaMidia(
 
   if (!midiaPublica(creditoNoAcervo, cadastro)) {
     saida.push({
-      texto: "crédito — nenhuma mídia publica sem crédito (165), e esta não publica",
+      texto: "crédito, nenhuma mídia publica sem crédito (165), e esta não publica",
       bloqueia: true,
       dono: null,
     });
   }
   if (!cadastro || cadastro.fichaTecnica.duracao.trim().length === 0) {
     saida.push({
-      texto: "duração — sem ela não há barra de progresso honesta, e «player com retomada» (26) segue não sustentada",
+      texto: "duração, sem ela não há barra de progresso honesta, e «player com retomada» (26) segue não sustentada",
       bloqueia: false,
       dono: null,
     });
   }
   if (!cadastro || cadastro.fichaTecnica.formato === null) {
-    saida.push({ texto: "formato declarado — o acervo publica categoria, não formato", bloqueia: false, dono: null });
+    saida.push({ texto: "formato declarado, o acervo publica categoria, não formato", bloqueia: false, dono: null });
   }
   if (!cadastro || cadastro.fichaTecnica.capitulos.length === 0) {
     saida.push({
-      texto: "capítulos — retomar aos 43% de um podcast de duas horas é retomar no meio de uma frase",
+      texto: "capítulos, retomar aos 43% de um podcast de duas horas é retomar no meio de uma frase",
       bloqueia: false,
       dono: null,
     });
   }
   if (!cadastro?.direito.declarado) {
     saida.push({
-      texto: "direito de distribuição — enquanto não for declarado, o item não baixa (30)",
+      texto: "direito de distribuição, enquanto não for declarado, o item não baixa (30)",
       bloqueia: false,
       dono: null,
     });
   }
   saida.push({
-    texto: "conferência dos direitos de imagem — a decisão é da fila de moderação",
+    texto: "conferência dos direitos de imagem, a decisão é da fila de moderação",
     bloqueia: false,
     dono: "Moderador (114, 115)",
   });
@@ -821,11 +821,11 @@ export function faltasDaMidia(
 }
 
 // ---------------------------------------------------------------------------
-// O programa — O3. A única classe da ontologia com ZERO instâncias
+// O programa, O3. A única classe da ontologia com ZERO instâncias
 // ---------------------------------------------------------------------------
 
 /**
- * Uma edição do programa — Rumos 2015, Rumos 2017.
+ * Uma edição do programa, Rumos 2015, Rumos 2017.
  *
  * `rotulo` e não «ano»: nem toda edição é anual, e um campo numérico obrigaria «Temporada
  * 2024/2025» a virar dois registros ou uma mentira.
@@ -839,13 +839,13 @@ export interface EdicaoDePrograma {
 /**
  * O guarda-chuva acima do evento.
  *
- * `programa` EXISTE NO TIPO E NÃO EXISTE NO ACERVO — zero instâncias em 7.810 entidades. O
+ * `programa` EXISTE NO TIPO E NÃO EXISTE NO ACERVO, zero instâncias em 7.810 entidades. O
  * motor de caminhada a percorre e nada a popula. Por isso esta é a única tela da sessão que
  * não tem lista para editar: ela CRIA, e o que aparece nela é o que a organização criou na
  * demonstração.
  *
  * `eventoIds` aponta para eventos REAIS do acervo. É o desenho inteiro da tela: o
- * guarda-chuva é autorado, os 300 eventos embaixo dele não são — e é essa mistura que deixa
+ * guarda-chuva é autorado, os 300 eventos embaixo dele não são, e é essa mistura que deixa
  * ver o que a classe faria se alguém a povoasse.
  */
 export interface Programa {
@@ -861,28 +861,28 @@ export interface Programa {
 export const PROGRAMA_TEM_ZERO =
   "«programa» é a única das 20 classes da ontologia com zero instâncias: ela existe em " +
   "`tipos.ts`, o motor de caminhada a percorre, e nada no acervo a popula. Tudo o que " +
-  "aparece nesta tela foi criado aqui, agora — e os eventos reunidos embaixo, não.";
+  "aparece nesta tela foi criado aqui, agora, e os eventos reunidos embaixo, não.";
 
 export function faltasDoPrograma(p: Programa | undefined): Falta[] {
   const saida: Falta[] = [];
   if (!p) return saida;
 
   if (p.titulo.trim().length === 0) {
-    saida.push({ texto: "título — sem ele o programa não tem como ser referenciado", bloqueia: true, dono: null });
+    saida.push({ texto: "título, sem ele o programa não tem como ser referenciado", bloqueia: true, dono: null });
   }
   if (p.resumo.trim().length === 0) {
-    saida.push({ texto: "resumo — é o que o app público mostra acima dos eventos reunidos", bloqueia: false, dono: null });
+    saida.push({ texto: "resumo, é o que o app público mostra acima dos eventos reunidos", bloqueia: false, dono: null });
   }
   if (p.edicoes.length === 0) {
     saida.push({
-      texto: "nenhuma edição — um programa sem edição é indistinguível de uma etiqueta",
+      texto: "nenhuma edição, um programa sem edição é indistinguível de uma etiqueta",
       bloqueia: false,
       dono: null,
     });
   }
   if (p.eventoIds.length === 0) {
     saida.push({
-      texto: "nenhum evento reunido — o guarda-chuva existe e não cobre nada",
+      texto: "nenhum evento reunido, o guarda-chuva existe e não cobre nada",
       bloqueia: false,
       dono: null,
     });
@@ -896,7 +896,7 @@ export function faltasDoPrograma(p: Programa | undefined): Falta[] {
 }
 
 // ---------------------------------------------------------------------------
-// A formação — O4. Curso, biblioteca e a visita educativa
+// A formação, O4. Curso, biblioteca e a visita educativa
 // ---------------------------------------------------------------------------
 
 /**
@@ -921,7 +921,7 @@ export interface VisitaEducativa {
   escola: string;
   data: string;
   horario: string;
-  /** Quantas pessoas a escola traz. Entra na conta das vagas — é o que faz a agenda ser
+  /** Quantas pessoas a escola traz. Entra na conta das vagas, é o que faz a agenda ser
    *  agenda. `null` é «não informou», e uma visita sem número não se confirma. */
   pessoas: number | null;
   estado: EstadoDaVisita;
@@ -939,7 +939,7 @@ export interface MaterialDidatico {
 export interface CadastroDeFormacao {
   formacaoId: string;
   inscricaoAberta: boolean;
-  /** Lotação da oferta. `null` enquanto ninguém declarou — e sem ela nenhuma visita se
+  /** Lotação da oferta. `null` enquanto ninguém declarou, e sem ela nenhuma visita se
    *  confirma, porque confirmar contra um teto desconhecido é aceitar qualquer coisa. */
   vagas: number | null;
   materiais: MaterialDidatico[];
@@ -961,7 +961,7 @@ export function porQueNaoConfirma(
   jaConfirmadas: number,
 ): string | null {
   if (visita.estado === "confirmada") return null;
-  if (vagas === null) return "a oferta não declarou vagas — não há teto contra o que conferir";
+  if (vagas === null) return "a oferta não declarou vagas, não há teto contra o que conferir";
   if (visita.pessoas === null) return "a escola não informou quantas pessoas vêm";
   if (jaConfirmadas + visita.pessoas > vagas) {
     return `não cabe: ${jaConfirmadas} já confirmadas mais ${visita.pessoas} passa das ${vagas} vagas`;
@@ -977,7 +977,7 @@ export const EDUCADOR_FORA_DOS_OITO =
 
 export const FORMACAO_E_O_MODELO =
   "As formações são a única classe do acervo com 100% de ficha de acessibilidade, imagem e " +
-  "crédito. Elas são o modelo do que dado bem preenchido parece — e o argumento de que, " +
+  "crédito. Elas são o modelo do que dado bem preenchido parece, e o argumento de que, " +
   "quando a fonte preenche, o produto fica melhor sem mudar uma linha de código.";
 
 export function faltasDaFormacao(
@@ -988,26 +988,26 @@ export function faltasDaFormacao(
 
   if (!cadastro || cadastro.vagas === null) {
     saida.push({
-      texto: "vagas — sem elas nenhuma visita se confirma, porque não há teto contra o que conferir",
+      texto: "vagas, sem elas nenhuma visita se confirma, porque não há teto contra o que conferir",
       bloqueia: true,
       dono: null,
     });
   }
   if (!cadastro?.inscricaoAberta) {
-    saida.push({ texto: "inscrição fechada — a oferta aparece e não recebe ninguém", bloqueia: false, dono: null });
+    saida.push({ texto: "inscrição fechada, a oferta aparece e não recebe ninguém", bloqueia: false, dono: null });
   }
   if (!cadastro || cadastro.materiais.length === 0) {
     saida.push({ texto: "nenhum material didático publicado", bloqueia: false, dono: null });
   }
   if (visitasPendentes > 0) {
     saida.push({
-      texto: `${visitasPendentes} visita(s) esperando resposta — escola sem resposta remarca com outra instituição`,
+      texto: `${visitasPendentes} visita(s) esperando resposta, escola sem resposta remarca com outra instituição`,
       bloqueia: false,
       dono: null,
     });
   }
   saida.push({
-    texto: "acesso do educador como nível próprio — fora dos oito desta versão",
+    texto: "acesso do educador como nível próprio, fora dos oito desta versão",
     bloqueia: false,
     dono: "Admin (87)",
   });
@@ -1015,14 +1015,14 @@ export function faltasDaFormacao(
 }
 
 // ---------------------------------------------------------------------------
-// O edital — O6. Forma NOVA: a classe não existe em `ClasseEntidade`
+// O edital, O6. Forma NOVA: a classe não existe em `ClasseEntidade`
 // ---------------------------------------------------------------------------
 
 /**
  * O estado do edital.
  *
  * QUATRO VALORES, E O TERCEIRO É O QUE FALTA NA MAIORIA DOS SISTEMAS. «Em julgamento» é o
- * intervalo entre encerrar a inscrição e sair o resultado — o período em que quem se
+ * intervalo entre encerrar a inscrição e sair o resultado, o período em que quem se
  * inscreveu mais quer saber onde está. Um edital que pula de «encerrado» para «resultado»
  * deixa esse intervalo sem nome, e quem esperou não sabe se foi esquecido.
  */
@@ -1041,7 +1041,7 @@ export const EXPLICACAO_DO_EDITAL: Record<EstadoDoEdital, string> = {
   encerrado: "O prazo passou e ninguém mais se inscreve. Ainda não há julgamento.",
   "em-julgamento":
     "Encerrado e sendo avaliado. É o intervalo em que quem se inscreveu mais quer saber onde " +
-    "está — e é justamente ele que costuma não ter nome nos sistemas.",
+    "está, e é justamente ele que costuma não ter nome nos sistemas.",
   resultado: "O resultado saiu e está publicado.",
 };
 
@@ -1049,15 +1049,15 @@ export const EDITAL_E_FORMA_NOVA =
   "«edital» não existe em `ClasseEntidade`: um grep por edital em `src/dados/` não retorna " +
   "nada, e três funcionalidades do catálogo o pressupõem no grafo. A forma foi criada aqui, " +
   "por extensão aditiva, sem tocar `tipos.ts` e sem ser forçada dentro de «formacao» nem de " +
-  "«programa» — nenhuma das duas carrega prazo, critério estruturado nem estado de " +
+  "«programa», nenhuma das duas carrega prazo, critério estruturado nem estado de " +
   "julgamento, e enfiar edital numa delas seria fabricar classificação.";
 
 /**
- * Uma inscrição — e o funil da funcionalidade 49.
+ * Uma inscrição, e o funil da funcionalidade 49.
  *
  * `viraAgente` é o ponto: quem se inscreve num edital **entra no grafo como agente**, e é
  * assim que a plataforma ganha produtor sem campanha de cadastro. O edital é a porta de
- * entrada que a proposta descreve, e ela só existe porque alguém publica o edital — e
+ * entrada que a proposta descreve, e ela só existe porque alguém publica o edital, e
  * ninguém publicava.
  */
 export interface InscricaoNoEdital {
@@ -1079,7 +1079,7 @@ export interface InscricaoNoEdital {
  * permite o casamento com o perfil do produtor (48): «edital para dança no Pará» só encontra
  * quem faz dança no Pará se «dança» e «Pará» forem valores de vocabulário dos dois lados. Um
  * campo de texto com «voltado a companhias de dança da região Norte» é legível para uma
- * pessoa e mudo para o sistema — e a funcionalidade 166, que alerta o produtor sobre edital
+ * pessoa e mudo para o sistema, e a funcionalidade 166, que alerta o produtor sobre edital
  * compatível, depende inteiramente disso.
  */
 export interface Edital {
@@ -1105,7 +1105,7 @@ export interface PerfilDoProponente {
 export interface Casamento {
   territorioCasa: boolean;
   linguagemCasa: boolean;
-  /** `true` quando o edital não recorta aquela dimensão — sem critério, tudo passa. */
+  /** `true` quando o edital não recorta aquela dimensão, sem critério, tudo passa. */
   territorioAberto: boolean;
   linguagemAberto: boolean;
 }
@@ -1133,12 +1133,12 @@ export function faltasDoEdital(e: Edital | undefined): Falta[] {
   if (!e) return saida;
 
   if (e.prazo.trim().length === 0) {
-    saida.push({ texto: "prazo — um edital sem data de fechamento não fecha", bloqueia: true, dono: null });
+    saida.push({ texto: "prazo, um edital sem data de fechamento não fecha", bloqueia: true, dono: null });
   }
   if (e.linguagens.length === 0 && e.territorios.length === 0) {
     saida.push({
       texto:
-        "nenhum critério estruturado — sem eles o alerta de edital compatível (166) não tem o que comparar",
+        "nenhum critério estruturado, sem eles o alerta de edital compatível (166) não tem o que comparar",
       bloqueia: false,
       dono: null,
     });
@@ -1161,7 +1161,7 @@ export function faltasDoEdital(e: Edital | undefined): Falta[] {
 }
 
 // ---------------------------------------------------------------------------
-// A importação em lote — O8
+// A importação em lote, O8
 // ---------------------------------------------------------------------------
 
 export const ORIGENS_DE_LOTE = ["ical", "json"] as const;
@@ -1176,15 +1176,15 @@ export const ROTULO_DA_ORIGEM: Record<OrigemDeLote, string> = {
  * O que a importação NÃO traz, dito antes de ela rodar.
  *
  * É a frase mais útil da tela. Um lote de agenda traz título, data e, com sorte, o nome do
- * local em texto livre — e não traz espaço cadastrado, elenco com papel, preço, canal de
+ * local em texto livre, e não traz espaço cadastrado, elenco com papel, preço, canal de
  * ingresso nem ficha de acessibilidade. Uma tela que só mostrasse «12 eventos importados»
  * faria parecer que o trabalho acabou; o que acabou foi a digitação.
  */
 export const O_QUE_O_LOTE_NAO_TRAZ: readonly string[] = [
-  "espaço cadastrado — o arquivo traz nome de local em texto, e nome de local não é espaço",
-  "elenco com papel — a aresta «atua_em» exige papel, e nenhum formato de agenda o carrega",
+  "espaço cadastrado, o arquivo traz nome de local em texto, e nome de local não é espaço",
+  "elenco com papel, a aresta «atua_em» exige papel, e nenhum formato de agenda o carrega",
   "preço e canal de ingresso",
-  "ficha de acessibilidade — nem os recursos, nem o ato de declarar que não oferece",
+  "ficha de acessibilidade, nem os recursos, nem o ato de declarar que não oferece",
 ];
 
 /** Uma linha do lote, já lida e conferida contra o acervo. */
@@ -1194,7 +1194,7 @@ export interface LinhaDoLote {
   fim: string;
   /** O nome do local como o arquivo o traz. TEXTO, e a tela não o promove a espaço. */
   local: string;
-  /** Título normalizado — a mesma normalização do índice de busca. */
+  /** Título normalizado, a mesma normalização do índice de busca. */
   normalizado: string;
   /** Título de evento do acervo que colide por identidade, quando há. */
   colideCom: string | null;
@@ -1215,7 +1215,7 @@ export interface Lote {
 /**
  * A chave de integração.
  *
- * QUEM EMITE E LIMITA É O ADMIN (97). A organização vê a própria chave, usa e revoga — e
+ * QUEM EMITE E LIMITA É O ADMIN (97). A organização vê a própria chave, usa e revoga, e
  * não existe caminho neste módulo para criar uma. É a terceira segregação da sessão, junto
  * com «a organização não se verifica» e «a organização não declara fato de evento», e as
  * três seguem a mesma disciplina: a impossibilidade mora no código, não num aviso.
@@ -1232,7 +1232,7 @@ export interface ChaveDeIntegracao {
 }
 
 export const QUEM_EMITE_A_CHAVE =
-  "A chave é emitida e limitada pelo Admin (97). A organização vê a própria, usa e revoga — " +
+  "A chave é emitida e limitada pelo Admin (97). A organização vê a própria, usa e revoga, " +
   "e não há nesta tela caminho para criar uma. Emitir a própria credencial e definir o " +
   "próprio limite seria a organização se autorizando, que é o mesmo defeito de ela se " +
   "verificar.";
@@ -1252,12 +1252,12 @@ function linhasDesdobradas(texto: string): string[] {
  * Lê um lote de iCal ou de JSON.
  *
  * O LEITOR É ESTREITO DE PROPÓSITO. Ele pega `SUMMARY`, `DTSTART`, `DTEND` e `LOCATION`, e
- * ignora o resto — não porque o resto não importe, mas porque fingir que lê um iCal completo
+ * ignora o resto, não porque o resto não importe, mas porque fingir que lê um iCal completo
  * seria prometer um comportamento que este protótipo não tem. O que ele NÃO entende, ele
  * deixa de fora, e a tela lista o que ficou vazio.
  *
  * ENTRADA EXTERNA: nada aqui confia no formato. JSON malformado, campo ausente e tipo errado
- * caem no mesmo lugar — uma linha com o campo vazio e o nome dele na lista de vazios.
+ * caem no mesmo lugar, uma linha com o campo vazio e o nome dele na lista de vazios.
  */
 export function lerLote(texto: string, origem: OrigemDeLote): Omit<LinhaDoLote, "colideCom">[] {
   const brutas: { titulo: string; inicio: string; fim: string; local: string }[] = [];
@@ -1320,7 +1320,7 @@ export function lerLote(texto: string, origem: OrigemDeLote): Omit<LinhaDoLote, 
  * Uma linha pode ser gravada?
  *
  * SÓ COM TÍTULO. O critério de identidade do evento é «título normalizado + agente
- * realizador + obra», e sem o primeiro terço não há chave nenhuma — gravar assim produziria
+ * realizador + obra», e sem o primeiro terço não há chave nenhuma, gravar assim produziria
  * registro sem identidade, e a fila de duplicatas passaria a acusar o próprio sistema. Os
  * outros vazios diminuem o registro; este o impede.
  */
@@ -1335,14 +1335,14 @@ export const POR_QUE_A_PREVIA =
   "desfazer depois.";
 
 // ---------------------------------------------------------------------------
-// O alcance — O9. A tela onde é mais fácil mentir
+// O alcance, O9. A tela onde é mais fácil mentir
 // ---------------------------------------------------------------------------
 
 /**
  * O que o acervo NÃO sustenta, item a item, com o motivo.
  *
  * ESTA CONSTANTE É O CONTEÚDO PRINCIPAL DA O9, e não um rodapé de ressalva. Um painel de
- * alcance com número inventado destrói o argumento de procedência da proposta inteira — e
+ * alcance com número inventado destrói o argumento de procedência da proposta inteira, e
  * num painel institucional ninguém confere, que é exatamente o que torna a mentira barata.
  * Cada linha aqui é um número que a tela PODERIA exibir e escolhe não exibir, com a razão.
  */
@@ -1381,22 +1381,22 @@ export const O_QUE_O_ALCANCE_NAO_SUSTENTA: readonly { medida: string; porque: st
 
 export const REGRA_DO_ALCANCE =
   "Se o dado não sustenta, a tela diz. Um painel de alcance com número inventado destrói o " +
-  "argumento de procedência da proposta inteira — e num painel institucional ninguém " +
+  "argumento de procedência da proposta inteira, e num painel institucional ninguém " +
   "confere, que é justamente o que torna a mentira barata.";
 
 // ---------------------------------------------------------------------------
-// A conformidade — O10, funcionalidade 168
+// A conformidade, O10, funcionalidade 168
 // ---------------------------------------------------------------------------
 
 export const CONFORMIDADE_NAO_E_VIGILANCIA =
   "Isto é conformidade, não vigilância: mede o REGISTRO, não a pessoa. O recorte por " +
-  "colaborador existe para a organização corrigir processo — três devoluções pelo mesmo " +
-  "motivo são um problema de instrução, não de quem preencheu —, e nenhuma medida daqui " +
+  "colaborador existe para a organização corrigir processo, três devoluções pelo mesmo " +
+  "motivo são um problema de instrução, não de quem preencheu,, e nenhuma medida daqui " +
   "vira nota de desempenho de ninguém.";
 
 export const COMO_A_O10_LE_A_FILA =
   "A fila do produtor mora sob outra chave de armazenamento, escrita pelo nível 7. Esta tela " +
-  "a lê pelo CONTRATO COMPARTILHADO — a chave e o tipo do rascunho são exportados por " +
-  "`tipos-acesso.ts`, que existe exatamente para atravessar níveis —, e a lê em LEITURA: não " +
+  "a lê pelo CONTRATO COMPARTILHADO, a chave e o tipo do rascunho são exportados por " +
+  "`tipos-acesso.ts`, que existe exatamente para atravessar níveis,, e a lê em LEITURA: não " +
   "há aqui nenhum caminho que escreva no registro do produtor. A organização vê a fila; quem " +
   "decide sobre ela continua sendo a moderação.";

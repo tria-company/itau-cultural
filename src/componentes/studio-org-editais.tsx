@@ -15,12 +15,12 @@ import type { EstadoDoEdital } from "@/dados/tipos-organizacao";
 import type { DeclaracaoDaTela, VocabularioDoEdital } from "@/dados/organizacao";
 
 /**
- * studio-org-editais.tsx — O6 · Editais e oportunidades (funcionalidades 46, 48 e 49).
+ * studio-org-editais.tsx, O6 · Editais e oportunidades (funcionalidades 46, 48 e 49).
  *
  * A FUNCIONALIDADE QUE NÃO TINHA CLASSE NEM MÓDULO. Um grep por edital em `src/dados/` não
  * retorna nada, e três funcionalidades do catálogo o pressupõem no grafo: o produtor RECEBE
  * alerta de edital compatível, e nunca existiu quem publica. A forma foi criada antes da
- * tela, por extensão aditiva — `tipos.ts` não foi tocado, e edital não foi forçado dentro de
+ * tela, por extensão aditiva, `tipos.ts` não foi tocado, e edital não foi forçado dentro de
  * `formacao` nem de `programa`, que não carregam prazo, critério estruturado nem estado de
  * julgamento.
  *
@@ -35,7 +35,7 @@ import type { DeclaracaoDaTela, VocabularioDoEdital } from "@/dados/organizacao"
  * tratá-lo como sem correspondência esconderia dele exatamente quem ele quer alcançar.
  *
  * E A LISTA DE TERRITÓRIOS TEM AS 27, NÃO AS 25 DO ACERVO. Um edital que não pode mirar
- * Sergipe e Tocantins é o mecanismo exato pelo qual o deserto se perpetua — e a tela marca
+ * Sergipe e Tocantins é o mecanismo exato pelo qual o deserto se perpetua, e a tela marca
  * quais das 27 o acervo ainda não cobre.
  *
  * SÓ NA VISÃO WEB (D-67).
@@ -255,7 +255,7 @@ export function StudioOrgEditais({
                   <h2 className="studio-painel-nome">Critérios, como dado</h2>
                   <p className="studio-nota">
                     Estes são os valores que o alerta de edital compatível compara. Nenhum
-                    critério marcado significa «serve para todos» — e não «não serve para
+                    critério marcado significa «serve para todos», e não «não serve para
                     ninguém».
                   </p>
 
@@ -316,7 +316,7 @@ export function StudioOrgEditais({
                               onChange={() => org.alternarCriterio(atual.id, "territorios", t.nome)}
                             />
                             {t.nome}
-                            {t.noAcervo ? "" : " — sem acervo"}
+                            {t.noAcervo ? "" : ", sem acervo"}
                           </label>
                         </li>
                       ))}
@@ -324,7 +324,7 @@ export function StudioOrgEditais({
                     <p className="studio-campo-nota">
                       As 27 aparecem, e não as{" "}
                       {vocabulario.territorios.filter((t) => t.noAcervo).length} que o acervo
-                      cobre. Faltam {vocabulario.ufsAusentes.join(" e ")} — e um edital que não
+                      cobre. Faltam {vocabulario.ufsAusentes.join(" e ")}, e um edital que não
                       pode mirar onde não há acervo é o mecanismo exato pelo qual o deserto se
                       perpetua.
                     </p>
@@ -399,10 +399,10 @@ export function StudioOrgEditais({
                         <span>
                           território{" "}
                           {casamento.territorioAberto
-                            ? "— sem recorte, serve para todos"
+                            ? ", sem recorte, serve para todos"
                             : casamento.territorioCasa
-                              ? "— casa"
-                              : "— fora do recorte"}
+                              ? ", casa"
+                              : ", fora do recorte"}
                         </span>
                       </li>
                       <li
@@ -412,10 +412,10 @@ export function StudioOrgEditais({
                         <span>
                           linguagem{" "}
                           {casamento.linguagemAberto
-                            ? "— sem recorte, serve para todos"
+                            ? ", sem recorte, serve para todos"
                             : casamento.linguagemCasa
-                              ? "— casa"
-                              : "— fora do recorte"}
+                              ? ", casa"
+                              : ", fora do recorte"}
                         </span>
                       </li>
                     </ul>
@@ -432,7 +432,7 @@ export function StudioOrgEditais({
                   </div>
                   <p className="studio-nota">
                     Quem se inscreve entra no grafo como agente proposto e passa por
-                    reconciliação na moderação. É o funil que a proposta descreve — e ele só
+                    reconciliação na moderação. É o funil que a proposta descreve, e ele só
                     existe porque alguém publica o edital.
                   </p>
 
@@ -484,7 +484,7 @@ export function StudioOrgEditais({
                         <li key={i.id} className="org-falta-item" data-bloqueia="nao">
                           <span>
                             {i.proponente} · {i.territorio} · {rotuloDaLinguagem(i.linguagem)}
-                            {i.viraAgente ? " — vira agente no grafo" : ""}
+                            {i.viraAgente ? ", vira agente no grafo" : ""}
                           </span>
                           <span className="org-falta-dono">
                             {i.autor} · {i.quando}

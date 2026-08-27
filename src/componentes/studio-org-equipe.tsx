@@ -18,11 +18,11 @@ import {
 import type { Alcada } from "@/dados/tipos-organizacao";
 
 /**
- * studio-org-equipe.tsx — O7 · Equipe e alçadas (funcionalidades 139 e 140).
+ * studio-org-equipe.tsx, O7 · Equipe e alçadas (funcionalidades 139 e 140).
  *
  * O QUE ELA IMPEDE. Sem esta tela, quem fez o cadastro é dono dele: o estagiário que criou
  * o perfil do teatro leva o teatro embora quando sai. A tela existe para que a organização
- * — e não a pessoa — seja quem responde, e é por isso que o PRD a marca como não-cortável.
+ *, e não a pessoa, seja quem responde, e é por isso que o PRD a marca como não-cortável.
  *
  * DUAS REGRAS DURAS, e as duas moram no MÉTODO e não no botão:
  *
@@ -37,7 +37,7 @@ import type { Alcada } from "@/dados/tipos-organizacao";
  * OS PERFIS SÃO PAPÉIS, NÃO PESSOAS. O acervo tem 575 pessoas reais, e vincular qualquer
  * uma delas a uma instituição como colaboradora afirmaria um fato sobre uma pessoa real
  * que a fonte não afirma. Nomes inventados teriam o problema oposto e igualmente ruim:
- * pareceriam dado. É a mesma saída de `OPERADOR_DO_STUDIO` — o papel é o nome.
+ * pareceriam dado. É a mesma saída de `OPERADOR_DO_STUDIO`, o papel é o nome.
  *
  * SÓ NA VISÃO WEB (D-67).
  */
@@ -152,7 +152,7 @@ export function StudioOrgEquipe({
                     >
                       <span className="web-linha-titulo">
                         {c.nome}
-                        {c.titular ? " — titular" : ""}
+                        {c.titular ? ", titular" : ""}
                       </span>
                       <span className="web-linha-meta">
                         {c.email} · {ROTULO_DO_VINCULO[c.estado]} ·{" "}
@@ -220,7 +220,7 @@ export function StudioOrgEquipe({
                 </ul>
                 <p className="studio-campo-nota">
                   «Gerir a equipe» não aparece aqui: ela é do titular, e o caminho para ela é a
-                  sucessão — não um convite que se concede a si mesmo.
+                  sucessão, não um convite que se concede a si mesmo.
                 </p>
               </div>
               <div className="studio-acoes">
@@ -347,7 +347,7 @@ export function StudioOrgEquipe({
                       >
                         <span className="web-linha-titulo">Transferir para {c.nome}</span>
                         <span className="web-linha-meta">
-                          recebe junto a alçada de gerir a equipe — titular sem ela seria dono
+                          recebe junto a alçada de gerir a equipe, titular sem ela seria dono
                           que não pode conceder nada
                         </span>
                       </button>
@@ -384,7 +384,7 @@ export function StudioOrgEquipe({
               {org.historicoDaEquipe.length === 0 ? (
                 <p className="studio-campo-nota">
                   Nenhuma decisão nesta sessão ainda. Toda concessão, remoção e sucessão
-                  entra aqui com autor e carimbo — sem os dois, «a alçada mudou» é rumor.
+                  entra aqui com autor e carimbo, sem os dois, «a alçada mudou» é rumor.
                 </p>
               ) : (
                 <ul className="org-falta">

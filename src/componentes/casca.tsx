@@ -1,13 +1,67 @@
 "use client";
 
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useVisao, type Visao } from "@/contexto/visao";
 
 const OPCOES: Array<{ valor: Visao; rotulo: string }> = [
   { valor: "mobile", rotulo: "App" },
   { valor: "web", rotulo: "Web" },
 ];
+
+/** A caixa do aparelho, borda inclusa (box-sizing: border-box) — o par de `base.css`. */
+const LARGURA_APARELHO = 390;
+const ALTURA_APARELHO = 844;
+
+/**
+ * O respiro em volta do aparelho ampliado, como fração do palco. Não é padding
+ * porque a folga tem de ser proporcional: um padding fixo somado a uma escala
+ * variável deixa a margem gorda em janela baixa e magra em janela alta.
+ */
+const FOLGA = 0.94;
+
+/**
+ * Mede o palco e devolve por quanto ampliar o aparelho (D-03, 26/08).
+ *
+ * O mockup passou a DOMINAR a janela em vez de flutuar nominal no meio dela: a
+ * tela lógica continua 390×844 — o app não sabe de nada — e quem cresce é o
+ * objeto, via `transform: scale()` na `.moldura`. Aumentar a moldura em vez da
+ * escala relayoutaria o app numa largura que ninguém desenhou.
+ *
+ * A medida é do PALCO, não de `window`: é ele que já desconta o que a página
+ * tirou da janela, e um `ResizeObserver` acompanha o redimensionamento sem uma
+ * segunda fonte de verdade sobre o tamanho da janela (D-01 continua de pé — isto
+ * não escolhe visão, só desenha a que já foi escolhida).
+ */
+function useEscalaDoAparelho(ativa: boolean) {
+  const palco = useRef<HTMLDivElement>(null);
+  const [escala, setEscala] = useState(1);
+
+  useEffect(() => {
+    if (!ativa) {
+      setEscala(1);
+      return;
+    }
+    const alvo = palco.current;
+    if (!alvo) return;
+
+    const medir = () => {
+      const { clientWidth: largura, clientHeight: altura } = alvo;
+      if (!largura || !altura) return;
+      const cabe = Math.min(largura / LARGURA_APARELHO, altura / ALTURA_APARELHO);
+      // Três casas: a escala vira uma matriz de transformação, e arredondar
+      // evita reescrever a variável a cada pixel de arrasto do redimensionamento.
+      setEscala(Math.round(cabe * FOLGA * 1000) / 1000);
+    };
+
+    medir();
+    const observador = new ResizeObserver(medir);
+    observador.observe(alvo);
+    return () => observador.disconnect();
+  }, [ativa]);
+
+  return { palco, escala };
+}
 
 /**
  * O alternador de visão, no canto, fora do fluxo do conteúdo (D-04).
@@ -60,9 +114,11 @@ function Alternador() {
  * visão resolve.
  *
  * Na visão mobile o conteúdo vai dentro de uma moldura de celular de 390×844
- * centralizada (D-03). A moldura some em viewport estreito, e essa é a única
- * media query legítima do projeto: ela é sobre o tamanho real da janela, não
- * sobre a visão escolhida. Mora em `globals.css`, na classe `.moldura`.
+ * centralizada (D-03), AMPLIADA por `transform: scale()` até dominar a janela —
+ * ver `useEscalaDoAparelho` acima: a tela lógica não muda, só é vista de mais
+ * perto. A moldura some em viewport estreito, e essa é a única media query
+ * legítima do projeto: ela é sobre o tamanho real da janela, não sobre a visão
+ * escolhida. Mora em `base.css`, na classe `.moldura`.
  *
  * A moldura tem ALTURA; desde a reformulação do design system quem rola é o
  * filho `.moldura-rolagem`, e a moldura em si é `relative; overflow: hidden`.
@@ -71,6 +127,10 @@ function Alternador() {
  */
 export function Casca({ children }: { children: ReactNode }) {
   const { visao, hidratado, janelaDeTelefone } = useVisao();
+
+  // Ampliar só faz sentido quando existe um aparelho desenhado: na visão web não
+  // há moldura, e em janela de telefone ela já colapsou em tela cheia (`base.css`).
+  const { palco, escala } = useEscalaDoAparelho(visao === "mobile" && !janelaDeTelefone);
 
   // No telefone, com o app na tela, não há escolha a oferecer: a pessoa já ESTÁ
   // no aparelho que a visão app imita. A visão web usa a janela do computador.
@@ -92,7 +152,11 @@ export function Casca({ children }: { children: ReactNode }) {
       data-hidratado={hidratado ? "sim" : "nao"}
       className="min-h-screen bg-superficie text-tinta app:bg-superficie-2 desk:bg-superficie"
     >
-      <div className="palco">
+      <div
+        ref={palco}
+        className="palco"
+        style={{ "--escala-aparelho": escala } as CSSProperties}
+      >
         {/* A moldura deixou de ser o contêiner de rolagem na reformulação do design
             system: ela é `relative; overflow: hidden` e quem rola é `.moldura-rolagem`,
             filho dela. É isso que permite à gaveta do menu lateral posicionar `absolute`

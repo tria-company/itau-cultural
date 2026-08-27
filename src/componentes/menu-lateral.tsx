@@ -19,6 +19,8 @@ import {
 } from "@/componentes/base/icones";
 import { IconeVivo } from "@/componentes/icone-vivo";
 import { AssinaturaIc, Chancela } from "@/componentes/marca";
+import { TrocaDePapel } from "@/componentes/selecao-papel";
+import { DESCRICAO_DO_PAPEL, usePapel } from "@/contexto/papel";
 import { useSessao } from "@/contexto/sessao";
 import { personaPorId } from "@/dados/personas";
 
@@ -85,12 +87,32 @@ const PLANEJAR: Item[] = [
   { href: "/meu", rotulo: "Meu perfil", icone: ICONE_PERFIL },
 ];
 
-/** Só na visão web: as rotas de bastidor se declaram «só web» no app (AvisoDesktop). */
-const BASTIDOR: Item[] = [
-  { href: "/studio/duplicatas", rotulo: "Studio" },
-  { href: "/moderacao/fila", rotulo: "Moderação" },
-  { href: "/observatorio", rotulo: "Observatório" },
-  { href: "/roteiro", rotulo: "Roteiro guiado" },
+/**
+ * O bastidor, com o prefixo de superfície ao lado — é por ele que o papel filtra.
+ *
+ * O STUDIO PASSOU A APONTAR PARA A RAIZ, e não mais para `/studio/duplicatas`. A raiz não
+ * existia: `/studio` era um diretório sem índice, e o menu tinha de escolher uma das
+ * dezoito telas para servir de porta. Agora ela existe — é o painel P1 — e é ela a porta.
+ *
+ * `/redacao` E `/admin` ENTRARAM. Nenhum dos dois estava listado, e quem chegava a eles
+ * digitava a URL. A Redação foi um pedido aberto desde a fase 5; a Administração nunca
+ * teve entrada. Como o grupo agora é filtrado por papel, listá-los não polui a navegação de
+ * quem não os usa.
+ */
+interface ItemDeBastidor extends Item {
+  /** O prefixo que `DESCRICAO_DO_PAPEL[...].superficies` compara. */
+  superficie: string;
+  /** `false` no Studio, que é mobile-first desde o perfil Produtor. */
+  soWeb: boolean;
+}
+
+const BASTIDOR: ItemDeBastidor[] = [
+  { href: "/studio", rotulo: "Studio", superficie: "/studio", soWeb: false },
+  { href: "/moderacao/fila", rotulo: "Moderação", superficie: "/moderacao", soWeb: true },
+  { href: "/redacao/trilha", rotulo: "Redação", superficie: "/redacao", soWeb: true },
+  { href: "/observatorio", rotulo: "Observatório", superficie: "/observatorio", soWeb: true },
+  { href: "/admin/papeis", rotulo: "Administração", superficie: "/admin", soWeb: true },
+  { href: "/roteiro", rotulo: "Roteiro guiado", superficie: "/roteiro", soWeb: true },
 ];
 
 function ItemDeMenu({ item, caminho }: { item: Item; caminho: string }) {
@@ -137,6 +159,14 @@ export function MenuLateral() {
   const caminho = (usePathname() ?? "").replace(/\/$/, "");
   const { personaId } = useSessao();
   const persona = personaPorId(personaId);
+  const { papel, hidratado: papelHidratado } = usePapel();
+
+  // ANTES DE HIDRATAR, O GRUPO É O DO PÚBLICO — vazio. O HTML do build não sabe qual papel
+  // o navegador guardou, e renderizar a lista cheia para depois encolhê-la faria o menu
+  // piscar itens que aquele perfil não usa. É a mesma disciplina de `SelecaoPersona`.
+  const doPapel = papelHidratado
+    ? BASTIDOR.filter((b) => DESCRICAO_DO_PAPEL[papel].superficies.includes(b.superficie))
+    : [];
 
   return (
     <div className="menu-lateral">
@@ -159,16 +189,24 @@ export function MenuLateral() {
             ))}
           </ul>
 
-          {/* Bastidor: as rotas existem nas duas visões, mas no app cada uma se declara
-              «só web» — o atalho só na web evita anunciar um beco. */}
-          <div className="hidden desk:block">
-            <p className="menu-rotulo-grupo tipo-micro">Bastidor</p>
-            <ul>
-              {BASTIDOR.map((item) => (
-                <ItemDeMenu key={item.href} item={item} caminho={caminho} />
-              ))}
-            </ul>
-          </div>
+          {/* Bastidor: só o que ESTE papel abre. O grupo some inteiro para o público, que
+              é o padrão — quem entra sem escolher perfil vê o produto e mais nada.
+
+              O item «só web» continua escondido na visão app, porque a rota dele se declara
+              superfície de desktop e um atalho para um aviso é um beco anunciado. O Studio
+              NÃO é «só web» desde o perfil Produtor: ele aparece nas duas visões. */}
+          {doPapel.length > 0 ? (
+            <div>
+              <p className="menu-rotulo-grupo tipo-micro">Bastidor</p>
+              <ul>
+                {doPapel.map((item) => (
+                  <div key={item.href} className={item.soWeb ? "hidden desk:block" : undefined}>
+                    <ItemDeMenu item={item} caminho={caminho} />
+                  </div>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
 
         <div className="menu-rodape">
@@ -176,6 +214,9 @@ export function MenuLateral() {
             Você está como <strong className="text-tinta">{persona?.nome ?? "…"}</strong>
             <span className="text-acao-tinta"> · trocar</span>
           </Link>
+          {/* Trocar de papel SEM passar por `/entrar`: quem troca a partir de uma tela
+              qualquer quase sempre quer continuar onde está e ver o que muda. */}
+          <TrocaDePapel className="mt-2" />
         </div>
       </nav>
       <Chancela />

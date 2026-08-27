@@ -19,16 +19,16 @@ import type { FormatoDeMidia } from "@/dados/tipos-organizacao";
 import type { DeclaracaoDaTela, MidiaDoAcervo, NumerosDasMidias } from "@/dados/organizacao";
 
 /**
- * studio-org-midia.tsx — O5 · Mídia (funcionalidades 147 e 148): o acervo de ativos, com
+ * studio-org-midia.tsx, O5 · Mídia (funcionalidades 147 e 148): o acervo de ativos, com
  * direito declarado.
  *
- * ELA ABRE PELA FILA, E NÃO PELO CATÁLOGO. Das 529 mídias, 9 têm imagem e não têm crédito —
+ * ELA ABRE PELA FILA, E NÃO PELO CATÁLOGO. Das 529 mídias, 9 têm imagem e não têm crédito,
  * e crédito é bloqueante, então essas 9 não publicam. A lista vem ordenada com elas em
  * primeiro lugar, e isso é decisão e não acaso: uma fila de trabalho que abre no meio da
  * ordem alfabética não é uma fila, é um catálogo com um aviso em cima.
  *
- * O NÚMERO MAIS DURO DA TELA. As 529 mídias DECLARAM a ficha de acessibilidade — o ato foi
- * feito em 100% do acervo — e mesmo assim sete das oito dimensões estão em ZERO itens:
+ * O NÚMERO MAIS DURO DA TELA. As 529 mídias DECLARAM a ficha de acessibilidade, o ato foi
+ * feito em 100% do acervo, e mesmo assim sete das oito dimensões estão em ZERO itens:
  * audiodescrição, legenda descritiva, closed caption, legenda aberta, tradução simultânea,
  * estenotipia e legenda. Só Libras aparece, em três. **Ficha preenchida não é ficha
  * atendida**, e a distância entre as duas coisas é o que esta tela existe para encurtar.
@@ -155,7 +155,7 @@ export function StudioOrgMidia({
                 data-estado={d.quantos > 0 ? "oferece" : "declarado-ausente"}
               >
                 <span>
-                  {d.rotulo} — {d.quantos}
+                  {d.rotulo}, {d.quantos}
                 </span>
               </li>
             ))}
@@ -239,7 +239,7 @@ export function StudioOrgMidia({
                       >
                         <span className="web-linha-titulo">{m.titulo}</span>
                         <span className="web-linha-meta">
-                          {m.categoria} · {ok ? "publica" : "sem crédito — não publica"}
+                          {m.categoria} · {ok ? "publica" : "sem crédito, não publica"}
                         </span>
                       </button>
                     </li>
@@ -249,7 +249,7 @@ export function StudioOrgMidia({
             )}
             {lista.length > 120 ? (
               <p className="studio-campo-nota">
-                Mostrando 120 de {lista.length}. O corte é da lista, não do acervo — refine a
+                Mostrando 120 de {lista.length}. O corte é da lista, não do acervo, refine a
                 busca para chegar nas outras {lista.length - 120}.
               </p>
             ) : null}
@@ -303,7 +303,7 @@ export function StudioOrgMidia({
                 </p>
               ) : (
                 <p className="studio-campo-nota">
-                  Sem descrição alternativa da imagem — leitor de tela não lê esta capa. São{" "}
+                  Sem descrição alternativa da imagem, leitor de tela não lê esta capa. São{" "}
                   {numeros.total - numeros.comImagemAlt} assim no acervo.
                 </p>
               )}
@@ -362,7 +362,7 @@ export function StudioOrgMidia({
                     {ficha.capitulos.map((c, i) => (
                       <li key={`${c.inicio}-${i}`} className="org-falta-item" data-bloqueia="nao">
                         <span>
-                          {c.inicio} — {c.titulo}
+                          {c.inicio}, {c.titulo}
                         </span>
                         <button
                           type="button"

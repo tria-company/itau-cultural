@@ -46,8 +46,10 @@ trata viewport realmente estreito.
 2. **Não existe componente irmão por visão.** Não há `ComponenteWeb` em lugar nenhum, de
    propósito. A divergência é de layout e densidade, dentro do mesmo componente. Criar um
    irmão duplica lógica que vai divergir na primeira correção.
-3. **Na visão mobile, a moldura de celular é o contêiner de rolagem** —
-   `height: min(844px, calc(100vh - 4rem))`, `overflow-y: auto`. Qualquer coisa ancorada na
+3. **Na visão mobile, a moldura de celular é o contêiner de rolagem** — 390×844 fixos,
+   `overflow-y: auto`, AMPLIADOS por `transform: scale(var(--escala-aparelho))` até o
+   aparelho dominar a janela (fator medido contra o palco em `casca.tsx`, 26/08). Quem
+   cresce é o objeto, nunca a medida: o app continua desenhado para 390 lógicos. Qualquer coisa ancorada na
    janela (`position: fixed`) escapa da moldura e ocupa a largura da tela inteira,
    destruindo a ilusão. Quem precisa grudar usa `sticky`, que resolve contra o contêiner de
    rolagem mais próximo.
@@ -55,6 +57,44 @@ trata viewport realmente estreito.
 **A régua de dobra**, medida e resolvida na fase 5: na visão app a barra de abas é
 `sticky; bottom:0`, mede 60 px, e o limite útil é **807**. Na web é a mesma barra em
 `top:0`, mede 59 px, limite **960**. Não subtraia altura — use o limite medido.
+
+**No bastidor não há barra de abas**, e por isso a dobra do Studio é outra: a área útil da
+moldura, **824** — 844 menos os 10 px de bezel de cada lado. Medir a barra de ação contra a
+borda EXTERNA da moldura dá 834 e reprova uma barra que está exatamente no lugar certo,
+encostada no fundo do vidro; a medida certa é contra `.moldura-rolagem`.
+
+### D-67 e a exceção do Studio (2026-08)
+
+**D-67 dizia: o bastidor só existe na visão web.** Ninguém resolve uma fila de mil
+duplicatas em 390 px, e a tela declara isso em vez de espremer a tabela. Isso valia para as
+52 rotas de bastidor, com um `app:hidden` só, em `(bastidor)/layout.tsx`.
+
+**O perfil Produtor inverteu a regra para UMA superfície.** O Studio deixou de ser mesa de
+trabalho densa e virou a ferramenta de quem alimenta o produto — e quem produz cultura no
+Brasil produz do telefone. Uma ferramenta de publicação que só existe no computador não é
+usada.
+
+| Superfície | Visão | Onde a regra é aplicada |
+|---|---|---|
+| `/studio/*` | **mobile-first**, e também na web | `(bastidor)/studio/layout.tsx` — não monta `SuperficieSoWeb` |
+| `/moderacao/*` | só web | `(bastidor)/moderacao/layout.tsx` |
+| `/redacao/*` | só web | `(bastidor)/redacao/layout.tsx` |
+| `/observatorio/*` | só web | `(bastidor)/observatorio/layout.tsx` |
+| `/admin/*` | só web | `(bastidor)/admin/layout.tsx` |
+| `/roteiro` | só web | `(bastidor)/roteiro/layout.tsx` |
+
+**O `app:hidden` desceu do layout do grupo para o layout de cada superfície**, em
+`SuperficieSoWeb` (`src/componentes/superficie-so-web.tsx`). A divergência continua sendo
+CSS puro: o conteúdo já sai escondido no artefato estático e não depende de hidratação.
+
+**Nenhum portão foi afrouxado — dois foram reescritos, e passaram a medir MAIS.**
+`verificar-fase4.mjs` afirmava uma coisa («conteúdo de bastidor invisível no app») e agora
+afirma duas: escondido onde a regra diz escondido, E VISÍVEL onde a regra diz visível. A
+segunda metade é nova, e é ela que pega o defeito que a versão anterior não pegaria — um
+`app:hidden` esquecido no Studio deixaria a superfície inteira invisível no telefone, e o
+gate antigo daria verde. `verificar-moderacao.mjs` ganhou um bloco que MEDE a regra, onde
+antes só a citava num comentário. Quem confere as duas metades nas seis superfícies é
+`verificar-produtor.mjs`.
 
 ---
 

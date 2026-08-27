@@ -17,16 +17,16 @@ import type {
 } from "@/dados/organizacao";
 
 /**
- * studio-org-formacao.tsx — O4 · Formação (funcionalidades 144, 145 e 146).
+ * studio-org-formacao.tsx, O4 · Formação (funcionalidades 144, 145 e 146).
  *
  * TRÊS COISAS NUMA TELA, e a do meio é a que muda o que ela é. Curso com inscrição é
  * publicação; biblioteca é catálogo; **agendamento de visita educativa é GESTÃO DE
- * RESERVA** — uma escola pede, alguém confirma ou recusa, e o número de pessoas entra na
+ * RESERVA**, uma escola pede, alguém confirma ou recusa, e o número de pessoas entra na
  * conta das vagas. Uma tela que só publicasse «temos visitas educativas» seria um cartaz, e
  * a diferença entre um cartaz e uma agenda é a turma que aparece na porta sem ter lugar.
  *
  * O ARGUMENTO DAS 54, E O CONTRA-ARGUMENTO NA MESMA TELA. As formações são a única classe
- * do acervo com 100% de ficha, imagem, crédito e descrição alternativa — o modelo do que
+ * do acervo com 100% de ficha, imagem, crédito e descrição alternativa, o modelo do que
  * dado bem preenchido parece. E ainda assim as 54 somam 6 marcações de dimensão em 432
  * possíveis: a ficha foi preenchida em todas, e o que ela diz na maioria das linhas é «não
  * oferece». **Preencher é o que a plataforma pode exigir; oferecer é o que ela pode medir**,
@@ -186,8 +186,8 @@ export function StudioOrgFormacao({
               {aba === "biblioteca" ? (
                 <p className="studio-campo-nota">
                   A consulta ao acervo bibliográfico está listada como faltando no catálogo de
-                  funcionalidades. O dado está aqui — {numeros.publicacoes} publicações,{" "}
-                  {numeros.publicacoesComFicha} com ficha declarada —, e a tela pública que o
+                  funcionalidades. O dado está aqui, {numeros.publicacoes} publicações,{" "}
+                  {numeros.publicacoesComFicha} com ficha declarada,, e a tela pública que o
                   mostra é que não existe.
                 </p>
               ) : null}
@@ -255,7 +255,7 @@ export function StudioOrgFormacao({
                 <div className="org-ato" data-declarado={cadastro?.inscricaoAberta ? "sim" : "nao"}>
                   <span className="org-ato-texto">
                     {cadastro?.inscricaoAberta
-                      ? "Inscrição aberta — a oferta recebe."
+                      ? "Inscrição aberta, a oferta recebe."
                       : "Inscrição fechada: a oferta aparece no app e não recebe ninguém."}
                   </span>
                   <button
@@ -281,7 +281,7 @@ export function StudioOrgFormacao({
                         <li key={`${m.titulo}-${i}`} className="org-falta-item" data-bloqueia="nao">
                           <span>
                             {m.titulo}
-                            {m.descricao ? ` — ${m.descricao}` : ""}
+                            {m.descricao ? `, ${m.descricao}` : ""}
                           </span>
                           <button
                             type="button"
@@ -347,7 +347,7 @@ export function StudioOrgFormacao({
                     <h2 className="studio-painel-nome">Agenda de visitas</h2>
                     <span className="studio-pastilha">
                       <span className="studio-pastilha-numero">{jaConfirmadas}</span> de{" "}
-                      {cadastro?.vagas ?? "— "} pessoas confirmadas
+                      {cadastro?.vagas ?? ", "} pessoas confirmadas
                     </span>
                   </div>
                   <p className="studio-nota">
@@ -372,7 +372,7 @@ export function StudioOrgFormacao({
                             <span>
                               {v.escola} · {v.data}
                               {v.horario ? ` ${v.horario}` : ""} ·{" "}
-                              {v.pessoas === null ? "sem número" : `${v.pessoas} pessoas`} —{" "}
+                              {v.pessoas === null ? "sem número" : `${v.pessoas} pessoas`},{" "}
                               {ROTULO_DA_VISITA[v.estado]}
                             </span>
                             {v.estado === "solicitada" ? (
@@ -452,7 +452,7 @@ export function StudioOrgFormacao({
                       onChange={(e) => setPessoas(e.target.value)}
                     />
                     <span className="studio-campo-nota">
-                      Em branco é «não informou», e visita sem número não se confirma — não há
+                      Em branco é «não informou», e visita sem número não se confirma, não há
                       o que somar contra as vagas.
                     </span>
                   </label>

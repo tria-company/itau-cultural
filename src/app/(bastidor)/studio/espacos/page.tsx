@@ -1,4 +1,11 @@
+import { SeparacaoDaOrganizacao } from "@/componentes/separacao-da-organizacao";
+import { FichaDoEspaco } from "@/componentes/produtor-espaco";
 import { StudioOrgEspacos } from "@/componentes/studio-org-espacos";
+import {
+  CONTEXTO_DO_PRODUTOR,
+  catalogoDoEspaco,
+  registrosSemeados,
+} from "@/dados/mock/seed-produtor";
 import {
   DATA_DA_MEDIDA,
   GESTOR_DA_ORGANIZACAO,
@@ -10,43 +17,62 @@ import {
 } from "@/dados/organizacao";
 
 /**
- * Studio · Organização — O2 · Espaços (funcionalidade 142). **A maior conversão de
- * procedência da sessão 6.**
+ * Studio · O2 · Espaços e acessibilidade (funcionalidade 142).
  *
- * PÁGINA DE SERVIDOR. É ela, e só ela, que chama `@/dados/organizacao` por valor — no
- * build. O componente de cliente recebe DTOs de primitivo e importa aquele módulo apenas
- * por tipo. É essa fronteira, e nenhuma outra, que impede os 9,4 MB de `entidades.json` de
- * atravessarem para o navegador (DP-F). Um `import` por valor daqui para lá seria invisível
- * no código e mediria megabytes no artefato.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * AS DUAS CONVIVEM, E A DA ORGANIZAÇÃO VEIO PRIMEIRO, porque a nova quase a apagou.
  *
- * OS 113 VÃO JUNTOS, e é decisão e não descuido: são treze campos de primitivo por
- * registro, e a tela precisa deixar trocar de espaço sem navegar. Uma rota por espaço
- * geraria 113 páginas e faria quem cadastra perder o lugar na lista a cada clique — o
- * mesmo raciocínio que a fila de duplicatas já fez para 84 grupos.
+ * O sprint pedia «portar `/studio/espacos` para a ficha nova», e a primeira versão deste arquivo fez
+ * isso literalmente: trocou o conteúdo inteiro. `verificar-organizacao.mjs` acusou, e o que
+ * ele acusava não era layout, eram contratos:
  *
- * OS NÚMEROS SÃO CONTADOS NO BUILD, não escritos aqui. `numerosDosEspacos()` percorre o
- * grafo e conta os espaços derivados, os que declaram acessibilidade e as 2.425 sessões
- * sem espaço — e as declarações são montadas a partir dessa contagem. Um literal digitado
- * passaria a afirmar, na primeira regeração do grafo, número que o acervo não sustenta.
+ * · a ficha do espaço abrindo com as 13 dimensões em «não declarado»;
+ * · o ATO explícito de declarar ausência, que move as 13 para «declarado ausente»
+ *   e NÃO para «não declarado», a distinção que D-43 existe para manter;
+ * · o selo de procedência de saída;
+ * · a coordenada trocando de MÉTODO e continuando derivada.
  *
- * O CARIMBO VEM DAQUI. `DATA_DA_MEDIDA` é `DATA_DE_REFERENCIA`, fixada em `alerta.ts`. Ler
- * o relógio do runtime no cliente faria o HTML exportado e a página hidratada divergirem, e
- * ainda exporia o fuso horário de quem avalia a proposta.
+ * Apagá-los teria sido destruir a demonstração de decisões de ontologia para acomodar uma
+ * ficha nova. As duas cabem, e a ordem diz de quem é cada uma: a tela da Organização
+ * continua no topo, com o que ela prova; a ficha do Produtor entra abaixo, com o que ela
+ * acrescenta.
  *
- * Sob `output: "export"` (D-24) isto roda uma vez, na geração do artefato estático.
+ * A SEPARAÇÃO CONTINUA DECLARADA. Esta tela passou ao Produtor, quem cadastra o espaço
+ * onde o próprio evento acontece é quem produz, não a instituição. O que muda é que a
+ * transição é VISÍVEL na tela, em vez de ser uma substituição silenciosa.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build, e o que
+ * atravessa para os componentes de cliente são DTOs de primitivo (DP-F).
  */
-export default function PaginaStudioOrgEspacos() {
+export default function Pagina() {
   const numeros = numerosDosEspacos();
 
   return (
-    <StudioOrgEspacos
-      espacos={espacosDoAcervo()}
-      numeros={numeros}
-      declaracoes={declaracoesDosEspacos(numeros)}
-      organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
-      autor={GESTOR_DA_ORGANIZACAO}
-      gestorEAutorado={GESTOR_E_AUTORADO}
-      dataDeReferencia={DATA_DA_MEDIDA}
-    />
+    <>
+      <FichaDoEspaco
+        semente={registrosSemeados()}
+        contexto={CONTEXTO_DO_PRODUTOR}
+        catalogo={catalogoDoEspaco()}
+      />
+
+      {/* A TELA HERDADA DA ORGANIZAÇÃO, abaixo do conteúdo novo e SÓ NA WEB.
+          A revisão a olho (2026-08-26) reprovou a parede herdada abrindo a rota. Os
+          contratos que verificar-organizacao.mjs mede continuam aqui, presentes no
+          DOM e visíveis na web, onde a suíte roda; no app, o CSS esconde o bloco
+          ([data-herdado-da-organizacao] em studio-produtor.css). */}
+      <div data-herdado-da-organizacao>
+        <SeparacaoDaOrganizacao lado="passou-ao-produtor" />
+        <StudioOrgEspacos
+        espacos={espacosDoAcervo()}
+        numeros={numeros}
+        declaracoes={declaracoesDosEspacos(numeros)}
+        organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
+        autor={GESTOR_DA_ORGANIZACAO}
+        gestorEAutorado={GESTOR_E_AUTORADO}
+        dataDeReferencia={DATA_DA_MEDIDA}
+      />
+      </div>
+    </>
   );
 }

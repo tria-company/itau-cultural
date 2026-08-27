@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PublicadoPeloProdutor } from "@/componentes/publicado-pelo-produtor";
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Chip, Estante } from "@/componentes/base/chip";
 import {
@@ -214,6 +215,12 @@ export function Cursos({ catalogo }: { catalogo: CatalogoDeCursos }) {
 
   return (
     <div data-cursos className="cursos">
+      {/* O QUE ESTE NAVEGADOR PUBLICOU pelo Studio. Fica ACIMA do conteúdo do build e
+          declara que não está no acervo: o protótipo é um artefato estático e não tem
+          servidor para receber publicação. Sem este bloco, a jornada do produtor terminaria
+          no vazio — ele aperta publicar e a vitrine não muda. */}
+      <PublicadoPeloProdutor pauta="cursos" titulo="Publicado por você nesta demonstração" />
+
       <header className="cursos-abertura">
         <p className="cursos-kicker tipo-micro">
           <Grafismo variacao="barra" className="h-[0.9em] w-auto" />

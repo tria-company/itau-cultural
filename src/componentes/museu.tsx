@@ -1,4 +1,5 @@
 import { cloneElement, type ReactElement } from "react";
+import { PublicadoPeloProdutor } from "@/componentes/publicado-pelo-produtor";
 import Link from "next/link";
 import { Chip } from "@/componentes/base/chip";
 import {
@@ -173,6 +174,12 @@ export function Museu() {
 
   return (
     <div className="museu">
+      {/* O QUE ESTE NAVEGADOR PUBLICOU pelo Studio. Fica ACIMA do conteúdo do build e
+          declara que não está no acervo: o protótipo é um artefato estático e não tem
+          servidor para receber publicação. Sem este bloco, a jornada do produtor terminaria
+          no vazio — ele aperta publicar e a vitrine não muda. */}
+      <PublicadoPeloProdutor pauta="museu" titulo="Publicado por você nesta demonstração" />
+
       <header className="museu-abertura">
         <p className="museu-kicker tipo-micro">Museu</p>
         <h1 className="museu-titulo tipo-cartaz">Museu virtual</h1>

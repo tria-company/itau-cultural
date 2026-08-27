@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Grafismo } from "@/componentes/grafismo";
 import { SeletorDisposicao } from "@/componentes/seletor-disposicao";
 import { TrocaPersona } from "@/componentes/troca-persona";
+import { TrocaDeAcesso } from "@/componentes/troca-de-acesso";
 import { repertorioDe } from "@/dados/repertorio";
 import { PERSONAS } from "@/dados/personas";
 
@@ -38,6 +39,11 @@ export default function Meu() {
       <TrocaPersona />
 
       <SeletorDisposicao permanente />
+
+      {/* O TIPO DE ACESSO MORA EM TODA TELA DE PERFIL. Quem está como Público e quer
+          voltar ao Studio não deveria precisar da URL de `/entrar`: o mesmo controle da
+          tela do Produtor aparece aqui, com o mesmo componente. */}
+      <TrocaDeAcesso />
 
       <nav aria-label="Atalhos do perfil" className="grid gap-3 desk:grid-cols-2">
         <Link href="/meu/repertorio" className="cartao no-underline">

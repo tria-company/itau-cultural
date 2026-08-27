@@ -1,4 +1,6 @@
+import { GestaoDeSessoes } from "@/componentes/produtor-sessoes";
 import { StudioOcorrencias } from "@/componentes/studio-ocorrencias";
+import { CONTEXTO_DO_PRODUTOR, registrosSemeados } from "@/dados/mock/seed-produtor";
 import {
   CARIMBO_DA_ALTERACAO,
   EVENTO_PADRAO_DO_STUDIO,
@@ -17,46 +19,50 @@ import {
 } from "@/dados/ocorrencias-studio";
 
 /**
- * Studio — gestão de ocorrências (tela 32, STUD-02). **A outra metade do Cenário 4.**
+ * Studio · gestão de ocorrências, a tela da fase 4, MAIS a gestão do que o produtor publicou.
  *
- * Página de SERVIDOR. É ela quem chama `@/dados/ocorrencias-studio` por valor, no build, e
- * passa adiante DTOs só de primitivo. O componente de cliente importa o módulo apenas por
- * tipo — é essa fronteira, e só ela, que impede 23 MB de grafo de atravessar (DP-F).
+ * ─────────────────────────────────────────────────────────────────────────────
+ * AS DUAS CONVIVEM, E A PRIMEIRA VEIO PRIMEIRO, porque a segunda quase a apagou.
  *
- * OS 129 EVENTOS VÃO JUNTOS, COM AS SESSÕES DELES, e é decisão e não descuido. Trocar de
- * evento não navega: a URL não muda, o build não gera 129 páginas e quem opera não perde o
- * lugar. Para isso as sessões precisam estar no cliente, e por isso elas viajam ACHATADAS em
- * tupla — `[sufixo do id, "AAAA-MM-DDTHH:mm", gratuito]` —, com o prefixo comum mandado uma
- * vez só. Nenhuma `Ocorrencia` inteira e nenhuma `Entidade` atravessam (T-04-19).
+ * O sprint pedia «portar `/studio/ocorrencias` para a gestão de sessões publicadas», e a
+ * primeira versão deste arquivo fez isso literalmente: trocou o conteúdo inteiro. O portão
+ * da fase 4 acusou, e o que ele acusou não foi um detalhe, era `[data-evento-imutavel]`,
+ * o bloco que prova, POR AUSÊNCIA DE CONTROLES, que mexer numa sessão nunca mexe no evento.
+ * Quatro asserções daquela suíte dependem dele, incluindo a que conta quantos `input`,
+ * `button`, `select` e `textarea` existem dentro da ficha, e a resposta certa é zero.
  *
- * O HISTÓRICO NÃO NASCE VAZIO: as duas alterações autoradas vêm de `alerta.ts`, pela mão de
- * `historicoAutorado()`, que só as reformata. São as MESMAS que `/salvos` exibe do outro
- * lado, e é por isso que a propagação do Cenário 4 é crível sem servidor — uma fonte, duas
- * telas, nenhuma cópia.
+ * Apagar aquilo teria sido destruir a demonstração de uma decisão de ontologia para
+ * acomodar uma tela nova. As duas cabem: a ficha imutável e o histórico do Cenário 4
+ * continuam no topo, e a gestão do que ESTE navegador publicou entra abaixo.
+ * ─────────────────────────────────────────────────────────────────────────────
  *
- * Todo texto que cita número — as quatro declarações honestas, a frase de D-73 — vem do
- * módulo, calculado sobre o dado. Um literal digitado aqui faria a apresentação afirmar, na
- * primeira regeração do grafo, número que o acervo não sustenta.
- *
- * Sob `output: "export"` (D-24) isto roda uma vez, na geração do artefato estático.
+ * PÁGINA DE SERVIDOR: os dois módulos de dado são chamados aqui, por valor, no build, e o
+ * que atravessa para os dois componentes de cliente são DTOs de primitivo (DP-F).
  */
 export default function PaginaStudioOcorrencias() {
   return (
-    <StudioOcorrencias
-      eventos={eventosDoStudio()}
-      eventoPadrao={EVENTO_PADRAO_DO_STUDIO}
-      prefixo={PREFIXO_DA_OCORRENCIA}
-      semeados={salvamentosSemeados()}
-      historicoAutorado={historicoAutorado()}
-      propostas={horariosPropostos()}
-      par={parDoCenario4()}
-      numeros={numerosDoAcervo()}
-      declaracoes={declaracoesDoQueNaoSustenta()}
-      operador={OPERADOR_DO_STUDIO}
-      operadorFrase={OPERADOR_E_AUTORADO}
-      carimbo={CARIMBO_DA_ALTERACAO}
-      fraseDeD73={FRASE_DE_D73}
-      fraseDasDuasMetades={FRASE_DAS_DUAS_METADES}
-    />
+    <>
+      <GestaoDeSessoes semente={registrosSemeados()} contexto={CONTEXTO_DO_PRODUTOR} />
+
+      {/* O HERDADO DA FASE 4 CONTINUA, ABAIXO E NAS DUAS VISÕES: verificar-fase4
+          exige o evento imutável VISÍVEL no app e as contagens exatas no HTML
+          exportado. Só a ordem mudou: o conteúdo novo abre a tela. */}
+      <StudioOcorrencias
+        eventos={eventosDoStudio()}
+        eventoPadrao={EVENTO_PADRAO_DO_STUDIO}
+        prefixo={PREFIXO_DA_OCORRENCIA}
+        semeados={salvamentosSemeados()}
+        historicoAutorado={historicoAutorado()}
+        propostas={horariosPropostos()}
+        par={parDoCenario4()}
+        numeros={numerosDoAcervo()}
+        declaracoes={declaracoesDoQueNaoSustenta()}
+        operador={OPERADOR_DO_STUDIO}
+        operadorFrase={OPERADOR_E_AUTORADO}
+        carimbo={CARIMBO_DA_ALTERACAO}
+        fraseDeD73={FRASE_DE_D73}
+        fraseDasDuasMetades={FRASE_DAS_DUAS_METADES}
+      />
+    </>
   );
 }

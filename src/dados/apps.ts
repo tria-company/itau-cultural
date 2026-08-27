@@ -329,12 +329,69 @@ export const ATALHOS_CONTA: readonly Atalho[] = [
   { href: "/meu", rotulo: "Perfil", descricao: "Persona, disposições e preferências" },
 ];
 
-/** Bastidor: só na visão web — no app cada uma destas rotas se declara «só web». */
-export const ATALHOS_BASTIDOR: readonly Atalho[] = [
-  { href: "/studio/duplicatas", rotulo: "Studio", descricao: "Publicar e deduplicar ocorrências" },
-  { href: "/moderacao/fila", rotulo: "Moderação", descricao: "Fila com origem declarada e decisão com autor" },
-  { href: "/observatorio", rotulo: "Observatório", descricao: "Indicadores e procedência do acervo" },
-  { href: "/roteiro", rotulo: "Roteiro guiado", descricao: "A demonstração passo a passo" },
+/**
+ * Bastidor — e desde o perfil Produtor a lista tem DUAS marcações, porque duas coisas
+ * diferentes decidem se cada item aparece.
+ *
+ * `superficie` é o prefixo que o PAPEL compara: o hub mostra só o que o perfil escolhido
+ * abre, e para quem entra como público a seção some inteira. `soWeb` é a outra pergunta, e
+ * ela é anterior — a rota se declara superfície de desktop? Cinco se declaram; o Studio
+ * deixou de se declarar quando virou mobile-first, e é por isso que ele é o único item que
+ * aparece dentro da moldura.
+ *
+ * O STUDIO APONTA PARA A RAIZ, e não mais para `/studio/duplicatas`: a raiz não existia, e
+ * o hub tinha de escolher uma das dezoito telas para servir de porta. Agora ela é o painel.
+ */
+export interface AtalhoDeBastidor extends Atalho {
+  /** O prefixo que `DESCRICAO_DO_PAPEL[...].superficies` compara. */
+  readonly superficie: string;
+  /** `false` no Studio, que é mobile-first desde o perfil Produtor. */
+  readonly soWeb: boolean;
+}
+
+export const ATALHOS_BASTIDOR: readonly AtalhoDeBastidor[] = [
+  {
+    href: "/studio",
+    rotulo: "Studio",
+    descricao: "Alimentar as onze pautas do produto e publicar",
+    superficie: "/studio",
+    soWeb: false,
+  },
+  {
+    href: "/moderacao/fila",
+    rotulo: "Moderação",
+    descricao: "Fiscalizar o que foi publicado, com decisão e autor",
+    superficie: "/moderacao",
+    soWeb: true,
+  },
+  {
+    href: "/redacao/trilha",
+    rotulo: "Redação",
+    descricao: "Trilha curada, pontes de sentido e destaque de feed",
+    superficie: "/redacao",
+    soWeb: true,
+  },
+  {
+    href: "/observatorio",
+    rotulo: "Observatório",
+    descricao: "Indicadores e procedência do acervo",
+    superficie: "/observatorio",
+    soWeb: true,
+  },
+  {
+    href: "/admin/papeis",
+    rotulo: "Administração",
+    descricao: "Governança: motor, território, vocabulário e auditoria",
+    superficie: "/admin",
+    soWeb: true,
+  },
+  {
+    href: "/roteiro",
+    rotulo: "Roteiro guiado",
+    descricao: "A demonstração passo a passo",
+    superficie: "/roteiro",
+    soWeb: true,
+  },
 ];
 
 /**

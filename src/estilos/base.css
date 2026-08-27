@@ -116,21 +116,41 @@ body {
  * D-03 existe para criar; continua proibido fora do `.canto`. O que precisa
  * grudar no topo (cabeçalho do menu) usa `sticky` contra a rolagem.
  * 390×844 é o tamanho lógico de um iPhone 14/15.
+ *
+ * O APARELHO É AMPLIADO PARA DOMINAR A JANELA (26/08). A tela lógica continua
+ * sendo 390×844 — o app nunca sabe que foi ampliado, porque quem cresce é o
+ * objeto, num `transform: scale()`, e não a medida do produto. É a diferença
+ * entre aumentar a MOLDURA (o app relayouta numa largura que ninguém desenhou)
+ * e aumentar o MOCKUP (a mesma tela, vista de mais perto). O fator vem de
+ * `--escala-aparelho`, medido em `casca.tsx` contra o palco; sem ele a regra
+ * cai em 1 e o telefone volta ao tamanho nominal.
+ *
+ * Por isso a altura deixou de ser `min(844px, …)`: encolher a moldura cortava a
+ * tela em janela baixa. Agora a tela é sempre a inteira e quem cede é a escala.
  * ------------------------------------------------------------------------- */
 [data-view="mobile"] .palco {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 2rem 1rem;
+  /* Altura EXATA da janela, não `min-height`: é a caixa contra a qual a escala é
+     medida, e o `overflow: hidden` existe porque a caixa de layout do aparelho
+     continua 390×844 mesmo quando o desenho está maior — `transform` não mexe no
+     fluxo. Sem isto a página ganhava uma rolagem morta ao lado do telefone. */
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 [data-view="mobile"] .moldura {
   position: relative;
   width: 390px;
-  height: min(844px, calc(100vh - 4rem));
+  height: 844px;
   flex: none;
   overflow: hidden;
+  /* A ampliação. `center` porque o palco centraliza nos dois eixos: o excedente
+     da caixa de layout sobra igual dos dois lados e nada é cortado. */
+  transform: scale(var(--escala-aparelho, 1));
+  transform-origin: center center;
   /* O BEZEL NÃO É O TEMA, É O OBJETO. A tela do telefone acompanha o tema — ela
      é o produto — mas a moldura de plástico continua preta no escuro, porque um
      telefone preto é preto de dia e de noite. O preço é que, sobre palco escuro,
@@ -155,14 +175,13 @@ body {
  * a visão escolhida, que é estado da aplicação (D-01, D-02). A outra @media
  * legítima do projeto é a de prefers-reduced-motion, em tokens.css. */
 @media (max-width: 430px) {
-  [data-view="mobile"] .palco {
-    padding: 0;
-  }
-
   [data-view="mobile"] .moldura {
     width: 100%;
     height: 100vh;
     height: 100dvh;
+    /* Em tela cheia não há aparelho a ampliar — o aparelho é o de verdade. A
+       medida em `casca.tsx` já devolve 1 aqui; esta linha é o cinto. */
+    transform: none;
     border: 0;
     border-radius: 0;
     box-shadow: none;

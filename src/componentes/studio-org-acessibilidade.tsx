@@ -12,13 +12,13 @@ import { DIMENSOES_DE_ACESSIBILIDADE } from "@/dados/tipos-acesso";
 import type { AcessibilidadeDeEspaco } from "@/dados/tipos-organizacao";
 
 /**
- * studio-org-acessibilidade.tsx — o EDITOR da ficha, escrito uma vez para as telas da
+ * studio-org-acessibilidade.tsx, o EDITOR da ficha, escrito uma vez para as telas da
  * Organização que coletam acessibilidade.
  *
  * POR QUE ELE EXISTE. A O2 (espaços) e a O1 (instituição) coletam exatamente a mesma ficha:
  * cinco recursos do lugar, oito dimensões de mídia e um ato. Duas cópias deste JSX
  * divergiriam na primeira correção, e o sintoma seria a tela de espaços aceitando um ato
- * que a tela de instituição não aceita — o defeito que o portão «nenhuma segunda ficha de
+ * que a tela de instituição não aceita, o defeito que o portão «nenhuma segunda ficha de
  * acessibilidade» existe para impedir.
  *
  * ELE NÃO É A FICHA DO APP PÚBLICO, e a distinção é de papel e não de aparência.
@@ -28,7 +28,7 @@ import type { AcessibilidadeDeEspaco } from "@/dados/tipos-organizacao";
  *
  * OS TRÊS ESTADOS SÃO OS MESMOS DE D-43, e por isso o atributo `data-estado` tem os mesmos
  * três valores da ficha pública. Marcado é «oferece». Desmarcado com a ficha declarada é
- * «declarado ausente». Desmarcado sem declaração é «não declarado» — e ele NUNCA é uma
+ * «declarado ausente». Desmarcado sem declaração é «não declarado», e ele NUNCA é uma
  * variação do «não»: um espaço que não fala de rampa não afirma que não tem rampa.
  */
 export function EditorDeAcessibilidade({
@@ -45,7 +45,7 @@ export function EditorDeAcessibilidade({
    *
    * `false` na tela de mídia, e a razão é a mesma que separou as duas metades da ficha:
    * rampa e elevador são atributos de um lugar onde se entra, e um podcast não é um lugar.
-   * Exibi-los ali pediria uma declaração sobre algo que não existe — e uma caixa marcável
+   * Exibi-los ali pediria uma declaração sobre algo que não existe, e uma caixa marcável
    * que não se aplica é convite para alguém marcá-la.
    */
   mostrarFisicos?: boolean;
@@ -85,7 +85,7 @@ export function EditorDeAcessibilidade({
         </ul>
         <p className="studio-campo-nota">
           Rampa, elevador, banheiro adaptado, piso tátil e vaga reservada não cabem nas 8
-          dimensões de acessibilidade, que são de mídia. Eles estão em estrutura própria —
+          dimensões de acessibilidade, que são de mídia. Eles estão em estrutura própria,
           forçar rampa dentro de «closed caption» seria fabricar classificação.
         </p>
       </div>

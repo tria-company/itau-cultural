@@ -13,6 +13,7 @@ import {
 } from "@/componentes/base/icones";
 import { OpcaoDeSegmento, Segmento } from "@/componentes/base/segmento";
 import { CapaDeCartao, CapaSemImagem } from "@/componentes/capa-sem-imagem";
+import { PublicadoPeloProdutor } from "@/componentes/publicado-pelo-produtor";
 import { linguagemPorId, SelosDeLinguagem } from "@/componentes/selo-linguagem";
 import type { Agenda, DiaDaAgenda, EventoDaAgenda } from "@/dados/agenda";
 import type { MapaDaAgenda } from "@/dados/mapa-agenda";
@@ -436,6 +437,12 @@ export function Acontece({ agenda, mapa }: { agenda: Agenda; mapa: MapaDaAgenda 
           </Link>
         </div>
       </header>
+
+      {/* O QUE ESTE NAVEGADOR PUBLICOU pelo Studio. Fica ACIMA do conteúdo do build e
+          declara que não está no acervo: o protótipo é um artefato estático e não tem
+          servidor para receber publicação. Sem este bloco, a jornada de oito atos do
+          produtor terminaria no vazio — ele aperta publicar e a agenda não muda. */}
+      <PublicadoPeloProdutor pauta="agenda" titulo="Publicado por você nesta demonstração" />
 
       {/* ================================================================== */}
       {/* A VISÃO WEB — lista e mapa lado a lado, sincronizados (D-79, D-80,   */}

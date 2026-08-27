@@ -20,13 +20,13 @@ import type { DeclaracaoDaTela, EspacoDoAcervo, NumerosDosEspacos } from "@/dado
 import type { Acessibilidade } from "@/dados/tipos";
 
 /**
- * studio-org-espacos.tsx — O2 · Espaços, a tela da maior conversão de procedência da
+ * studio-org-espacos.tsx, O2 · Espaços, a tela da maior conversão de procedência da
  * sessão 6.
  *
  * O QUE ELA EXISTE PARA FAZER. Os 113 espaços do acervo são 100% `derivado`: nenhum vem da
  * fonte. Eles foram INFERIDOS por regra a partir do campo territorial da Enciclopédia, e a
  * coordenada de cada um é um deslocamento em torno da cidade. Esta tela é onde o espaço
- * deixa de ser inferência e passa a ser cadastro — e ela MOSTRA a passagem acontecendo, em
+ * deixa de ser inferência e passa a ser cadastro, e ela MOSTRA a passagem acontecendo, em
  * vez de só gravar o formulário.
  *
  * TRÊS REGRAS DURAS, e cada uma tem um lugar visível na tela:
@@ -40,10 +40,10 @@ import type { Acessibilidade } from "@/dados/tipos";
  *     ontologia). O botão de declarar ausência tem peso igual ao de salvar.
  *  3. **O selo mostra a conversão**, com a procedência de saída e a de chegada lado a lado.
  *
- * DE ONDE VEM CADA COISA. Tudo o que fala do acervo — os 113, os denominadores, as
- * declarações — chega por props, medido no build pelo componente de servidor (DP-F). Tudo
- * o que fala do CONTRATO — as 8 dimensões, os 5 recursos físicos, as frases do ato e da
- * coordenada — é importado por valor de módulos que não tocam em dado. Nenhum número está
+ * DE ONDE VEM CADA COISA. Tudo o que fala do acervo, os 113, os denominadores, as
+ * declarações, chega por props, medido no build pelo componente de servidor (DP-F). Tudo
+ * o que fala do CONTRATO, as 8 dimensões, os 5 recursos físicos, as frases do ato e da
+ * coordenada, é importado por valor de módulos que não tocam em dado. Nenhum número está
  * escrito aqui dentro.
  *
  * SÓ NA VISÃO WEB (D-67). O layout de bastidor esconde o conteúdo inteiro sob `app:hidden`
@@ -51,7 +51,7 @@ import type { Acessibilidade } from "@/dados/tipos";
  *
  * REUSO E NÃO CÓPIA, em três camadas. A ficha das 8 dimensões em LEITURA é
  * `FichaDeAcessibilidade`, a mesma do app público, com os três estados de D-43. O EDITOR da
- * ficha é `EditorDeAcessibilidade`, escrito uma vez e compartilhado com a O1 — a instituição
+ * ficha é `EditorDeAcessibilidade`, escrito uma vez e compartilhado com a O1, a instituição
  * coleta exatamente os mesmos treze campos, e duas cópias divergiriam na primeira correção.
  * Superfície, painel, campo e botão vêm de `studio.css`, que é da S7.
  */
@@ -142,7 +142,7 @@ export function StudioOrgEspacos({
       </header>
 
       {/* Os denominadores, primeiro. Quem abre a tela precisa saber por que ela existe
-          antes de ver o formulário — e o número é o que sustenta a frase. */}
+          antes de ver o formulário, e o número é o que sustenta a frase. */}
       <section className="studio-painel">
         <h2 className="studio-painel-nome">O estado do acervo, medido</h2>
         <ul className="web-denominadores">
@@ -217,7 +217,7 @@ export function StudioOrgEspacos({
           {lista.length === 0 ? (
             <p className="studio-nota">
               Nenhum espaço neste recorte. O acervo tem {numeros.total} espaços em{" "}
-              {numeros.cidades} lugares distintos — troque o termo ou volte para «todos».
+              {numeros.cidades} lugares distintos, troque o termo ou volte para «todos».
             </p>
           ) : (
             <ul className="web-lista-densa">
@@ -234,7 +234,7 @@ export function StudioOrgEspacos({
                       <span className="web-linha-titulo">{e.titulo}</span>
                       <span className="web-linha-meta">
                         {[e.cidade, e.estado].filter(Boolean).join(" · ")}
-                        {" — "}
+                        {", "}
                         {convertido ? "cadastrado" : e.procedencia}
                       </span>
                     </button>
@@ -264,7 +264,7 @@ export function StudioOrgEspacos({
                   <h2 className="studio-painel-nome">{atual.titulo}</h2>
                 </div>
 
-                {/* O selo da conversão — o argumento da tela em um elemento. */}
+                {/* O selo da conversão, o argumento da tela em um elemento. */}
                 <div className="org-conversao">
                   <span className="org-conversao-de">{atual.procedencia}</span>
                   <span className="org-conversao-seta" aria-hidden="true">
@@ -288,7 +288,7 @@ export function StudioOrgEspacos({
 
                 {/* O RESULTADO, e não o editor: esta é a ficha que o app público mostra
                     para este espaço, com os três estados de D-43. Ela fica AQUI, junto do
-                    selo de conversão, e o editor fica no painel de baixo — de propósito.
+                    selo de conversão, e o editor fica no painel de baixo, de propósito.
                     Lado a lado, as duas leituras pareceriam duas fichas concorrentes; a
                     distância entre elas é o que deixa ver a conversão acontecendo, porque
                     marcar uma caixa lá embaixo muda o que este bloco afirma. */}
@@ -380,7 +380,7 @@ export function StudioOrgEspacos({
                 ) : null}
               </section>
 
-              {/* A ficha de acessibilidade — as 5 do lugar, as 8 de mídia, e o ato. */}
+              {/* A ficha de acessibilidade, as 5 do lugar, as 8 de mídia, e o ato. */}
               <section className="studio-painel">
                 <h2 className="studio-painel-nome">Acessibilidade do espaço</h2>
                 <p className="studio-nota">
@@ -395,7 +395,7 @@ export function StudioOrgEspacos({
                 />
               </section>
 
-              {/* O que falta — permanente, e é o inverso do cadastro comum. */}
+              {/* O que falta, permanente, e é o inverso do cadastro comum. */}
               <section className="studio-painel">
                 <h2 className="studio-painel-nome">O que falta neste espaço</h2>
                 <ul className="org-falta">

@@ -1,0 +1,3684 @@
+/* ---------------------------------------------------------------------------
+ * studio-produtor.css — a folha do perfil Produtor: o Studio mobile-first.
+ *
+ * POR QUE NÃO SE CHAMA `produtor.css`. Esse nome já existe e é de outra tela: a página
+ * pública `/produtor/[slug]`, escrita pelo plano 05-03, com o prefixo `.pr-*`. Duas folhas
+ * com o mesmo nome não é uma opção, e renomear a dela apagaria uma tela pública para
+ * acomodar esta. O prefixo daqui é `.prod-*`, e os dois convivem.
+ *
+ * O QUE ELA COBRE: a casca do Studio, o trilho de pautas, o painel, a ficha em atos, a
+ * folha de seleção, a grade de sessões e a barra de ação. Vale nas duas visões — mobile
+ * primeiro, web por divergência sob `[data-view="web"]`.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * AS REGRAS DA CASA, e aqui elas valem inteiras:
+ *
+ *  1. NUNCA importe esta folha de um componente. O único `import` de CSS do projeto é
+ *     `src/app/layout.tsx → ./globals.css`, e há gate medindo isso.
+ *
+ *  2. NENHUM HEX. Toda cor sai de `var(--cor-*)` ou de `color-mix` sobre `var(--ic-*)`
+ *     (D-06, D-08). `verificar-ds.mjs` reprova hex nesta folha.
+ *
+ *  3. NENHUMA MEDIDA LITERAL de tipografia. `--tipo-*` e `--dur-*` vêm de `tokens.css`, a
+ *     única folha onde rem e ms podem nascer. Medidas de LAYOUT em rem existem aqui pelo
+ *     mesmo motivo que existem nas outras 25 folhas de tela: a grade de 0.25rem é o
+ *     vocabulário, e o gate confere que elas caem nela.
+ *
+ *  4. NENHUM `position: fixed`. O único do projeto mora no `.canto` de `casca.tsx`. Dentro
+ *     da moldura de 390px o `fixed` escapa para a largura da janela e quebra D-03 — a fase
+ *     3 já pagou por isso uma vez. Quem gruda no topo usa `sticky` contra
+ *     `.moldura-rolagem`; quem gruda no pé, `absolute` contra a `.moldura`.
+ *
+ *  5. AS SEIS CLASSES PÚBLICAS DE `studio.css` — `studio-painel`, `studio-tabela`,
+ *     `studio-lados`, `studio-nao-sustenta`, `studio-botao`, `studio-pastilha` — são
+ *     interface de outra sessão. Esta folha SÓ ACRESCENTA sobre elas; não renomeia nenhuma
+ *     e não redefine o que elas já desenham.
+ *
+ *  6. LARANJA É AÇÃO. `--cor-acao` em botão primário, foco, progresso e link ativo. Nunca
+ *     em decoração, nunca em data, nunca em situação: `publicado` e `rascunho` são ESTADO,
+ *     e estado usa pastilha neutra. Um `publicado` laranja competiria com o botão que
+ *     publica, na mesma tela, pelo mesmo olho.
+ *
+ *  7. DIVERGÊNCIA POR VISÃO EM CSS PURO, sob `[data-view="web"]`. Componente irmão por
+ *     visão é proibido (D-05): a árvore JSX é uma só.
+ *
+ *  8. ESTA FOLHA É SEM CAMADA, E ISSO VENCE `@layer utilities`.
+ *
+ *     Medido no bundle exportado: `.app\:hidden` sai em `@layer utilities`, e toda regra
+ *     daqui sai sem camada. **CSS sem camada ganha de CSS em camada, independentemente da
+ *     especificidade** — então uma classe daqui que declare `display` DESLIGA o
+ *     `app:hidden` e o `desk:hidden` do elemento que a carrega, em silêncio.
+ *
+ *     Consequência prática: não ponha `app:hidden` num elemento que já tenha classe
+ *     `.prod-*` declarando `display`. Se precisar esconder por visão, escreva a regra
+ *     AQUI, sob `[data-view="…"]` — ela é sem camada dos dois lados e o cascade resolve
+ *     por ordem, como se espera.
+ *
+ *     A descoberta veio de `--provar-ausencias`, quando um defeito injetado não injetou
+ *     nada e o portão ficou verde com razão. Ver `superficie-so-web.tsx`.
+ * ------------------------------------------------------------------------- */
+
+/* ===========================================================================
+ * A CASCA — a tela do Studio dentro da moldura
+ * ======================================================================== */
+
+/**
+ * `.prod-tela` é o contêiner de página, montado pelo layout de `/studio`.
+ *
+ * O `padding-bottom` é generoso e não é folga estética: a barra de ação primária é
+ * `absolute` contra a moldura, e o conteúdo tem de PAGAR o espaço dela — senão o último
+ * campo do formulário fica embaixo do botão que o submete, e a pessoa rola até o fim sem
+ * nunca alcançar aquele campo.
+ */
+.prod-tela {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  min-height: 100%;
+  padding: 0 var(--espaco-tela) 6rem;
+}
+
+/**
+ * `.prod-conteudo` é tudo o que NÃO é o trilho — o cabeçalho, o corpo e a barra de ação.
+ *
+ * Ele existe por causa da grade da web (ver o layout de `/studio`), e no app não custa
+ * nada: uma coluna dentro de uma coluna.
+ */
+.prod-conteudo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  min-width: 0;
+}
+
+.prod-cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0 calc(var(--espaco-tela) * -1);
+  padding: 0.75rem var(--espaco-tela);
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+}
+
+.prod-cabecalho-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.prod-superficie {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cor-acao-tinta);
+}
+
+.prod-titulo {
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.prod-objetivo {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  line-height: 1.45;
+  color: var(--cor-tinta-2);
+}
+
+.prod-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-secao);
+  padding-top: var(--espaco-pilha);
+}
+
+.prod-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.prod-secao-titulo {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-rodape {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  padding-top: var(--espaco-secao);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.prod-nota {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  line-height: 1.5;
+  color: var(--cor-tinta-3);
+}
+
+/* ===========================================================================
+ * O TRILHO DE PAUTAS — o padrão «chips de filtro» do design system
+ *
+ * Rolagem horizontal com `scroll-snap`: onze pautas não cabem em 370px, e um trilho que
+ * para no meio de uma pastilha faz a pessoa achar que a lista acabou ali.
+ * ======================================================================== */
+
+.prod-trilho {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 calc(var(--espaco-tela) * -1);
+  padding: 0.75rem var(--espaco-tela);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  /* A barra de rolagem horizontal rouba 15px de altura de uma faixa de 36px e some
+   * sozinha em telefone. Escondê-la aqui é o que mantém a pastilha inteira à vista. */
+  scrollbar-width: none;
+}
+
+.prod-trilho::-webkit-scrollbar {
+  display: none;
+}
+
+/**
+ * A pastilha. 36px de altura visual, e o alvo de toque chega aos 44px pela área de
+ * arrasto do trilho — ver `.prod-trilho` no bloco de alvo de toque, mais abaixo.
+ */
+.prod-pauta {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  line-height: 1;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  transition:
+    background-color var(--dur-1) var(--ease-padrao),
+    border-color var(--dur-1) var(--ease-padrao),
+    color var(--dur-1) var(--ease-padrao);
+}
+
+/* SELECIONADO É PRETO CHEIO, e não laranja. O laranja é a AÇÃO — o botão que publica —, e
+ * uma pastilha laranja de navegação disputaria com ele. Preto cheio sobre papel mede
+ * 18,9:1; branco sobre laranja mediria 2,64:1 e reprovaria. */
+.prod-pauta[data-ativa="sim"] {
+  border-color: var(--cor-tinta);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+  font-weight: 700;
+}
+
+/* A pauta cuja ficha ainda não existe APARECE, e não é link. É a diferença entre uma
+ * superfície que mostra o próprio tamanho e uma que esconde o que falta. */
+.prod-pauta[data-pronta="nao"] {
+  border-style: dashed;
+  color: var(--cor-tinta-3);
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .prod-pauta:hover:not([data-ativa="sim"]):not([data-pronta="nao"]) {
+    border-color: var(--cor-tinta);
+    background: var(--cor-superficie-2);
+  }
+}
+
+/* ===========================================================================
+ * A PASTILHA DE SITUAÇÃO — neutra, sempre
+ *
+ * Situação é ESTADO, e estado não é ação. Um `publicado` laranja ao lado de um botão
+ * «Publicar» laranja faria o olho procurar o botão e achar o rótulo. O que distingue as
+ * seis situações é o peso do contorno e a tinta, não a cor da marca.
+ * ======================================================================== */
+
+.prod-situacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-2);
+  white-space: nowrap;
+}
+
+/* Publicado é o único CHEIO: é o estado terminal, e o preenchimento diz «isto está no ar»
+ * sem precisar de uma segunda cor. */
+.prod-situacao[data-situacao="publicado"] {
+  border-color: var(--cor-tinta);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+}
+
+/* Devolvido e vetado são os dois que pedem AÇÃO de quem lê, e por isso ganham o único
+ * traço de laranja da família — a barra à esquerda, a mesma gramática de declaração
+ * honesta que `.studio-nao-sustenta` e `.web-declaracao` já usam. */
+.prod-situacao[data-situacao="devolvido"],
+.prod-situacao[data-situacao="vetado"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+.prod-situacao[data-situacao="suspenso"] {
+  border-style: dashed;
+  color: var(--cor-tinta-3);
+}
+
+/* A CONTAGEM É OUTRA COISA, e por isso tem desenho próprio: sem contorno, sem
+ * preenchimento, só tinta rebaixada. Ela usava a pastilha de situação e saía preta-cheia,
+ * com a mesma forma de «publicado» — o olho lia um número como um estado. */
+.prod-contagem {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+  white-space: nowrap;
+}
+
+/* ===========================================================================
+ * A LISTA DO PAINEL — cartão empilhado no app, tabela densa na web
+ *
+ * MESMA ÁRVORE JSX. O que muda é o CSS: `.prod-lista` é coluna de cartões aqui e vira
+ * `display: table` sob `[data-view="web"]`, lá embaixo. Componente irmão por visão é
+ * proibido (D-05), e esta é a regra que torna a proibição praticável.
+ * ======================================================================== */
+
+.prod-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-registro {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  text-align: left;
+  transition:
+    border-color var(--dur-1) var(--ease-padrao),
+    box-shadow var(--dur-1) var(--ease-padrao);
+}
+
+@media (hover: hover) {
+  .prod-registro:hover {
+    border-color: var(--cor-borda-forte);
+    box-shadow: var(--sombra-1);
+  }
+}
+
+/* A capa é 56px e quadrada. Quadrada e não 3:2 porque a lista mistura pautas: um cartaz de
+ * play ao lado de um espaço e de uma matéria, cada um com a proporção da própria vitrine,
+ * daria uma coluna esquerda serrilhada. */
+.prod-capa {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--raio-p);
+  object-fit: cover;
+  background: var(--cor-superficie-2);
+}
+
+.prod-capa-vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--cor-borda-forte);
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
+
+.prod-registro-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-registro-titulo {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+  font-weight: 700;
+  line-height: 1.3;
+  /* Duas linhas e reticências: um título de exposição chega a 120 caracteres, e três
+   * linhas empurrariam a pastilha de situação para fora do cartão. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.prod-registro-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.prod-registro-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  grid-column: 1 / -1;
+  padding-top: 0.25rem;
+}
+
+/* ===========================================================================
+ * PENDÊNCIAS — o que espera por outro nível, com o dono nomeado
+ *
+ * A gramática é a da declaração honesta que a fase 4 fixou e `web.css` repete: barra
+ * laranja à esquerda, fundo de laranja diluído. Quem lê já sabe que aquela barra quer
+ * dizer «a tela está te dizendo por quê».
+ * ======================================================================== */
+
+.prod-pendencias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem var(--espaco-cartao);
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-g) var(--raio-g) 0;
+  background: var(--cor-acao-lavada);
+}
+
+.prod-pendencia {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-pendencia-texto {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.45;
+}
+
+.prod-pendencia-dono {
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-acao-tinta);
+}
+
+/* ===========================================================================
+ * ESTADO VAZIO — com saída, nunca só com a constatação
+ * ======================================================================== */
+
+.prod-vazio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: var(--espaco-secao) var(--espaco-cartao);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+}
+
+.prod-vazio-frase {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.5;
+  color: var(--cor-tinta-2);
+}
+
+/* ===========================================================================
+ * BOTÕES — o vocabulário mínimo, sobre `studio-botao` quando ele serve
+ *
+ * `.prod-botao` existe porque `studio-botao` foi desenhado para densidade de desktop e
+ * não alcança 44px de alvo de toque. Ela ACRESCENTA; não redefine a de lá.
+ * ======================================================================== */
+
+.prod-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cor-tinta);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-padrao),
+    border-color var(--dur-1) var(--ease-padrao),
+    transform var(--dur-1) var(--ease-padrao);
+}
+
+.prod-botao:active {
+  transform: scale(0.98);
+}
+
+/* O ÚNICO LARANJA CHEIO DA FOLHA. Tinta preta por cima: branco sobre este laranja mede
+ * 2,64:1 e reprova; preto mede 9,1:1. Não é escolha estética, é o único par que passa. */
+.prod-botao[data-primaria="sim"] {
+  border-color: transparent;
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+}
+
+.prod-botao[disabled],
+.prod-botao[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.prod-botao[data-porte="curto"] {
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  font-size: var(--tipo-legenda);
+}
+
+/* ===========================================================================
+ * BARRA DE AÇÃO — `absolute` contra a moldura, NUNCA `fixed`
+ *
+ * Dentro da moldura de 390px o `fixed` escapa para a largura da janela: a barra iria parar
+ * no rodapé do navegador, atravessada por cima do telefone. `absolute` contra a `.moldura`
+ * é o que a mantém dentro do aparelho — a mesma regra que a gaveta do menu lateral segue.
+ *
+ * `position: sticky` com `bottom: 0` seria a outra saída, e não serve: ela precisa de um
+ * ancestral com altura definida, e a `.prod-tela` cresce com o conteúdo.
+ * ======================================================================== */
+
+.prod-barra-acao {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem var(--espaco-tela);
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-2);
+}
+
+.prod-barra-acao > .prod-botao[data-primaria="sim"] {
+  flex: 1;
+}
+
+/* ===========================================================================
+ * ALVO DE TOQUE E FOCO — os dois pisos de acessibilidade da folha
+ * ======================================================================== */
+
+/* 44px em tudo que se toca. A pastilha do trilho tem 36px de ALTURA VISUAL e chega aos 44
+ * de alvo pelo padding vertical do trilho — o dedo acerta a faixa inteira, e a pastilha
+ * continua com o desenho de chip que o design system fixou. */
+.prod-tela button,
+.prod-tela [role="button"],
+.prod-tela select,
+.prod-tela input:not([type="checkbox"]):not([type="radio"]),
+.prod-tela textarea {
+  min-height: 2.75rem;
+}
+
+.prod-tela input[type="checkbox"],
+.prod-tela input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* O foco é `--cor-foco`, com contorno afastado: um outline colado na borda arredondada
+ * de uma pílula some no próprio traço do controle. */
+.prod-tela :focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* ===========================================================================
+ * MOVIMENTO — o vocabulário que já existe, e nada além
+ *
+ * Nada de mola, nada de blur. `--ease-padrao` em tudo, e `prefers-reduced-motion` zera as
+ * três durações em `tokens.css` — o que faz toda transição desta folha virar instantânea
+ * sem uma única regra a mais aqui.
+ * ======================================================================== */
+
+/* A troca de ato desliza curto. `--deslize-irma` e não `--deslize-tela`: a troca de ato é
+ * movimento DENTRO da mesma tela, e o deslocamento de troca de rota faria o formulário
+ * parecer outra página. */
+@keyframes prod-ato-entra {
+  from {
+    opacity: 0;
+    transform: translateX(var(--deslize-irma));
+  }
+}
+
+.prod-ato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  animation: prod-ato-entra var(--dur-2) var(--ease-padrao);
+}
+
+/* ===========================================================================
+ * VISÃO WEB — a mesma árvore, outra densidade
+ *
+ * Cinco divergências e só cinco (ver §3.6 da especificação). As que dependem de telas que
+ * ainda não existem entram junto com elas; o que está aqui é o que a casca já sustenta.
+ * ======================================================================== */
+
+/* ① O trilho vira coluna à esquerda: 240px permanentes, no padrão do menu lateral. */
+[data-view="web"] .prod-tela {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: 0 var(--espaco-secao);
+  align-items: start;
+  padding-bottom: var(--espaco-secao);
+}
+
+/* Duas colunas, UMA linha. O invólucro é o segundo item, e por isso o trilho ocupa a
+ * coluna inteira sem precisar de `grid-row` nenhum. */
+[data-view="web"] .prod-conteudo {
+  min-width: 0;
+}
+
+/**
+ * O trilho ocupa a COLUNA INTEIRA, e não a primeira linha dela.
+ *
+ * Sem `grid-row: 1 / -1` ele ficava só na linha do cabeçalho, e como onze pastilhas
+ * empilhadas são mais altas que um título de duas linhas, aquela linha da grade crescia
+ * até a altura do trilho — abrindo um vazio de quinhentos pixels entre o cabeçalho e o
+ * primeiro bloco de conteúdo. A captura pegou; nenhum número teria pego.
+ */
+[data-view="web"] .prod-trilho-pautas {
+  position: sticky;
+  top: var(--espaco-tela);
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+[data-view="web"] .prod-trilho-pautas .prod-pauta {
+  width: 100%;
+  justify-content: flex-start;
+  border-color: transparent;
+  border-radius: var(--raio-m);
+}
+
+[data-view="web"] .prod-trilho-pautas .prod-pauta[data-ativa="sim"] {
+  border-color: transparent;
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+/* O cabeçalho e o corpo ficam na segunda coluna. `grid-column` explícito e não ordem
+ * implícita: o trilho é o primeiro filho no JSX, e sem isto o cabeçalho cairia embaixo
+ * dele na coluna estreita. */
+[data-view="web"] .prod-cabecalho,
+[data-view="web"] .prod-corpo,
+[data-view="web"] .prod-rodape {
+  margin: 0;
+}
+
+[data-view="web"] .prod-cabecalho {
+  padding-inline: 0;
+}
+
+/* ② A lista vira tabela densa — mesma linha, outro CSS. */
+[data-view="web"] .prod-lista {
+  gap: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  overflow: hidden;
+}
+
+[data-view="web"] .prod-registro {
+  grid-template-columns: 2.5rem minmax(0, 3fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  border-radius: 0;
+  padding: 0.5rem var(--espaco-cartao);
+}
+
+[data-view="web"] .prod-lista > :last-child .prod-registro {
+  border-bottom: 0;
+}
+
+[data-view="web"] .prod-capa {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+[data-view="web"] .prod-registro-titulo {
+  -webkit-line-clamp: 1;
+  font-size: var(--tipo-detalhe);
+}
+
+[data-view="web"] .prod-registro-acoes {
+  grid-column: auto;
+  padding-top: 0;
+}
+
+/* ④ Nada gruda no pé na web: a janela é alta e a barra flutuante seria uma faixa de
+ * telefone posta onde não resolve nada. A ação primária volta para o fluxo. */
+[data-view="web"] .prod-barra-acao {
+  position: static;
+  justify-content: flex-end;
+  border: 0;
+  box-shadow: none;
+  padding-inline: 0;
+}
+
+[data-view="web"] .prod-barra-acao > .prod-botao[data-primaria="sim"] {
+  flex: none;
+}
+
+/* ===========================================================================
+ * AS DEZOITO TELAS HERDADAS, DENTRO DO TELEFONE — adaptação mínima
+ *
+ * As telas que a S7 e a S6 construíram usam `.studio`, desenhada para densidade de
+ * desktop: gutter de 1.5rem, `<select>` de largura natural, tabela. Com a inversão de
+ * D-67 elas passaram a abrir na visão app, e em 370px o `<select>` de título longo
+ * atravessa a borda do aparelho.
+ *
+ * O QUE ESTE BLOCO FAZ E O QUE ELE NÃO FAZ. Ele impede o transbordo e devolve o gutter
+ * ao contêiner de fora — nada mais. Ele NÃO redesenha aquelas telas: o porte para a
+ * ficha em atos é o Sprint 4, e adiantá-lo aqui em CSS produziria duas versões do mesmo
+ * layout disputando a mesma classe.
+ *
+ * `studio.css` NÃO É TOCADA. As regras moram nesta folha, sob `[data-view="mobile"]`,
+ * e as seis classes públicas de lá continuam como estão.
+ * ======================================================================== */
+
+[data-view="mobile"] .prod-conteudo .studio {
+  /* O gutter já é da `.prod-tela`. Repetido aqui, ele soma e sobram 306px de conteúdo. */
+  padding-inline: 0;
+  padding-block: var(--espaco-pilha) 0;
+  gap: var(--espaco-pilha);
+}
+
+[data-view="mobile"] .prod-conteudo .studio-cabecalho {
+  margin-inline: calc(var(--espaco-tela) * -1);
+  padding-inline: var(--espaco-tela);
+}
+
+/* Nada atravessa a borda do aparelho. `min-width: 0` porque o item de grade e o item de
+ * flex têm largura mínima automática igual ao conteúdo — sem ele, um `<option>` de
+ * setenta caracteres estica o `<select>` e a tela inteira ganha rolagem lateral. */
+[data-view="mobile"] .prod-conteudo .studio :is(select, input, textarea, table) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+[data-view="mobile"] .prod-conteudo .studio :is(.studio-lados, .studio-jornada) {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A tabela densa rola por dentro em vez de empurrar a página. Vira cartão no Sprint 4;
+ * até lá, rolar dentro do próprio bloco é o que mantém o resto alcançável. */
+[data-view="mobile"] .prod-conteudo .studio-tabela {
+  display: block;
+  overflow-x: auto;
+}
+
+/* ===========================================================================
+ * O TRILHO DE PROGRESSO DA FICHA — a navegação entre atos
+ *
+ * ESTE É O ÚNICO LARANJA DA FICHA QUE NÃO É O BOTÃO, e ele é legítimo: progresso é ação em
+ * curso, não decoração e não estado. O ato fechado acende; o atual tem contorno; o que não
+ * foi aberto fica em tinta rebaixada.
+ * ======================================================================== */
+
+.prod-progresso {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.5rem calc(var(--espaco-tela) * -1) 0;
+  padding: 0 var(--espaco-tela) 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.prod-progresso::-webkit-scrollbar {
+  display: none;
+}
+
+.prod-degrau {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* A MARCA é o ponto que acende. Ela existe como elemento próprio porque a transição de cor
+ * de um pseudo-elemento não é animável em todos os motores, e o «acender» é o gesto que diz
+ * que o ato fechou. */
+.prod-degrau-marca {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  transition:
+    background-color var(--dur-1) var(--ease-padrao),
+    border-color var(--dur-1) var(--ease-padrao);
+}
+
+/* (A regra antiga do ponto aceso por ato fechado morava aqui. Saiu: a barra da ficha
+ * acende por POSICAO, e o estado por ato mora na folha de passos.) */
+
+.prod-degrau[data-atual="sim"] {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta);
+  font-weight: 700;
+}
+
+/* No app o rótulo do degrau some: oito palavras não cabem em 370px, e o que importa ali é
+ * o ponto aceso e o «2/8» do cabeçalho. Na web o rótulo volta — ver a seção da visão web. */
+.prod-degrau-rotulo {
+  display: none;
+}
+
+.prod-degrau[data-atual="sim"] .prod-degrau-rotulo {
+  display: inline;
+}
+
+/* ===========================================================================
+ * CAMPOS — rótulo, obrigatoriedade, controle, nota
+ * ======================================================================== */
+
+.prod-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-campo-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+/* A OBRIGATORIEDADE É UMA COISA SÓ, e é esta. Espalhada, ela vira asterisco numa tela, a
+ * palavra «obrigatório» noutra e borda vermelha na terceira — três gramáticas para a mesma
+ * informação. Laranja aqui é legítimo: é a AÇÃO que falta. */
+.prod-campo-exigido {
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-acao-tinta);
+}
+
+.prod-campo-entrada {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+  color: var(--cor-tinta);
+}
+
+/* O campo bloqueante em branco ganha a barra laranja à esquerda — a mesma gramática da
+ * declaração honesta. Sem borda vermelha: vermelho não existe nesta paleta, e inventá-lo
+ * aqui abriria um décimo hex fora da fonte de verdade. */
+.prod-campo-entrada[aria-invalid="true"] {
+  border-left: 3px solid var(--cor-acao);
+}
+
+.prod-campo-nota {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  line-height: 1.45;
+  color: var(--cor-tinta-3);
+}
+
+/* ===========================================================================
+ * O SELETOR DE CATÁLOGO E O CAMPO COM PROPOSTA
+ * ======================================================================== */
+
+.prod-abrir-catalogo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+  text-align: left;
+  color: var(--cor-tinta);
+  cursor: pointer;
+}
+
+.prod-abrir-catalogo-rotulo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prod-abrir-catalogo-seta {
+  flex: none;
+  color: var(--cor-tinta-3);
+}
+
+.prod-escolhidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* O termo escolhido. A COR VEM DO DADO — `--cor-termo` é preenchida em linha, com o nome do
+ * token que `vocabulario.json` guarda. Nenhum mapa linguagem→cor mora em CSS (D-08). */
+.prod-termo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta);
+  cursor: pointer;
+}
+
+.prod-termo[data-tem-cor="sim"] {
+  border-left: 3px solid var(--cor-termo, var(--cor-borda-forte));
+}
+
+/* O termo PROPOSTO é tracejado: ele existe no registro e ainda não no vocabulário, e o
+ * traço interrompido é a forma que este design system dá ao que está em aberto. */
+.prod-termo[data-proposto="sim"] {
+  border-style: dashed;
+  border-color: var(--cor-acao);
+  color: var(--cor-acao-tinta);
+}
+
+.prod-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-opcao {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  background: transparent;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+  text-align: left;
+  color: var(--cor-tinta);
+  cursor: pointer;
+}
+
+.prod-opcao-marca {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  font-size: var(--tipo-legenda);
+}
+
+.prod-opcao[data-marcado="sim"] .prod-opcao-marca {
+  border-color: var(--cor-tinta);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+}
+
+.prod-opcao-rotulo {
+  flex: 1;
+  min-width: 0;
+}
+
+.prod-opcao-rotulo[data-tem-cor="sim"] {
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--cor-termo, var(--cor-borda-forte));
+}
+
+.prod-opcao-usos {
+  flex: none;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+/* A PROPOSTA. Gramática de declaração honesta: barra laranja e fundo lavado — quem lê já
+ * sabe que aquela barra quer dizer «a tela está te dizendo por quê». */
+.prod-propor,
+.prod-propor-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.75rem;
+  border: 0;
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  background: var(--cor-acao-lavada);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-legenda);
+  line-height: 1.45;
+  text-align: left;
+  color: var(--cor-tinta);
+}
+
+.prod-propor {
+  cursor: pointer;
+}
+
+.prod-propor-bloco > .prod-propor {
+  padding: 0;
+  border-left: 0;
+  background: transparent;
+}
+
+.prod-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prod-resultado-cabeca {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.prod-resultado-nome {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+  color: var(--cor-tinta);
+}
+
+.prod-resultado-classe {
+  flex: none;
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+/* O VERBETE EMBUTIDO. Duas linhas: o suficiente para distinguir cinco «Maria Silva» sem
+ * transformar a busca em leitura. */
+.prod-resultado-resumo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-legenda);
+  line-height: 1.4;
+  color: var(--cor-tinta-2);
+}
+
+.prod-resultado-resumo[data-sem-verbete] {
+  font-style: italic;
+  color: var(--cor-tinta-3);
+}
+
+.prod-escolhido {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie-2);
+}
+
+.prod-escolhido[data-proposto="sim"] {
+  border-style: dashed;
+  border-color: var(--cor-acao);
+}
+
+.prod-escolhido-nome {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+/* ===========================================================================
+ * A FOLHA — sobe do pé no app, cola no lado na web
+ *
+ * `absolute` CONTRA A MOLDURA. `fixed` escaparia para a janela e a folha cobriria a página
+ * inteira, com o aparelho por baixo (D-03, D-04).
+ * ======================================================================== */
+
+.prod-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: color-mix(in srgb, var(--ic-preto) 45%, transparent);
+  animation: prod-scrim-entra var(--dur-2) var(--ease-padrao);
+}
+
+@keyframes prod-scrim-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+.prod-folha {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  /* 82% da moldura: sobra o bastante do que está atrás para a pessoa não perder o contexto
+   * do que estava preenchendo. Cobrir tudo transformaria a folha numa segunda tela. */
+  max-height: 82%;
+  border-radius: var(--raio-g) var(--raio-g) 0 0;
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-3);
+  animation: prod-folha-sobe var(--dur-3) var(--ease-padrao);
+}
+
+@keyframes prod-folha-sobe {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.prod-folha-cabeca {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.75rem var(--espaco-tela) 0.5rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+/* A ALÇA. Ela atravessa as duas colunas e diz «isto arrasta» antes de qualquer palavra. */
+.prod-folha-alca {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 2.5rem;
+  height: 0.25rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-borda-forte);
+}
+
+.prod-folha-titulos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-folha-titulo {
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.prod-folha-descricao {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.prod-folha-fechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  font-size: var(--tipo-corpo);
+  color: var(--cor-tinta-2);
+  cursor: pointer;
+}
+
+.prod-folha-corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem var(--espaco-tela);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.prod-folha-rodape {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem var(--espaco-tela);
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+}
+
+.prod-folha-rodape > .prod-botao {
+  flex: 1;
+}
+
+.prod-galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-galeria-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.prod-galeria-foto {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.prod-galeria-de,
+.prod-galeria-credito {
+  padding: 0 0.25rem;
+  font-size: var(--tipo-micro);
+  line-height: 1.3;
+  color: var(--cor-tinta-3);
+}
+
+.prod-galeria-de {
+  font-weight: 700;
+  color: var(--cor-tinta-2);
+}
+
+.prod-galeria-credito {
+  padding-bottom: 0.25rem;
+}
+
+/* ===========================================================================
+ * O ATO DE DECLARAR — largura inteira, SEM raio de pílula
+ *
+ * A pílula é a forma dos controles CURTOS deste design system: chip, botão, filtro. Isto
+ * não é um controle — é uma afirmação, com peso igual ao de salvar. Um retângulo de raio
+ * médio, largura inteira, contorno grosso.
+ * ======================================================================== */
+
+.prod-ato-declarar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prod-botao-ato {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--cor-tinta);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--cor-tinta);
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease-padrao);
+}
+
+.prod-botao-ato:active {
+  background: var(--cor-superficie-2);
+}
+
+.prod-declarado {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.prod-declarado-frase {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.prod-declarado-confirma,
+.prod-declarado-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prod-declarado-acoes {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+/* Desfazer é ato próprio e ganha peso de LINK, não de botão: ele não é uma das ações da
+ * tela, é o caminho de volta de quem se enganou. */
+.prod-desfazer-declaracao {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.prod-dimensoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.prod-dimensao {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+  cursor: pointer;
+}
+
+.prod-dimensao-rotulo {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+}
+
+.prod-acessibilidade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+/* ===========================================================================
+ * IMPEDIMENTOS — o que falta, com o endereço de onde se resolve
+ * ======================================================================== */
+
+.prod-impedimentos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-left: 3px solid var(--cor-borda-forte);
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  background: var(--cor-superficie-2);
+}
+
+/* Quando algo BLOQUEIA, a barra vira laranja: é a mesma gramática da declaração honesta, e
+ * ela diz «isto impede» sem precisar de uma cor que a paleta não tem. */
+.prod-impedimentos:not([data-impedimentos="0"]) {
+  border-left-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+}
+
+.prod-impedimentos-frase {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.prod-impedimentos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-impedimento {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-impedimento-texto {
+  font-size: var(--tipo-detalhe);
+  line-height: 1.4;
+}
+
+.prod-impedimento-ir {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  color: var(--cor-acao-tinta);
+  cursor: pointer;
+}
+
+.prod-impedimentos-opcionais > summary {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  cursor: pointer;
+}
+
+.prod-impedimentos-opcionais[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+/* ===========================================================================
+ * IMAGEM E PRÉVIA
+ * ======================================================================== */
+
+.prod-imagem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+/**
+ * O PALCO DA FOTO: largura inteira, proporcao de cartaz. Escolher uma capa e decidir o
+ * que o publico ve primeiro, e a miniatura de 96px que morava aqui nao deixava decidir.
+ */
+.prod-imagem-palco {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--raio-m);
+  overflow: hidden;
+  background: var(--cor-superficie-2);
+}
+
+.prod-imagem-grande {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prod-imagem-vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+/* A foto enviada diz de onde veio: ela nao esta no acervo, e some se o armazem for limpo. */
+.prod-imagem-selo {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 70%, transparent);
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ic-branco);
+}
+
+.prod-imagem-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.prod-previa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+/* A PRÉVIA É PARA VER. Um clique dentro dela levaria a uma rota que ainda não existe — o
+ * slug real nasce na publicação —, e 404 no meio da revisão é perder o lugar. */
+.prod-previa-palco {
+  padding: var(--espaco-cartao);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-fundo);
+  pointer-events: none;
+}
+
+.prod-visibilidade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+/* ===========================================================================
+ * MOVIMENTO — e `prefers-reduced-motion` zera tudo
+ *
+ * Ele zera sem uma linha a mais aqui: `--dur-1/2/3` viram `0ms` em `tokens.css`, e toda
+ * animação e transição desta folha os consome. Uma regra própria seria uma segunda lista
+ * para divergir da primeira.
+ * ======================================================================== */
+
+/* A troca de ato usa View Transitions quando o navegador as tem. O CABEÇALHO É NOMEADO para
+ * NÃO viajar junto: sem o nome, ele participaria da transição e o título deslizaria com o
+ * conteúdo — o chrome perseguindo a tela, que é o lampejo que `transicao.css` já corrigiu
+ * uma vez na barra de abas. */
+.prod-cabecalho {
+  view-transition-name: prod-cabecalho;
+}
+
+.prod-trilho-pautas {
+  view-transition-name: prod-trilho;
+}
+
+.prod-barra-acao {
+  view-transition-name: prod-barra;
+}
+
+/* ===========================================================================
+ * VISÃO WEB — o que as primitivas divergem
+ * ======================================================================== */
+
+/* ④ A folha vira PAINEL LATERAL. Mesma árvore, outra ancoragem: numa janela de 1440px uma
+ * folha subindo do pé cobriria a tela inteira para oferecer trinta e três termos. */
+[data-view="web"] .prod-folha {
+  top: 0;
+  left: auto;
+  width: min(26rem, 40vw);
+  max-height: none;
+  border-radius: var(--raio-g) 0 0 var(--raio-g);
+  animation: prod-painel-entra var(--dur-3) var(--ease-padrao);
+}
+
+@keyframes prod-painel-entra {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+/* O scrim da web é mais leve: o painel não cobre a tela, e escurecer tudo faria parecer
+ * que a página inteira foi desativada. */
+[data-view="web"] .prod-scrim {
+  background: color-mix(in srgb, var(--ic-preto) 25%, transparent);
+}
+
+/* ③ O rótulo do degrau volta: na web cabem os oito, e o trilho passa a ser um sumário. */
+[data-view="web"] .prod-degrau-rotulo {
+  display: inline;
+}
+
+[data-view="web"] .prod-degrau {
+  font-size: var(--tipo-legenda);
+}
+
+/* ===========================================================================
+ * A FICHA DA AGENDA — o ato 1 e a chave viva
+ * ======================================================================== */
+
+.prod-seletor-registro {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prod-seletor-registro-rotulo {
+  flex: none;
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-seletor-registro > select {
+  flex: 1;
+  min-width: 0;
+}
+
+/**
+ * A CHAVE VIVA. Os três terços acendem conforme fecham.
+ *
+ * É o segundo laranja legítimo da ficha, pelo mesmo motivo do trilho de progresso: a chave
+ * fechando é AÇÃO EM CURSO, não estado e não decoração. E é ela que explica por que a obra
+ * é um campo e não um enfeite — 300 de 300 eventos do acervo têm um terço da chave.
+ */
+.prod-chave {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.prod-chave-conta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.prod-chave-conta > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-2);
+  line-height: 1;
+}
+
+.prod-chave-conta > span {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.prod-chave-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-chave-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-3);
+  transition: color var(--dur-1) var(--ease-padrao);
+}
+
+.prod-chave-item[data-fechado="sim"] {
+  color: var(--cor-tinta);
+  font-weight: 700;
+}
+
+.prod-chave-item[data-fechado="sim"] .prod-degrau-marca {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao);
+}
+
+/**
+ * O AVISO DE DUPLICATA. Ele entra de cima e PERMANECE — aviso que pisca é aviso perdido.
+ *
+ * Sem animação de saída e sem temporizador: ele fica enquanto o título continuar parecido, e
+ * some quando deixar de estar. Um aviso que desaparece sozinho depois de dois segundos é um
+ * aviso que a pessoa vê pelo canto do olho enquanto digita, e não lê.
+ */
+.prod-duplicata {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  background: var(--cor-acao-lavada);
+  font-size: var(--tipo-detalhe);
+  line-height: 1.45;
+  animation: prod-duplicata-entra var(--dur-2) var(--ease-padrao);
+}
+
+@keyframes prod-duplicata-entra {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--deslize-irma) * -1));
+  }
+}
+
+.prod-duplicata > ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+/* O carimbo do sistema: quem realiza. Fundo de superfície e tinta rebaixada dizem «isto é
+ * lido, não escrito» sem precisar de um controle desabilitado — que seria um campo que
+ * parece editável e não é. */
+.prod-carimbo {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie-2);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-corpo);
+  color: var(--cor-tinta-2);
+}
+
+/* ===========================================================================
+ * PARES DE CAMPO — «de / até», «inteira / meia»
+ *
+ * Em 370px dois campos lado a lado dão 175px cada, e um `<input type="date">` não cabe:
+ * o widget nativo do Chrome tem largura mínima. Por isso o par é COLUNA no app e LINHA na
+ * web — mesma árvore, outro CSS.
+ * ======================================================================== */
+
+.prod-par {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.prod-temporada,
+.prod-vinculo,
+.prod-gerador,
+.prod-preco,
+.prod-inscricao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.prod-temporada,
+.prod-gerador {
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.prod-vinculo {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+}
+
+.prod-vinculo[data-proposto="sim"] {
+  border-style: dashed;
+  border-color: var(--cor-acao);
+}
+
+/* ===========================================================================
+ * A GRADE DE SESSÕES
+ * ======================================================================== */
+
+.prod-dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* Sete botões de 44px não cabem em 370px sem quebra — e quebrar é o certo: uma fileira
+ * espremida de 42px cada seria alvo de toque abaixo do piso. */
+.prod-dia {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta);
+  cursor: pointer;
+}
+
+.prod-dia[data-marcado="sim"] {
+  border-color: var(--cor-tinta);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+  font-weight: 700;
+}
+
+.prod-horarios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prod-horario {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/**
+ * A PRÉVIA, ANTES DE APLICAR.
+ *
+ * «Gera 39 sessões · 2 colidem» dito antes do clique é uma decisão; dito depois, é uma
+ * limpeza. A contagem tem peso de número grande porque é ela que a pessoa lê para decidir
+ * se o intervalo está certo.
+ */
+.prod-previa-grade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.prod-previa-conta {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+}
+
+.prod-previa-conta > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+}
+
+/* A colisão usa a gramática da declaração honesta: barra laranja e fundo lavado. */
+.prod-previa-colisao {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-p) var(--raio-p) 0;
+  background: var(--cor-acao-lavada);
+  font-size: var(--tipo-legenda);
+  line-height: 1.45;
+}
+
+.prod-sessoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* NO APP A SESSÃO É CARTÃO AGRUPADO POR DIA. Uma tabela de cinco colunas em 370px é uma
+ * tabela que rola de lado — e quem rola de lado perde a coluna do dia, que é a única que
+ * diz onde a pessoa está na lista. */
+.prod-dia-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.prod-dia-titulo {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+.prod-sessao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie-2);
+}
+
+.prod-sessao[data-cancelada="sim"] {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.prod-sessao-quando {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.prod-sessao-hora {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  line-height: 1;
+}
+
+.prod-sessao-espaco {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.prod-sessao-edicao {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.prod-sessao-edicao > .prod-campo {
+  flex: 1;
+  min-width: 0;
+}
+
+.prod-sessao-marcas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* O `min-height` das dimensões vale para a lista de acessibilidade, onde cada linha é um
+ * alvo de toque próprio. Aqui elas são marcas soltas numa fileira, e 44px cada empilharia
+ * o cartão da sessão em três linhas de nada. */
+.prod-sessao-marcas .prod-dimensao {
+  min-height: 2.25rem;
+  border-bottom: 0;
+}
+
+.prod-sessao-preco {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+/* ===========================================================================
+ * VISÃO WEB — a densidade da ficha
+ * ======================================================================== */
+
+/* ① Os pares voltam a ser LINHA: na web cabem dois campos de data lado a lado. */
+[data-view="web"] .prod-par,
+[data-view="web"] .prod-preco {
+  flex-direction: row;
+  gap: var(--espaco-pilha);
+}
+
+[data-view="web"] .prod-par > .prod-campo,
+[data-view="web"] .prod-preco > .prod-campo {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ② A SESSÃO VIRA LINHA DE TABELA. Mesma árvore JSX: o que muda é a direção do fluxo e o
+ * alinhamento. Nenhum componente irmão por visão (D-05). */
+[data-view="web"] .prod-dia-grupo {
+  padding: 0.5rem 0.75rem;
+}
+
+[data-view="web"] .prod-sessao {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+[data-view="web"] .prod-sessao-edicao {
+  gap: 0.75rem;
+}
+
+[data-view="web"] .prod-sessao-marcas {
+  justify-content: flex-end;
+}
+
+/* ③ O gerador vira faixa: os quatro blocos lado a lado, e a prévia à direita. */
+[data-view="web"] .prod-gerador {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-pilha) var(--espaco-secao);
+  align-items: start;
+}
+
+[data-view="web"] .prod-gerador > .prod-secao-titulo,
+[data-view="web"] .prod-previa-grade {
+  grid-column: 1 / -1;
+}
+
+[data-view="web"] .prod-previa-grade {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-pilha);
+}
+
+/* ===========================================================================
+ * O QUE ESTE NAVEGADOR PUBLICOU, na tela pública
+ *
+ * A seção NÃO SE DISFARÇA DE ACERVO, e o desenho diz isso: contorno tracejado, título
+ * próprio e a nota de procedência antes dos cartões. Misturá-la com os 300 eventos do
+ * build faria a tela afirmar um número que o acervo não sustenta.
+ * ======================================================================== */
+
+.prod-publicado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao);
+  border: 1px dashed var(--cor-acao);
+  border-radius: var(--raio-g);
+  background: var(--cor-acao-lavada);
+}
+
+.prod-publicado-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-publicado-titulo {
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.prod-publicado-nota {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  line-height: 1.45;
+  color: var(--cor-tinta-2);
+}
+
+.prod-publicado-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Na janela larga os cartões ficam lado a lado, no mesmo ritmo das vitrines da web. */
+[data-view="web"] .prod-publicado-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+}
+
+/* ===========================================================================
+ * GESTÃO — seleção, ações em massa e o editor de blocos
+ * ======================================================================== */
+
+/* A caixa de seleção da lista. Ela é a PRIMEIRA coluna no app e na web, e por isso a grade
+ * do registro ganha um degrau — sem ele, a caixa cairia sobre a capa. */
+.prod-selecao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0.25rem;
+}
+
+.prod-registro[data-selecionado="sim"] {
+  border-color: var(--cor-tinta);
+  background: var(--cor-superficie-2);
+}
+
+.prod-massa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  background: var(--cor-acao-lavada);
+}
+
+/* A seleção acrescentou uma coluna à esquerda. `auto` e não uma medida: a caixa nativa tem
+ * tamanho próprio em cada sistema, e fixá-la produziria um corte no Firefox. */
+.prod-registro {
+  grid-template-columns: auto 3.5rem minmax(0, 1fr);
+}
+
+[data-view="web"] .prod-registro {
+  grid-template-columns: auto 2.5rem minmax(0, 3fr) minmax(0, 1fr) auto;
+}
+
+/* ===========================================================================
+ * O EDITOR DE BLOCOS
+ * ======================================================================== */
+
+.prod-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.prod-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.prod-bloco-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.prod-bloco-tipo {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-bloco-acoes {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* O subtítulo dentro do corpo tem peso de subtítulo. Ver a forma do bloco enquanto se
+ * escreve é o que evita descobrir na prévia que aquilo era um parágrafo. */
+.prod-bloco[data-bloco="subtitulo"] textarea {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+}
+
+.prod-bloco[data-bloco="citacao"] textarea {
+  border-left: 3px solid var(--cor-borda-forte);
+  font-style: italic;
+}
+
+.prod-mais-blocos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ===========================================================================
+ * A FISCALIZAÇÃO — o que a Moderação virou
+ * ======================================================================== */
+
+.fisc-declaracao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem var(--espaco-cartao);
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-g) var(--raio-g) 0;
+  background: var(--cor-acao-lavada);
+}
+
+.fisc-declaracao > p {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.5;
+}
+
+.fisc-declaracao strong {
+  font-weight: 700;
+}
+
+/* O AVISO DE QUE O REGISTRO ESTÁ NO AR. Ele mora no cabeçalho, que é `sticky`: quem rola
+ * até o ato 6 continua vendo que está mexendo em algo publicado. Barra laranja e fundo
+ * lavado — a mesma gramática de «a tela está te dizendo por quê». */
+.prod-no-ar {
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--cor-acao);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao-lavada);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-acao-tinta);
+  white-space: nowrap;
+}
+
+/* O separador entre pautas e telas de gestão. Um fio vertical no app; no trilho lateral da
+ * web ele vira horizontal — mesma marca, outra direção, porque o trilho girou. */
+.prod-separador-trilho {
+  flex: none;
+  align-self: center;
+  width: 1px;
+  height: 1.5rem;
+  background: var(--cor-borda-forte);
+}
+
+[data-view="web"] .prod-separador-trilho {
+  width: 100%;
+  height: 1px;
+  margin: 0.5rem 0;
+}
+
+/* ===========================================================================
+ * VISÃO WEB · ③ A FICHA EM DUAS COLUNAS, com a coluna COLADA
+ *
+ * O ATO À ESQUERDA, O QUE FALTA À DIREITA. Em 370px a lista de impedimentos vive no ato 8,
+ * porque não há onde mais ela caiba; em 1440 ela pode ficar à vista o tempo todo, e ficar à
+ * vista muda o que a pessoa faz — ela resolve enquanto preenche, em vez de descobrir no fim.
+ *
+ * `.web-coluna-fixa` É REUSADA, e não reescrita. Ela existe em `web.css` PORQUE ESTE
+ * DEFEITO JÁ ACONTECEU: uma coluna colada de 1.279px numa janela de 960, com 319px
+ * inalcançáveis, porque uma coluna `sticky` nunca rola para revelar o próprio fim. A regra
+ * de lá — `max-height: calc(100vh - 2 * topo)` mais `overflow-y: auto` — é a correção, e
+ * escrever outra aqui repetiria o erro.
+ *
+ * A MEDIDA CERTA NÃO É «A COLUNA CABE». É «cada painel chega inteiro à vista»: uma coluna
+ * que rola por dentro sempre «cabe», e ainda assim pode ter um bloco que ninguém alcança se
+ * o contêiner não rolar. O portão mede o segundo.
+ * ======================================================================== */
+
+[data-view="web"] .prod-ficha-duas-colunas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: var(--espaco-secao);
+  align-items: start;
+}
+
+[data-view="web"] .prod-lado-do-ato {
+  min-width: 0;
+}
+
+/* A COLUNA COLADA. `--web-topo-colado` vem de `web.css`, junto com a regra de rolagem
+ * interna — as duas andam juntas, e separá-las é o que produziu os 319px inalcançáveis. */
+[data-view="web"] .prod-lado-fixo {
+  position: sticky;
+  top: var(--web-topo-colado, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  max-height: calc(100vh - (2 * var(--web-topo-colado, 1.5rem)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.25rem;
+}
+
+/* No app a coluna não existe: o que ela mostra vive nos atos, e duplicá-lo faria a mesma
+ * informação aparecer duas vezes em 370px. */
+[data-view="mobile"] .prod-lado-fixo {
+  display: none;
+}
+
+[data-view="mobile"] .prod-ficha-duas-colunas {
+  display: contents;
+}
+
+/* ---------------------------------------------------------------------------
+ * A CHAVE VIVA NÃO APARECE DUAS VEZES.
+ *
+ * Ela é o MESMO componente nos dois lugares — dentro do ato 1 e na coluna colada — e é isso
+ * que impede as duas de divergirem. Mas na visão web as duas ficam VISÍVEIS ao mesmo tempo,
+ * e a captura mostrou o quadro repetido lado a lado.
+ *
+ * O que fica no ato é a FRASE do critério de identidade: ela é longa, é leitura de uma vez,
+ * e na coluna estreita ela empurraria a prévia para fora da vista. O que fica na coluna é a
+ * CONTAGEM — ela é o que se olha de canto de olho enquanto se preenche.
+ *
+ * Divergência em CSS puro, sob `[data-view]`. A árvore JSX continua sendo uma só (D-05).
+ * ------------------------------------------------------------------------ */
+[data-view="web"] .prod-lado-do-ato .prod-chave > .prod-chave-conta,
+[data-view="web"] .prod-lado-do-ato .prod-chave > .prod-chave-lista {
+  display: none;
+}
+
+/* Sem a contagem e a lista, o que sobra é um parágrafo — e a moldura de painel em volta de
+ * um parágrafo lê como caixa vazia. Ela vira a declaração que de fato é. */
+[data-view="web"] .prod-lado-do-ato .prod-chave {
+  border: 0;
+  border-left: 3px solid var(--cor-borda-forte);
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  padding-block: 0.5rem;
+}
+
+/* ===========================================================================
+ * PAINEL 2.0, o redesenho de 2026-08
+ *
+ * A revisao a olho reprovou o desenho anterior: pendencias, busca, dois trilhos de chips e
+ * a lista inteira disputavam a primeira vista, e quem entrava nao via por onde comecar. A
+ * regra nova: a primeira tela ORIENTA com imagem e atalhos, e o detalhe mora em folhas.
+ * ======================================================================== */
+
+.prod-painel {
+  padding-top: 0;
+}
+
+/* ---- o hero ------------------------------------------------------------ */
+
+/**
+ * Sangra ate a borda do aparelho: as margens negativas anulam o gutter da tela, e o raio
+ * de baixo devolve o desenho de cartao. A foto e a mesma do hub, local, sem requisicao
+ * externa, com veu escuro por cima para o texto branco medir contraste em qualquer foto.
+ */
+.prod-hero {
+  position: relative;
+  margin: calc(var(--espaco-pilha) * -1) calc(var(--espaco-tela) * -1) 0;
+  padding: 5rem var(--espaco-tela) 1rem;
+  border-radius: 0 0 var(--raio-g) var(--raio-g);
+  overflow: hidden;
+  color: var(--ic-branco);
+}
+
+.prod-hero-foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prod-hero-veu {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ic-preto) 25%, transparent),
+    color-mix(in srgb, var(--ic-preto) 80%, transparent)
+  );
+}
+
+.prod-hero > *:not(.prod-hero-foto):not(.prod-hero-veu):not(.prod-hero-perfil):not(.prod-hero-voltar) {
+  position: relative;
+}
+
+/* Laranja cheio sobre o veu preto: 7,94:1, o mesmo par que o tema escuro ja usa. */
+.prod-hero-kicker {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ic-laranja);
+}
+
+.prod-hero-titulo {
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-1);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.prod-hero-sub {
+  margin: 0.25rem 0 0;
+  font-size: var(--tipo-legenda);
+  color: color-mix(in srgb, var(--ic-branco) 80%, transparent);
+}
+
+.prod-hero-stats {
+  display: flex;
+  /* NUNCA quebra: os tres numeros sao UMA linha, e as pilulas dividem a largura. */
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.prod-stat {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 25%, transparent);
+  border-radius: var(--raio-m);
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+}
+
+.prod-stat > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1.1;
+}
+
+.prod-stat > span {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ic-branco) 75%, transparent);
+}
+
+/* ---- a linha de pendencia ---------------------------------------------- */
+
+.prod-aviso-pendencia {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-left: 3px solid var(--cor-acao);
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  background: var(--cor-acao-lavada);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  text-align: left;
+  color: var(--cor-tinta);
+  cursor: pointer;
+}
+
+.prod-aviso-seta {
+  margin-left: auto;
+  color: var(--cor-acao-tinta);
+}
+
+/* ---- os atalhos com imagem --------------------------------------------- */
+
+.prod-atalhos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.prod-atalho {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  overflow: hidden;
+  text-decoration: none;
+  text-align: left;
+  color: var(--cor-tinta);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-1) var(--ease-padrao),
+    transform var(--dur-1) var(--ease-padrao),
+    box-shadow var(--dur-1) var(--ease-padrao);
+}
+
+.prod-atalho:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .prod-atalho:hover {
+    border-color: var(--cor-borda-forte);
+    box-shadow: var(--sombra-1);
+  }
+}
+
+.prod-atalho-capa {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  background: var(--cor-superficie-2);
+}
+
+.prod-atalho-capa > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O credito da foto, minusculo e sempre presente: imagem do acervo leva o nome de quem a
+ * fez, no atalho tanto quanto na vitrine. */
+.prod-atalho-credito {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.25rem;
+  max-width: 90%;
+  padding: 0 0.25rem;
+  border-radius: var(--raio-p);
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  color: color-mix(in srgb, var(--ic-branco) 85%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prod-atalho-rotulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem 0.75rem;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+.prod-atalho-rotulo > [aria-hidden] {
+  color: var(--cor-tinta-3);
+}
+
+.prod-atalho-breve {
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+/* O atalho sem ficha: presente, esmaecido, com a etiqueta dizendo por que nao vai. */
+.prod-atalho[data-pronta="nao"] {
+  cursor: not-allowed;
+}
+
+.prod-atalho[data-pronta="nao"] .prod-atalho-capa {
+  opacity: 0.45;
+}
+
+/* ---- as linhas de gerenciar -------------------------------------------- */
+
+.prod-atalho-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  text-decoration: none;
+  color: var(--cor-tinta);
+  transition: border-color var(--dur-1) var(--ease-padrao);
+}
+
+@media (hover: hover) {
+  .prod-atalho-linha:hover {
+    border-color: var(--cor-borda-forte);
+  }
+}
+
+.prod-atalho-linha-texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-atalho-linha-texto > strong {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+}
+
+.prod-atalho-linha-texto > span {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.prod-atalho-linha > [aria-hidden] {
+  color: var(--cor-tinta-3);
+}
+
+/* ---- os recentes -------------------------------------------------------- */
+
+.prod-recentes {
+  display: flex;
+  flex-direction: column;
+}
+
+.prod-recente {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.prod-recente-capa {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  border-radius: var(--raio-p);
+  object-fit: cover;
+  background: var(--cor-superficie-2);
+}
+
+.prod-recente-corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-recente-titulo {
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prod-recente-acoes {
+  display: flex;
+  flex: none;
+  gap: 0.25rem;
+}
+
+/* ---- o rodape discreto -------------------------------------------------- */
+
+.prod-rodape-limpo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding-top: var(--espaco-secao);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.prod-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---- a folha de criacao ------------------------------------------------- */
+
+.prod-opcoes-pauta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.prod-opcoes-pauta .prod-atalho[disabled] {
+  cursor: not-allowed;
+}
+
+.prod-criacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.prod-criacao-capa {
+  aspect-ratio: 16 / 7;
+  border-radius: var(--raio-m);
+  overflow: hidden;
+}
+
+.prod-passos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-passo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.4;
+}
+
+.prod-passo-numero {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+/* ---- os filtros da folha de registros ----------------------------------- */
+
+.prod-filtros-linha {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.prod-filtros-linha > select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- a tela sem trilho, na web ------------------------------------------ */
+
+/**
+ * A raiz nao monta o trilho lateral (o painel e a navegacao), e sem o primeiro item a
+ * grade de duas colunas poria o conteudo na coluna estreita. Sem trilho, a tela vira
+ * coluna unica com o painel centrado e limitado, como uma pagina de inicio.
+ */
+[data-view="web"] .prod-tela:not(:has(> .prod-trilho-pautas)) {
+  display: block;
+}
+
+[data-view="web"] .prod-painel {
+  max-width: 64rem;
+  margin-inline: auto;
+}
+
+[data-view="web"] .prod-hero {
+  margin: 0 0 0.5rem;
+  border-radius: var(--raio-g);
+  padding: 6rem 2rem 1.5rem;
+}
+
+[data-view="web"] .prod-atalhos {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+[data-view="web"] .prod-opcoes-pauta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ---- o perfil ------------------------------------------------------------ */
+
+/**
+ * O ACESSO, no canto do hero: um circulo com a foto da pessoa ou as iniciais. Ele fica
+ * FORA da regra que da position relative aos filhos do hero (o :not ali em cima), porque
+ * precisa de absolute para morar no canto sem empurrar o texto. 2.75rem e o alvo de toque
+ * minimo (44px), medido pelo portao.
+ */
+.prod-hero-perfil {
+  position: absolute;
+  z-index: 1;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 45%, transparent);
+  border-radius: var(--raio-pilula);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ic-preto) 45%, transparent);
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  color: var(--ic-branco);
+}
+
+.prod-hero-perfil > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O cartao de apresentacao: avatar grande, nome, funcao e organizacao. */
+.prod-perfil-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie-2);
+}
+
+/* O avatar e um BOTAO, e a tela diz o que ele abre: a escolha da foto no acervo. */
+.prod-avatar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  overflow: hidden;
+  background: var(--cor-superficie);
+  cursor: pointer;
+}
+
+.prod-avatar > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prod-avatar-iniciais {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  color: var(--cor-tinta-2);
+}
+
+.prod-perfil-cabeca-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-perfil-nome {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1.2;
+}
+
+.prod-perfil-funcao {
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+.prod-perfil-organizacao {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+/* A conta e leitura: linhas de rotulo e valor, com divisor entre elas. */
+.prod-conta {
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  overflow: hidden;
+}
+
+.prod-conta-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.prod-conta-linha + .prod-conta-linha {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.prod-conta-rotulo {
+  min-width: 0;
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+/* O VALOR NUNCA QUEBRA. Sem `nowrap` o «70» da loja de pontos partia em «7» e «0» em
+ * linhas diferentes quando o rotulo ao lado era longo: um numero quebrado nao e um
+ * numero, e a captura pegou o que a contagem de elementos jamais pegaria. */
+.prod-conta-valor {
+  flex: none;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* A chave do armazem e o unico valor que PODE quebrar: ela e um identificador longo. */
+.prod-conta-valor:has(code) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.prod-conta-valor code {
+  font-size: var(--tipo-micro);
+}
+
+/* Na web o hero cresce, e o circulo acompanha o padding maior. */
+[data-view="web"] .prod-hero-perfil {
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+/* ---- o desempenho da ultima publicacao ----------------------------------- */
+
+/**
+ * Lido como uma frase, de cima para baixo: capa e titulo (o que), numero grande com a
+ * variacao semanal (como vai), a curva dos catorze dias (a forma), e uma linha de texto
+ * com o resto. Sem caixa dentro de caixa: o desenho anterior, tres KPIs emoldurados e
+ * barras soltas, foi reprovado a olho. A curva e NEUTRA, em tinta com veu de gradiente:
+ * laranja e acao, nunca dado. A legenda declara que os numeros sao autorados.
+ */
+.prod-desempenho {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie-2);
+}
+
+.prod-desempenho-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.prod-desempenho-capa {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--raio-m);
+  object-fit: cover;
+}
+
+.prod-desempenho-texto {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-desempenho-meta {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-desempenho-nome {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  line-height: 1.25;
+}
+
+.prod-desempenho-seta {
+  flex: none;
+  color: var(--cor-tinta-3);
+}
+
+.prod-desempenho-numero {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.prod-desempenho-numero > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-1);
+  line-height: 1.05;
+}
+
+.prod-desempenho-delta {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  font-size: var(--tipo-micro);
+  font-weight: 600;
+  color: var(--cor-tinta-2);
+  white-space: nowrap;
+}
+
+.prod-desempenho-legenda {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+.prod-grafico {
+  display: block;
+  width: 100%;
+  height: 3.5rem;
+  margin-top: 0.5rem;
+  color: var(--cor-tinta);
+}
+
+.prod-grafico-eixo {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
+
+.prod-desempenho-secundario {
+  margin: 0.75rem 0 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.4;
+  color: var(--cor-tinta);
+}
+
+.prod-grafico-legenda {
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
+
+[data-view="web"] .prod-grafico {
+  height: 4.5rem;
+}
+
+/* ---- a ficha compacta ----------------------------------------------------- */
+
+/**
+ * O cabecalho da ficha numa altura de tres linhas: contexto, titulo numa linha, e a
+ * barra de segmentos. Os rotulos dos atos, o objetivo e o aviso completo moram na folha
+ * de passos, aberta pelo contador. O que motivou: a revisao a olho reprovou o cabecalho
+ * antigo, que ocupava metade da tela antes do primeiro campo.
+ */
+.prod-cabecalho-direita {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prod-abrir-passos {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  cursor: pointer;
+}
+
+.prod-cabecalho-ficha .prod-titulo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--tipo-destaque);
+}
+
+.prod-cabecalho-ficha .prod-progresso {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.prod-cabecalho-ficha .prod-degrau {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 1.75rem;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.prod-cabecalho-ficha .prod-degrau-marca {
+  width: 100%;
+  height: 0.25rem;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-borda-forte);
+  transition:
+    background-color var(--dur-1) var(--ease-padrao),
+    height var(--dur-1) var(--ease-padrao);
+}
+
+/* A barra acende por POSICAO, como toda barra de progresso que se entende: os passos
+ * ate o atual cheios, o resto apagado. O estado por ato (fechado, a fazer, dispensado)
+ * mora na folha de passos, nao aqui: dois sinais discordando na mesma barra foi o que a
+ * revisao a olho reprovou. */
+.prod-cabecalho-ficha .prod-degrau[data-passado="sim"] .prod-degrau-marca {
+  background: var(--cor-acao);
+}
+
+.prod-cabecalho-ficha .prod-degrau[data-atual="sim"] .prod-degrau-marca {
+  height: 0.5rem;
+}
+
+/* O rotulo do degrau nao existe mais na barra, em NENHUMA visao: ele mora no titulo do
+ * ato e na folha de passos. Tres classes para vencer o [data-atual] antigo. */
+.prod-cabecalho-ficha .prod-degrau .prod-degrau-rotulo {
+  display: none;
+}
+
+/* Os passos, dentro da folha: cada um e um botao que salta para o ato. */
+.prod-passo-botao {
+  width: 100%;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: var(--raio-m);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.prod-passo-botao:hover {
+  background: var(--cor-superficie-2);
+}
+
+.prod-passo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.prod-passo-estado {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-passo-numero[data-fechado="sim"] {
+  border-color: var(--cor-acao);
+  color: var(--cor-acao-tinta);
+}
+
+.prod-passo[data-dispensado="sim"] {
+  opacity: 0.65;
+}
+
+/* ---- a volta ao Studio e o fim do carrossel no app ------------------------ */
+
+.prod-voltar {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/**
+ * O TRILHO DE PILULAS NAO EXISTE NO APP. Carrossel horizontal foi vetado pela revisao a
+ * olho (2026-08-26): no telefone o PAINEL e a navegacao (atalhos com imagem), e cada tela
+ * interna oferece o caminho de volta no proprio cabecalho. Na web o trilho vira a coluna
+ * lateral de 240px, que nao e carrossel, e fica.
+ */
+[data-view="mobile"] .prod-trilho-pautas {
+  display: none;
+}
+
+/* ---- o inicio da pauta ----------------------------------------------------- */
+
+/**
+ * O painel de uma categoria: tres numeros, os melhores com imagem, o que esta em
+ * edicao, e UM botao de adicionar. Sem caixa dentro de caixa: linhas tocaveis, como as
+ * listas do painel raiz.
+ */
+.prod-inicio-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.prod-inicio-stat {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-inicio-stat > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-2);
+  line-height: 1.05;
+}
+
+.prod-inicio-stat > span {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-melhor {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  margin: 0 -0.5rem;
+  border: 0;
+  border-radius: var(--raio-m);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.prod-melhor:hover {
+  background: var(--cor-superficie-2);
+}
+
+.prod-posicao {
+  flex: none;
+  width: 1.25rem;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  font-weight: 700;
+  color: var(--cor-tinta-3);
+}
+
+.prod-melhor-capa {
+  flex: none;
+  width: 3.5rem;
+  height: 2.5rem;
+  border-radius: var(--raio-p);
+  object-fit: cover;
+}
+
+.prod-melhor-texto {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-melhor-nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: var(--tipo-detalhe);
+}
+
+.prod-melhor-sub {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-melhor-numero {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.prod-melhor-numero > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  line-height: 1.1;
+}
+
+.prod-melhor-numero > span {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+/* ---- a heranca da organizacao, so na web ---------------------------------- */
+
+/**
+ * As cinco rotas de pauta que herdaram telas da Organizacao (espacos, midia, programa,
+ * formacao, editais) mostram no app SO o conteudo novo: a parede herdada foi reprovada
+ * a olho. O bloco continua no DOM e visivel na web, porque verificar-organizacao.mjs
+ * mede PRESENCA, e mede na visao web; esconder por CSS no app nao tira nada do que a
+ * suite afirma. (Ocorrencias fica de fora: a fase 4 exige o imutavel visivel no app.)
+ */
+[data-view="mobile"] [data-herdado-da-organizacao] {
+  display: none;
+}
+
+/* ---- a tela do registro publicado ----------------------------------------- */
+
+/**
+ * Um registro no ar abre aqui, nao num formulario: a capa como heroi, os numeros da
+ * pauta, bilheteria quando ha, comentarios e fotos, tudo autorado e declarado. Editar
+ * e o botao primario, e so ele leva as etapas.
+ */
+.prod-hero-voltar {
+  position: absolute;
+  z-index: 1;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 45%, transparent);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 45%, transparent);
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ic-branco);
+  cursor: pointer;
+}
+
+.prod-hero-titulo-registro {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-titulo-2);
+}
+
+.prod-comentario {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.prod-comentario-avatar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  color: var(--cor-tinta-2);
+}
+
+.prod-comentario-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.45;
+}
+
+.prod-comentario-meta {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-detalhe-fotos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.prod-detalhe-foto {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: var(--raio-m);
+  overflow: hidden;
+}
+
+.prod-detalhe-foto > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* (O seletor de tipo de acesso saiu daqui para `acesso.css`: ele vive tambem no perfil
+ * publico, e uma tela publica nao pode depender do vocabulario do Studio.) */
+
+/* ---- a barra flutuante do Studio ----------------------------------------- */
+
+/**
+ * No molde da barra do publico (`barra-inferior.css`): tres abas numa pilula translucida
+ * e um botao redondo separado, que aqui abre a criacao em vez do hub. `absolute` contra a
+ * moldura, nunca `fixed` (D-03), e no FLUXO na visao web (D-05), porque pilula flutuando
+ * no pe de uma janela de 960px e padrao de telefone posto onde nao resolve nada.
+ *
+ * O CONTEINER NAO RECEBE TOQUE: ele ocupa a largura toda para posicionar os dois blocos,
+ * e o vao entre a pilula e o circulo e buraco de verdade. Sem `pointer-events: none` aqui
+ * essa faixa transparente engoliria o clique do conteudo que passa por baixo.
+ */
+.prod-barra-nav {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.75rem;
+  pointer-events: none;
+}
+
+.prod-barra-nav > * {
+  pointer-events: auto;
+}
+
+.prod-abas {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  /* Translúcida com desfoque: o conteudo continua existindo por baixo em vez de terminar
+   * numa faixa opaca. E o que faz a barra parecer sobreposta ao produto. */
+  background: color-mix(in srgb, var(--cor-superficie) 86%, transparent);
+  backdrop-filter: blur(0.75rem);
+  box-shadow: var(--sombra-2);
+}
+
+.prod-abas > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.prod-aba {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 2.75rem;
+  padding: 0.25rem;
+  border-radius: var(--raio-pilula);
+  color: var(--cor-tinta-2);
+  text-decoration: none;
+}
+
+.prod-aba svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.prod-aba-rotulo {
+  font-size: var(--tipo-micro);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* A aba ativa e TINTA CHEIA, nunca laranja: laranja e acao, e estar numa tela nao e acao. */
+.prod-aba[data-ativa="sim"] {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta);
+  font-weight: 600;
+}
+
+/* O redondo e ACAO: e o unico laranja da barra, e o gesto pelo qual tudo nasceu. */
+.prod-criar-redondo {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 3.5rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-family: var(--fonte-texto);
+  font-weight: 700;
+  box-shadow: var(--sombra-2);
+  cursor: pointer;
+  transition: transform var(--dur-1) var(--ease-padrao);
+}
+
+.prod-criar-redondo svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.prod-criar-rotulo {
+  font-size: var(--tipo-micro);
+}
+
+.prod-criar-redondo:hover {
+  transform: translateY(-0.25rem);
+}
+
+/* Na web ela volta para o fluxo, e a pilula vira uma faixa de largura contida. */
+[data-view="web"] .prod-barra-nav {
+  position: static;
+  padding: 0;
+  margin-top: var(--espaco-secao);
+}
+
+/* AS ABAS SOMEM NA WEB: o trilho lateral de 240px ja leva a Inicio, Comunidade e Pontos,
+ * e repetir a mesma navegacao no pe seria a mesma escolha oferecida duas vezes na mesma
+ * tela. O que sobra e o Criar, em pilula horizontal, onde a barra de acao antiga o punha. */
+[data-view="web"] .prod-barra-nav[data-raiz="nao"] .prod-abas {
+  display: none;
+}
+
+/* Na raiz da web a barra volta ao pe do conteudo, com as abas: e o unico caminho para
+ * Comunidade e Loja naquela tela. */
+[data-view="web"] .prod-barra-nav[data-raiz="sim"] {
+  justify-content: flex-start;
+}
+
+[data-view="web"] .prod-barra-nav[data-raiz="sim"] .prod-abas {
+  flex: none;
+  backdrop-filter: none;
+}
+
+[data-view="web"] .prod-criar-redondo {
+  flex-direction: row;
+  gap: 0.5rem;
+  width: auto;
+  padding: 0.75rem 1.5rem;
+}
+
+/* ---- a loja de pontos ----------------------------------------------------- */
+
+.prod-nivel-barra {
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  overflow: hidden;
+}
+
+/* Progresso e acao em curso: o mesmo laranja legitimo do trilho da ficha. */
+.prod-nivel-cheio {
+  display: block;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  transition: width var(--dur-2) var(--ease-padrao);
+}
+
+/* A conta («7 × 10») nunca parte: um multiplicador quebrado em duas linhas nao se le. */
+.prod-regra-valor {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: var(--tipo-micro);
+  white-space: nowrap;
+  color: var(--cor-tinta-3);
+}
+
+.prod-ganhar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.prod-ganhar-valor {
+  flex: none;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  font-weight: 700;
+  color: var(--cor-acao-tinta);
+}
+
+.prod-ganhar-texto {
+  font-size: var(--tipo-detalhe);
+  line-height: 1.4;
+  color: var(--cor-tinta-2);
+}
+
+.prod-recompensa {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.prod-recompensa[data-resgatada="sim"] {
+  opacity: 0.7;
+}
+
+.prod-recompensa-texto {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--tipo-detalhe);
+}
+
+.prod-recompensa-descricao {
+  line-height: 1.4;
+  color: var(--cor-tinta-2);
+}
+
+.prod-recompensa-acao {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prod-recompensa-custo {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-destaque);
+  font-weight: 700;
+}
+
+/* ---- a comunidade --------------------------------------------------------- */
+
+.prod-conversa,
+.prod-agente {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+  color: inherit;
+  text-decoration: none;
+}
+
+.prod-conversa:hover {
+  background: var(--cor-superficie-2);
+}
+
+.prod-agente-resumo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-legenda);
+  line-height: 1.4;
+  color: var(--cor-tinta-2);
+}
+
+/* O registro que recebeu o comentario, numa linha so: o titulo inteiro em maiusculas
+ * dentro da meta inflava a linha para tres, e o que se le primeiro num comentario e o
+ * comentario. */
+.prod-conversa-onde {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}

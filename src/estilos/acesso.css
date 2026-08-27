@@ -1,0 +1,126 @@
+/**
+ * acesso.css, a troca de tipo de acesso, em qualquer tela de perfil.
+ *
+ * FOLHA PROPRIA, E NAO UM BLOCO NO STUDIO. O controle vive no perfil do Produtor E no
+ * perfil publico, e um deles teria de importar o vocabulario do outro: uma tela publica
+ * dependendo de `studio-produtor.css` quebraria no dia em que aquela folha fosse escopada
+ * a `.prod-tela`. Vocabulario proprio para um controle que atravessa superficies.
+ *
+ * SO TOKENS. Nenhum hex, medidas na grade de 0.25rem, tipografia por `--tipo-*`. A folha
+ * entra em FOLHAS_MIGRADAS de `verificar-ds.mjs`, e o portao passa a medi-la.
+ */
+
+.acesso-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.acesso-titulo {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.acesso-nota {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  line-height: 1.45;
+  color: var(--cor-tinta-3);
+}
+
+.acesso-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* A linha inteira e o alvo: 2.75rem e o minimo de toque medido pelo portao. */
+.acesso-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease-padrao);
+}
+
+.acesso-linha:hover {
+  background: var(--cor-superficie-2);
+}
+
+/* O atual e o unico laranja daqui, e e legitimo: e o estado escolhido, nao decoracao. */
+.acesso-linha[data-atual="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  cursor: default;
+}
+
+.acesso-marca {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+}
+
+.acesso-linha[data-atual="sim"] .acesso-marca {
+  border-color: var(--cor-acao);
+  color: var(--cor-acao-tinta);
+}
+
+.acesso-texto {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--tipo-detalhe);
+}
+
+.acesso-resumo {
+  line-height: 1.4;
+  color: var(--cor-tinta-2);
+}
+
+.acesso-rota {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.acesso-seta {
+  flex: none;
+  color: var(--cor-tinta-3);
+}
+
+/* No atual a seta some sem sair do fluxo: tirar do fluxo mexeria na largura do texto. */
+.acesso-linha[data-atual="sim"] .acesso-seta {
+  visibility: hidden;
+}
+
+/* Na web as linhas ganham duas colunas: cinco perfis empilhados numa janela de 1440
+ * viram uma coluna estreita de texto no meio de um vazio. */
+[data-view="web"] .acesso-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}

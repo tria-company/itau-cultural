@@ -10,6 +10,7 @@
     "gerar-grafo": "node scripts/gerar-grafo.mjs",
     "smoke": "tsx scripts/smoke-grafo.ts",
     "testar-caminhada": "tsx scripts/testar-caminhada.ts",
+    "testar-semente-produtor": "tsx scripts/testar-semente-produtor.ts",
     "verificar-fase2": "node scripts/verificar-fase2.mjs",
     "verificar-fase3": "node scripts/verificar-fase3.mjs",
     "verificar-fase4": "node scripts/verificar-fase4.mjs",
@@ -21,7 +22,8 @@
     "checar": "tsc --noEmit --incremental false && node scripts/verificar-ds.mjs",
     "verificar-admin": "node scripts/verificar-admin.mjs",
     "verificar-gestor": "node scripts/verificar-gestor.mjs",
-    "verificar-moderacao": "node scripts/verificar-moderacao.mjs"
+    "verificar-moderacao": "node scripts/verificar-moderacao.mjs",
+    "verificar-produtor": "node scripts/verificar-produtor.mjs"
   },
   "dependencies": {
     "animejs": "^4.5.0",

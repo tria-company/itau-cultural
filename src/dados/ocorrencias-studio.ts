@@ -1,10 +1,10 @@
 /**
- * ocorrencias-studio.ts — o dado da tela 32, gestão de ocorrências do Studio (STUD-02).
+ * ocorrencias-studio.ts, o dado da tela 32, gestão de ocorrências do Studio (STUD-02).
  *
  * A AFIRMAÇÃO QUE ESTE MÓDULO EXISTE PARA SUSTENTAR. Evento, Temporada e Ocorrência são
  * registros PRÓPRIOS (DADO-02), e não datas aninhadas dentro de um evento. A consequência
- * prática é a tela inteira: alterar uma sessão altera UM registro, e o evento — título,
- * resumo, período declarado, procedência — sai da operação byte a byte igual. Num modelo de
+ * prática é a tela inteira: alterar uma sessão altera UM registro, e o evento, título,
+ * resumo, período declarado, procedência, sai da operação byte a byte igual. Num modelo de
  * catálogo, com as sessões dentro do evento, mudar um horário reescreveria o evento e o
  * aviso só poderia ser endereçado ao evento inteiro. É por isso que o Cenário 4 é
  * demonstrável aqui e não seria lá.
@@ -12,12 +12,12 @@
  * DP-F: roda NO BUILD. Alcança `grafo.ts` (23 MB de JSON) por `alerta.ts`, `repertorio.ts` e
  * diretamente, e NENHUM arquivo `"use client"` pode importar este módulo por valor. O que
  * atravessa a fronteira é o DTO, que é só primitivo. D-47: toda leitura do acervo passa por
- * `grafo.ts` — nunca `entidades.json` ou `ocorrencias.json` direto.
+ * `grafo.ts`, nunca `entidades.json` ou `ocorrencias.json` direto.
  *
  * O QUE ESTE MÓDULO NÃO FAZ, E É O PONTO. Ele NÃO recalcula as alterações autoradas: elas
  * vêm de `alerta.ts`, que a fase 3 já fixou, e são reexportadas na forma que o histórico
  * precisa. Duas fontes para a mesma alteração é exatamente como o Studio e `/salvos`
- * passariam a discordar sobre o que aconteceu — e o Cenário 4 depende de as duas telas
+ * passariam a discordar sobre o que aconteceu, e o Cenário 4 depende de as duas telas
  * mostrarem A MESMA mudança, uma do lado de quem causa e outra do lado de quem recebe.
  *
  * Pelo mesmo motivo, a chave de ocorrência é `chaveDeOcorrencia`/`indiceDeSalvaveis` de
@@ -39,7 +39,7 @@ import { chaveDeOcorrencia, indiceDeSalvaveis } from "./repertorio";
 import type { Entidade } from "./tipos";
 
 // ---------------------------------------------------------------------------
-// Constantes de operação — autoradas, e declaradas como tal
+// Constantes de operação, autoradas, e declaradas como tal
 // ---------------------------------------------------------------------------
 
 /** O evento em que o Studio abre. É o do Cenário 4, para o roteiro e o alerta caírem no
@@ -56,7 +56,7 @@ const HORA_DO_CARIMBO = "09:40";
 
 /**
  * Quem alterou. D-25: **não há autenticação neste protótipo**. O nome é autorado e a tela
- * diz que é — ele está ali para mostrar que a alteração FICA REGISTRADA (T-04-14), não para
+ * diz que é, ele está ali para mostrar que a alteração FICA REGISTRADA (T-04-14), não para
  * simular um login que o protótipo não tem.
  */
 export const OPERADOR_DO_STUDIO = "Operação de programação (perfil autorado)";
@@ -86,10 +86,10 @@ export const PREFIXO_DA_OCORRENCIA = indiceDeSalvaveis().prefixo;
  * navegar, então as 2.425 sessões dos 129 eventos precisam estar no cliente. Em array de
  * tuplas, cada aspa e cada colchete vira barra invertida dentro do payload RSC: a página
  * exportada saiu em **268.367 bytes**. Achatada em string, sem uma aspa dentro, saiu em
- * **219.854** — a tabela de sessões em si caiu de ~110 KB de tuplas para **53.013
+ * **219.854**, a tabela de sessões em si caiu de ~110 KB de tuplas para **53.013
  * caracteres**. O resto do peso é legítimo: 129 títulos, resumos e URLs de fonte.
  *
- * O id inteiro é recomposto com `PREFIXO_DA_OCORRENCIA` mais `prefixoLocal` do evento — os
+ * O id inteiro é recomposto com `PREFIXO_DA_OCORRENCIA` mais `prefixoLocal` do evento, os
  * dois viajam uma vez cada, em vez de `ocorrencia:derivado:13845-t1-o` 53 vezes.
  */
 export const SEPARADOR_DE_SESSAO = ";";
@@ -102,7 +102,7 @@ export interface EventoDoStudio {
   slug: string;
   titulo: string;
   resumo: string;
-  /** `ic` | `derivado` | `autorado` — o rótulo que nunca sai da tela. */
+  /** `ic` | `derivado` | `autorado`, o rótulo que nunca sai da tela. */
   procedencia: string;
   /** A URL de origem quando a procedência é `ic`. `null` quando o acervo não declara. */
   fonte: string | null;
@@ -110,7 +110,7 @@ export interface EventoDoStudio {
   linguagens: string[];
   /** "22.07.2026 – 18.10.2026", derivado das sessões. */
   periodo: string;
-  /** Quantas temporadas o evento tem — o nível intermediário de DADO-02. */
+  /** Quantas temporadas o evento tem, o nível intermediário de DADO-02. */
   temporadas: number;
   /** A rota pública do evento, para o Studio levar de volta ao que ele opera. */
   rota: string;
@@ -119,7 +119,7 @@ export interface EventoDoStudio {
   totalDeSessoes: number;
   /** O trecho que todos os sufixos de id deste evento compartilham (`"13845-t1-o00"`). */
   prefixoLocal: string;
-  /** `resto|AAAA-MM-DDTHH:mm|g;…` — ver `SEPARADOR_DE_SESSAO`. */
+  /** `resto|AAAA-MM-DDTHH:mm|g;…`, ver `SEPARADOR_DE_SESSAO`. */
   sessoes: string;
 }
 
@@ -133,7 +133,7 @@ export interface EntradaDeHistorico {
   campoRotulo: string;
   de: string;
   para: string;
-  /** "22.08.2026" — a data da sessão atingida. */
+  /** "22.08.2026", a data da sessão atingida. */
   dataDaSessao: string;
   quem: string;
   quando: string;
@@ -198,7 +198,7 @@ export function comSeparador(n: number): string {
 /**
  * O maior trecho inicial que TODOS os sufixos compartilham. Nenhum separador entra na conta:
  * o resto é recolado ao prefixo pelo cliente, e um prefixo que corte no meio de um campo
- * continuaria recompondo o id certo — mas é mais fácil de conferir se não cortar.
+ * continuaria recompondo o id certo, mas é mais fácil de conferir se não cortar.
  */
 function prefixoComum(sufixos: string[]): string {
   if (!sufixos.length) return "";
@@ -236,7 +236,7 @@ let CACHE_EVENTOS: EventoDoStudio[] | null = null;
  * Os eventos que o Studio opera: os que TÊM sessão.
  *
  * Medido: **129 de 300**, todos do CMS. As entidades da Enciclopédia devolvem zero
- * ocorrências — elas são o acervo histórico, sem programação datada —, então não entram no
+ * ocorrências, elas são o acervo histórico, sem programação datada,, então não entram no
  * seletor. Isso é DITO na tela (declaração 3), e não escondido: um seletor com 300 eventos
  * dos quais 171 abrem uma tabela vazia seria pior do que um seletor com 129 que abrem.
  */
@@ -292,7 +292,7 @@ export function eventoDoStudio(id: string): EventoDoStudio | undefined {
 }
 
 // ---------------------------------------------------------------------------
-// Os salvamentos semeados — a metade do número de impacto que vem de `personas.json`
+// Os salvamentos semeados, a metade do número de impacto que vem de `personas.json`
 // ---------------------------------------------------------------------------
 
 let CACHE_SEMEADOS: { mapa: Record<string, string[]>; descartados: number } | null = null;
@@ -335,7 +335,7 @@ export function salvamentosSemeados(): Record<string, string[]> {
 }
 
 // ---------------------------------------------------------------------------
-// O histórico que já nasce cheio — as alterações de `alerta.ts`
+// O histórico que já nasce cheio, as alterações de `alerta.ts`
 // ---------------------------------------------------------------------------
 
 /**
@@ -343,7 +343,7 @@ export function salvamentosSemeados(): Record<string, string[]> {
  *
  * REEXPORTADAS, e não recalculadas: `alteracoes()` é de `alerta.ts`, e é o mesmo objeto que
  * `/salvos` consome do outro lado. É isso, e só isso, que faz as duas metades do Cenário 4
- * mostrarem A MESMA mudança — o Studio não escreve na tela de Salvos, e não precisa.
+ * mostrarem A MESMA mudança, o Studio não escreve na tela de Salvos, e não precisa.
  */
 export function historicoAutorado(): EntradaDeHistorico[] {
   return alteracoes().map(
@@ -382,7 +382,7 @@ export const CARIMBO_DA_ALTERACAO = `${dataCurta(DATA_DE_REFERENCIA)}, ${HORA_DO
 // ---------------------------------------------------------------------------
 
 /** As duas sessões que a semeadura salva. Vêm de `alerta.ts`, com os MESMOS ids que
- * `/salvos` semeia — digitá-los aqui seria criar a segunda fonte que a tela existe para
+ * `/salvos` semeia, digitá-los aqui seria criar a segunda fonte que a tela existe para
  * não ter. */
 export function parDoCenario4(): ParDoStudio {
   const par = parDeDemonstracao();
@@ -449,7 +449,7 @@ export function numerosDoAcervo(): NumerosDoAcervo {
 }
 
 // ---------------------------------------------------------------------------
-// O que o acervo NÃO sustenta — produto, e não comentário
+// O que o acervo NÃO sustenta, produto, e não comentário
 // ---------------------------------------------------------------------------
 
 /**
@@ -457,7 +457,7 @@ export function numerosDoAcervo(): NumerosDoAcervo {
  *
  * Elas ficam na tela, como a declaração honesta da tela de duplicatas: a honestidade sobre
  * o dado é o argumento da proposta, não a nota de rodapé sobre ele. Os números são
- * interpolados do que `numerosDoAcervo()` mediu — um literal
+ * interpolados do que `numerosDoAcervo()` mediu, um literal
  * digitado na tela faria a apresentação afirmar, na primeira regeração do grafo, número que
  * o acervo não sustenta.
  */
@@ -471,7 +471,7 @@ export function declaracoesDoQueNaoSustenta(): DeclaracaoHonesta[] {
       texto:
         `Nenhuma das ${comSeparador(n.ocorrencias)} ocorrências do acervo declara espaço: são ` +
         `${comSeparador(n.ocorrenciasComEspaco)} de ${comSeparador(n.ocorrencias)}. A coluna ` +
-        `«espaço» existe nesta tabela e vem vazia, DECLARADA em vez de omitida — omitir a ` +
+        `«espaço» existe nesta tabela e vem vazia, DECLARADA em vez de omitida, omitir a ` +
         `coluna esconderia que o dado falta; declará-la mostra exatamente onde a ingestão ` +
         `precisa melhorar. Sem espaço não há endereço, não há acessibilidade do local e não ` +
         `há mapa da sessão.`,
@@ -483,7 +483,7 @@ export function declaracoesDoQueNaoSustenta(): DeclaracaoHonesta[] {
         `Nenhum dos ${comSeparador(n.eventos)} eventos declara ingresso: são ` +
         `${comSeparador(n.eventosQueDeclaramIngresso)} de ${comSeparador(n.eventos)}. A fonte ` +
         `tem só um booleano de gratuidade e ele vale o mesmo para todo mundo, então «entrada ` +
-        `franca» aqui é verdade POR PADRÃO e não por fato — o rótulo da coluna carrega o ` +
+        `franca» aqui é verdade POR PADRÃO e não por fato, o rótulo da coluna carrega o ` +
         `qualificador em vez de afirmar gratuidade, como a tela de Salvos já faz. Filtrar por ` +
         `preço neste acervo devolveria tudo.`,
     },
@@ -493,8 +493,8 @@ export function declaracoesDoQueNaoSustenta(): DeclaracaoHonesta[] {
       texto:
         `O seletor traz ${comSeparador(n.eventosComSessao)} eventos, e não os ` +
         `${comSeparador(n.eventos)} do acervo: são os do CMS que têm sessão. As entidades da ` +
-        `Enciclopédia devolvem zero ocorrências — elas são o acervo histórico, sem programação ` +
-        `datada — e por isso ficam de fora, dito e não escondido. Gestão de ocorrência sobre ` +
+        `Enciclopédia devolvem zero ocorrências, elas são o acervo histórico, sem programação ` +
+        `datada, e por isso ficam de fora, dito e não escondido. Gestão de ocorrência sobre ` +
         `evento sem ocorrência é tela vazia com aparência de defeito.`,
     },
     {
@@ -505,7 +505,7 @@ export function declaracoesDoQueNaoSustenta(): DeclaracaoHonesta[] {
         `${comSeparador(n.ocorrencias)} ocorrências deste grafo são derivadas do período real ` +
         `do evento e nenhuma delas registra alteração. A sessão e a data são reais; a mudança ` +
         `é nossa, e aparece rotulada em vez de passar por dado do acervo. Confirmar aqui não ` +
-        `grava em servidor nenhum — o protótipo é estático — e é justamente essa lacuna que a ` +
+        `grava em servidor nenhum, o protótipo é estático, e é justamente essa lacuna que a ` +
         `plataforma existe para fechar.`,
     },
   ];
@@ -514,10 +514,10 @@ export function declaracoesDoQueNaoSustenta(): DeclaracaoHonesta[] {
 /** A frase que fecha D-73, e que a tela existe para tornar visível. */
 export const FRASE_DE_D73 =
   "Alterar uma sessão não invalida o evento. Depois de confirmar, todos os campos da ficha " +
-  "acima continuam com exatamente os mesmos valores — e isso é consequência direta de Evento, " +
+  "acima continuam com exatamente os mesmos valores, e isso é consequência direta de Evento, " +
   "Temporada e Ocorrência serem registros próprios (DADO-02). Num modelo de catálogo, com as " +
   "datas aninhadas dentro do evento, mudar uma sessão reescreveria o evento inteiro, e o aviso " +
-  "só poderia ser do evento — chegaria a quem salvou qualquer uma das outras sessões.";
+  "só poderia ser do evento, chegaria a quem salvou qualquer uma das outras sessões.";
 
 /** A frase que amarra as duas metades do Cenário 4. */
 export const FRASE_DAS_DUAS_METADES =

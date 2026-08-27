@@ -71,11 +71,19 @@ function titulo(t) {
 async function abrirFilaLimpa(cdp) {
   await cdp.navegar(ROTA_DA_FILA);
   await cdp.avaliar(`window.localStorage.removeItem("moderacao.v1")`);
-  // A VISÃO PRECISA SER PEDIDA, e é a lição de D-67: o bastidor inteiro vive sob
-  // `app:hidden`, e na visão de app a tela existe no HTML com retângulo zerado. Um clique
-  // ali falha com «elemento sem área» e o relatório culparia o botão, quando a causa é a
-  // casca ter aberto na visão errada. A casca guarda a escolha no mesmo armazém do
-  // produto, e é por ele que se pede.
+  // A VISÃO PRECISA SER PEDIDA, e é a lição de D-67: a Moderação vive sob `app:hidden`, e
+  // na visão de app a tela existe no HTML com retângulo zerado. Um clique ali falha com
+  // «elemento sem área» e o relatório culparia o botão, quando a causa é a casca ter aberto
+  // na visão errada. A casca guarda a escolha no mesmo armazém do produto, e é por ele que
+  // se pede.
+  //
+  // «A MODERAÇÃO», E NÃO MAIS «O BASTIDOR INTEIRO». Em 2026-08 o `app:hidden` saiu do
+  // layout do grupo e passou a ser aplicado por superfície: o Studio virou mobile-first
+  // com o perfil Produtor, e as outras cinco continuam web-only. A frase acima dizia
+  // «o bastidor inteiro» e teria virado uma explicação errada — o gate continuaria verde
+  // e o comentário mentiria sobre o motivo. Quem confere a regra nova, nas duas metades, é
+  // `verificar-produtor.mjs`; aqui a afirmação é só sobre a Moderação, e ela é MAIS
+  // precisa do que era.
   await cdp.avaliar(`window.localStorage.setItem('agenda-cultural:visao', 'web')`);
   await cdp.navegar(ROTA_DA_FILA);
   await cdp.assentar();
@@ -88,8 +96,8 @@ async function abrirFilaLimpa(cdp) {
     // sequência de falhas sobre elementos ausentes, e nenhuma delas seria a causa.
     throw new Error(
       `pedi a visão «web» em /moderacao/fila/ e a casca abriu em «${visao}». ` +
-        "A Moderação só existe na web (D-67) — na visão de app o layout de `(bastidor)` a " +
-        "esconde e todo clique falha por retângulo zerado.",
+        "A Moderação só existe na web (D-67) — na visão de app o layout de `/moderacao` " +
+        "monta `SuperficieSoWeb`, que a esconde, e todo clique falha por retângulo zerado.",
     );
   }
 }
@@ -106,6 +114,53 @@ async function principal() {
   // tela quebrou — que é o tipo de vermelho falso que faz gate deixar de ser lido.
   const cdp = await abrirNavegador({ tetoNavegacao: 120_000, tetoHidratacao: 60_000 });
   try {
+    // -----------------------------------------------------------------------
+    titulo("── D-67 · a Moderação continua sendo superfície de desktop ──");
+    // -----------------------------------------------------------------------
+    //
+    // ESTE BLOCO É NOVO, e ele é a metade que a inversão de D-67 obriga a afirmar.
+    //
+    // Até 2026-08 nada aqui MEDIA a regra: ela era herdada do layout do grupo, que
+    // escondia as 52 rotas de bastidor de uma vez, e a suíte só a citava num comentário e
+    // numa mensagem de erro. Quando o `app:hidden` desceu para o layout de cada superfície
+    // — porque o Studio virou mobile-first com o perfil Produtor —, a regra passou a
+    // depender de um arquivo por superfície, e um arquivo esquecido é um defeito silencioso:
+    // a Moderação apareceria espremida em 390px e nenhum número acusaria.
+    //
+    // O gate mede MAIS do que media. Antes, zero afirmações; agora, duas.
+    await cdp.navegar(ROTA_DA_FILA);
+    await cdp.avaliar(`window.localStorage.setItem('agenda-cultural:visao', 'mobile')`);
+    await cdp.navegar(ROTA_DA_FILA);
+    await cdp.assentar();
+
+    const naApp = await cdp.avaliar(
+      naPagina(`
+        const aviso = Array.from(document.querySelectorAll('h1'))
+          .find((h) => /superfície de desktop/i.test(h.textContent || ''));
+        const escondido = document.querySelector('[data-superficie="so-web"]');
+        const r = escondido ? escondido.getBoundingClientRect() : null;
+        return {
+          view: document.querySelector('[data-view]')?.getAttribute('data-view') ?? null,
+          avisoVisivel: Boolean(aviso && aviso.getBoundingClientRect().height > 0),
+          envelopeExiste: Boolean(escondido),
+          conteudoVisivel: Boolean(r && r.height > 0 && r.width > 0),
+        };
+      `),
+    );
+
+    exigir(
+      naApp.view === "mobile" && naApp.envelopeExiste && !naApp.conteudoVisivel,
+      "D-67 · /moderacao/fila/ continua ESCONDIDA na visão app, pelo layout da própria superfície",
+      `view=${naApp.view} · envelope so-web presente: ${naApp.envelopeExiste} · conteúdo visível: ${naApp.conteudoVisivel}`,
+      "envelope presente, conteúdo com retângulo zerado",
+    );
+    exigir(
+      naApp.avisoVisivel,
+      "D-67 · e ela DECLARA o motivo em vez de dar tela branca",
+      `aviso de superfície de desktop visível: ${naApp.avisoVisivel}`,
+      "visível",
+    );
+
     // -----------------------------------------------------------------------
     titulo("── M1 · a fila: quatro origens, score só na IA, ordem por vazio ──");
     // -----------------------------------------------------------------------

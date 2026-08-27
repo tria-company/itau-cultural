@@ -92,8 +92,29 @@ function rotuloDaClasse(classe: ClasseEntidade): string {
 // Componente
 // ---------------------------------------------------------------------------
 
-export function Cartao({ cartao }: { cartao: CartaoDTO }) {
-  const rota = rotaDoCartao(cartao);
+/**
+ * `naoNavegavel` — o cartão SEM a promessa de navegação.
+ *
+ * ACRESCENTADO EM 2026-08 pelo perfil Produtor, e é adição pura: ausente, o componente se
+ * comporta exatamente como antes, e as 34 telas que já o montam não mudam em nada.
+ *
+ * POR QUE ELE PRECISOU EXISTIR. O registro que o produtor publica mora no `localStorage`
+ * deste navegador — o protótipo é um artefato estático e não há servidor para receber
+ * publicação. Ele não tem página no build, e o `<Link>` do cartão apontaria para
+ * `/evento/<id>/`, que não existe. O defeito não era só o clique: `next/link` PREFETCHA o
+ * destino quando o cartão entra no viewport, então a página pública passava a disparar
+ * 404 sozinha, sem ninguém tocar em nada — e o portão de console limpo pegou isso.
+ *
+ * `pointer-events: none` NÃO RESOLVERIA: ele impede o clique e não impede o prefetch.
+ */
+export function Cartao({
+  cartao,
+  naoNavegavel = false,
+}: {
+  cartao: CartaoDTO;
+  naoNavegavel?: boolean;
+}) {
+  const rota = naoNavegavel ? null : rotaDoCartao(cartao);
 
   const capa = (
     <CapaDeCartao
@@ -155,14 +176,29 @@ export function Cartao({ cartao }: { cartao: CartaoDTO }) {
               pastilha de classe faria as duas parecerem de espécies diferentes. */}
           <p className="m-0 flex flex-wrap items-center gap-2">
             <span className="cartao-tag">{rotuloDaClasse(cartao.classe)}</span>
-            <Link
-              href={rotaDaExplicacao(cartao)}
-              className="selo-motivo cartao-tag no-underline"
-              data-motivo={cartao.motivo.texto}
-              data-origem-motivo={cartao.motivo.origemMotivo}
-            >
-              <span>{cartao.motivo.texto}</span>
-            </Link>
+            {/* O SELO CONTINUA SENDO SELO nos dois casos: o que muda é ser link. Um
+                cartão que não tem página no build também não tem página de explicação,
+                e o `<Link>` prefetcharia um 404. A promessa de que todo cartão diz por
+                que veio permanece — `data-motivo` e `data-origem-motivo` continuam nos
+                dois ramos, e são eles que os portões leem. */}
+            {naoNavegavel ? (
+              <span
+                className="selo-motivo cartao-tag"
+                data-motivo={cartao.motivo.texto}
+                data-origem-motivo={cartao.motivo.origemMotivo}
+              >
+                <span>{cartao.motivo.texto}</span>
+              </span>
+            ) : (
+              <Link
+                href={rotaDaExplicacao(cartao)}
+                className="selo-motivo cartao-tag no-underline"
+                data-motivo={cartao.motivo.texto}
+                data-origem-motivo={cartao.motivo.origemMotivo}
+              >
+                <span>{cartao.motivo.texto}</span>
+              </Link>
+            )}
           </p>
         </div>
       </div>

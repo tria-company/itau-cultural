@@ -487,9 +487,49 @@ export function ModeracaoFila({
         </h1>
         <p className="studio-objetivo">
           Cada item traz a ORIGEM de onde veio. Os de sugestão de IA trazem score de
-          confiança e a regra que o produziu. Nada aqui vira dado público sem alguém
-          decidir, e toda decisão fica com nome e carimbo.
+          confiança e a regra que o produziu. Toda decisão fica com nome e carimbo.
         </p>
+
+        {/* ------------------------------------------------------------------
+            A FISCALIZAÇÃO POSTERIOR (2026-08) — o que mudou com o perfil Produtor.
+
+            Até aqui esta fila era o PEDÁGIO: nada virava dado público sem alguém
+            decidir. Com a publicação direta, o produtor publica e o registro vai ao
+            ar — e a decisão desta tela passou a ser sobre o que JÁ ESTÁ NO AR.
+
+            O QUE NÃO MUDOU, e é o que importa: as ações continuam sendo as mesmas seis,
+            `situacaoApos` continua sendo o mapa único entre ação e situação, e
+            `decisaoCompleta` continua cobrando motivo escrito em vetar e suspender. O
+            que mudou é O MOMENTO — antes de aparecer, agora depois — e o significado de
+            cada ação:
+
+              · SUSPENDER retira do ar o que estava publicado. É a ação central agora.
+              · VETAR continua barrando o que nunca entrou: as propostas de agente e de
+                obra que o produtor manda junto com o registro.
+              · DEVOLVER devolve a palavra a quem escreveu, com comentário.
+
+            A assimetria de motivo obrigatório continua onde estava, e agora ela pesa
+            mais: suspender tira do ar algo que o público já viu.
+            ------------------------------------------------------------------ */}
+        <div className="fisc-declaracao" data-fiscalizacao-posterior>
+          <p>
+            <strong>Fiscalização posterior.</strong> Desde o perfil Produtor, publicar não
+            passa por esta fila: quem produz publica direto, e o registro vai ao ar. O que
+            se decide aqui é sobre <strong>o que já está no ar</strong>, por amostragem,
+            por duplicata suspeita e por denúncia.
+          </p>
+          <p>
+            <strong>Suspender</strong> retira do ar o que foi publicado, com motivo escrito.{" "}
+            <strong>Vetar</strong> continua barrando o que nunca entrou, as propostas de
+            agente e de obra que chegam junto com o registro. <strong>Devolver</strong>{" "}
+            devolve a palavra a quem escreveu.
+          </p>
+          <p>
+            As duas que encerram o assunto sem devolver a palavra, vetar e suspender,
+            continuam sendo as únicas que cobram motivo por escrito. Isso pesa mais agora do
+            que pesava: suspender tira do ar algo que o público já viu.
+          </p>
+        </div>
 
         {/* AS OUTRAS TRÊS TELAS DA MODERAÇÃO. Sem estes links elas existem no artefato
             e não são alcançáveis por ninguém — tela sem entrada é tela que não existe
