@@ -1,3 +1,4 @@
+import { GuardaDeErro } from "@/componentes/guarda-de-erro";
 import { ProdutorNavegacao } from "@/componentes/produtor-navegacao";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 import { catalogoComum } from "@/dados/mock/seed-produtor";
@@ -39,7 +40,9 @@ export default function LayoutDoStudio({ children }: { children: React.ReactNode
           `-1` aponta para o fim da grade EXPLÍCITA, e aqui todas as linhas são implícitas.
           Com o invólucro a grade tem uma linha só, e o trilho ocupa a coluna inteira por
           construção. A captura de tela pegou; nenhum número teria pego. */}
-      <div className="prod-conteudo">{children}</div>
+      <div className="prod-conteudo">
+        <GuardaDeErro>{children}</GuardaDeErro>
+      </div>
     </div>
   );
 }

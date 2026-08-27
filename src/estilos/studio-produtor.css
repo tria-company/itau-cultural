@@ -4201,3 +4201,50 @@
   font-size: var(--tipo-detalhe);
   font-weight: 700;
 }
+
+/* ---- a tela de erro que fala ---------------------------------------------- */
+
+.prod-erro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 48rem;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid var(--cor-acao);
+  border-radius: var(--raio-g);
+  background: var(--cor-acao-lavada);
+}
+
+.prod-erro-titulo {
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+}
+
+.prod-erro-corpo {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.45;
+  color: var(--cor-tinta-2);
+}
+
+.prod-erro-detalhe {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  font-size: var(--tipo-micro);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.prod-erro-acoes {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
