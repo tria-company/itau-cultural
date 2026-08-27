@@ -116,7 +116,7 @@ export interface DescricaoDaPauta {
 export const DESCRICAO_DA_PAUTA: Record<Pauta, DescricaoDaPauta> = {
   agenda: {
     pauta: "agenda",
-    rotulo: "Agenda",
+    rotulo: "Eventos",
     singular: "Novo evento",
     rota: "/studio/publicar/",
     telaPublica: "/acontece/",

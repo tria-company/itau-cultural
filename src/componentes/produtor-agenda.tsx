@@ -12,7 +12,12 @@ import { OpcaoDeSegmento, Segmento } from "@/componentes/base/segmento";
 import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { SeletorDeVisibilidade } from "@/componentes/base/seletor-de-visibilidade";
 import { Previa } from "@/componentes/base/previa";
-import { consumirAberturaDaFicha, consumirAberturaDoDetalhe, useProdutor } from "@/componentes/produtor-estado";
+import {
+  consumirAberturaDaFicha,
+  consumirAberturaDoDetalhe,
+  consumirCriacaoDaPauta,
+  useProdutor,
+} from "@/componentes/produtor-estado";
 import { PautaInicio } from "@/componentes/produtor-pauta-inicio";
 import { RegistroDetalhe } from "@/componentes/produtor-registro-detalhe";
 import { GradeDeSessoes } from "@/componentes/produtor-grade";
@@ -99,6 +104,17 @@ export function FichaDaAgenda({
     if (querDetalhe) setModo("detalhe");
     else if (querFicha) setModo("ficha");
   }, []);
+
+  // A CRIAÇÃO espera o armazém, como na ficha simples.
+  useEffect(() => {
+    if (!armazem.pronto) return;
+    const criar = consumirCriacaoDaPauta();
+    if (criar === "agenda") {
+      armazem.criar("agenda");
+      setModo("ficha");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dispara na hidratação
+  }, [armazem.pronto]);
 
   if (!armazem.pronto) {
     return (
@@ -308,7 +324,7 @@ function Corpo({
   return (
     <FichaEmAtos
       aoVoltar={aoVoltar}
-      rotuloDaVolta="Agenda"
+      rotuloDaVolta="Eventos"
       titulo={registro.titulo.trim() === "" ? "Novo evento" : registro.titulo}
       objetivo="A chave de identidade antes de qualquer outra coisa: título normalizado, agente realizador e obra. Temporada e sessão só existem depois dela."
       atos={atos}

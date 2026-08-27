@@ -11,7 +11,12 @@ import { ListaDeImpedimentos } from "@/componentes/base/lista-de-impedimentos";
 import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { SeletorDeVisibilidade } from "@/componentes/base/seletor-de-visibilidade";
 import { Previa } from "@/componentes/base/previa";
-import { consumirAberturaDaFicha, consumirAberturaDoDetalhe, useProdutor } from "@/componentes/produtor-estado";
+import {
+  consumirAberturaDaFicha,
+  consumirAberturaDoDetalhe,
+  consumirCriacaoDaPauta,
+  useProdutor,
+} from "@/componentes/produtor-estado";
 import { PautaInicio } from "@/componentes/produtor-pauta-inicio";
 import { RegistroDetalhe } from "@/componentes/produtor-registro-detalhe";
 import { DESCRICAO_DA_PAUTA, podePublicar, impedimentosDe, scoreDoRegistro } from "@/dados/tipos-produtor";
@@ -95,6 +100,19 @@ export function FichaSimples<P extends Pauta>({
     if (querDetalhe) setModo("detalhe");
     else if (querFicha) setModo("ficha");
   }, []);
+
+  // A CRIAÇÃO espera o armazém: criar antes de hidratar perderia o registro quando a
+  // hidratação sobrescrevesse o estado. A folha de criação só marcou a pauta.
+  useEffect(() => {
+    if (!armazem.pronto) return;
+    const criar = consumirCriacaoDaPauta();
+    if (criar === pauta) {
+      armazem.criar(pauta);
+      setAtoPedido(0);
+      setModo("ficha");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dispara na hidratação
+  }, [armazem.pronto]);
   const d = DESCRICAO_DA_PAUTA[pauta];
 
   if (!armazem.pronto) {

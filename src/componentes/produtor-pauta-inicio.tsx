@@ -176,7 +176,7 @@ export function PautaInicio({
                       <span className="prod-melhor-nome">
                         {semTravessao(r.titulo) || "(sem título)"}
                       </span>
-                      <span className="prod-melhor-sub">toque para continuar</span>
+                      <span className="prod-melhor-sub">continue de onde parou</span>
                     </span>
                     <span className="prod-situacao" data-situacao={r.situacao}>
                       {ROTULO_DA_SITUACAO[r.situacao]}

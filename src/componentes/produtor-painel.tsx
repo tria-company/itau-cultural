@@ -329,12 +329,7 @@ export function ProdutorPainel({
       </div>
 
       {/* A ação primária: uma só, no pé, dentro da moldura. */}
-      <BarraDoStudio
-        semente={semente}
-        contexto={contexto}
-        pautasComFicha={pautasComFicha}
-        imagens={imagens}
-      />
+      <BarraDoStudio pautasComFicha={pautasComFicha} imagens={imagens} />
 
       {/* ---- a folha de criação, em dois passos ---- */}
       <Folha

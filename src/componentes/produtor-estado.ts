@@ -519,3 +519,22 @@ export function consumirAberturaDoDetalhe(): boolean {
   intencaoDeAbrirDetalhe = false;
   return pedida;
 }
+
+/**
+ * A INTENÇÃO DE CRIAR, irmã das duas de cima, com um dado a mais: qual pauta. A folha
+ * de criação não carrega o armazém (carregá-lo poria a semente inteira na coluna
+ * lateral de todas as telas); ela marca a pauta aqui e navega, e a página de chegada
+ * cria o registro QUANDO o armazém dela hidratar. Criar antes de hidratar perderia o
+ * registro no instante em que a hidratação sobrescrevesse o estado.
+ */
+let pautaParaCriar: string | null = null;
+
+export function marcarCriacaoDaPauta(pauta: string): void {
+  pautaParaCriar = pauta;
+}
+
+export function consumirCriacaoDaPauta(): string | null {
+  const pedida = pautaParaCriar;
+  pautaParaCriar = null;
+  return pedida;
+}

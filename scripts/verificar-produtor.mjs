@@ -253,23 +253,39 @@ async function gateDaDobra(cdp, base) {
   );
 
   await naVisao(cdp, `${base}/studio/`, "web");
+  // A REGRA MUDOU EM 2026-08-27, e o portão afirma a nova: na web a casca é a COLUNA
+  // LATERAL, presente em todas as telas (raiz incluída), com o Criar à vista; a barra
+  // flutuante é do app e não aparece. O portão anterior afirmava a barra no fluxo, e a
+  // revisão a olho reprovou exatamente o que ele deixava passar: a barra caída no pé de
+  // uma janela de 1600px, numa raiz sem navegação nenhuma.
   const naWeb = await cdp.avaliar(
     naPagina(`
+      const coluna = document.querySelector('.prod-trilho-pautas');
+      const criar = document.querySelector('[data-criar-da-lateral]');
       const barra = document.querySelector('[data-barra-acao]');
-      if (!barra) return null;
-      const b = barra.getBoundingClientRect();
+      const comunidade = todos('.prod-trilho-pautas a[href*="comunidade"]');
+      const pontos = todos('.prod-trilho-pautas a[href*="pontos"]');
       return {
-        posicao: getComputedStyle(barra).position,
-        topo: Math.round(b.top),
-        alcancavel: b.top < ${DOBRA_DA_WEB} || document.documentElement.scrollHeight > innerHeight,
+        colunaVisivel: coluna ? visivel(coluna) : false,
+        colunaColada: coluna ? getComputedStyle(coluna).position : null,
+        criarVisivel: criar ? visivel(criar) : false,
+        barraDoAppVisivel: barra ? visivel(barra) : false,
+        comunidadeNaColuna: comunidade.filter((a) => visivel(a)).length,
+        pontosNaColuna: pontos.filter((a) => visivel(a)).length,
       };
     `),
   );
   exigir(
-    naWeb !== null && naWeb.posicao === "static" && naWeb.alcancavel,
-    "na web a barra volta para o FLUXO — nada gruda no pé numa janela de 960px",
-    naWeb === null ? "não achei a barra" : `position: ${naWeb.posicao} · topo em ${naWeb.topo}px`,
-    "position: static, e alcançável por rolagem",
+    naWeb.colunaVisivel && naWeb.colunaColada === "sticky" && naWeb.criarVisivel,
+    "na web a casca é a COLUNA LATERAL, colada, com o Criar à vista — na raiz inclusive",
+    `coluna visível: ${naWeb.colunaVisivel} · position: ${naWeb.colunaColada} · criar visível: ${naWeb.criarVisivel}`,
+    "coluna sticky com o Criar",
+  );
+  exigir(
+    !naWeb.barraDoAppVisivel && naWeb.comunidadeNaColuna >= 1 && naWeb.pontosNaColuna >= 1,
+    "a barra flutuante é do app, e Comunidade e Loja se alcançam pela coluna",
+    `barra do app visível: ${naWeb.barraDoAppVisivel} · comunidade: ${naWeb.comunidadeNaColuna} · loja: ${naWeb.pontosNaColuna}`,
+    "barra invisível na web · 1 link de cada na coluna",
   );
 }
 

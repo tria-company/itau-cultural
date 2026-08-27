@@ -19,12 +19,7 @@ export default function Pagina() {
     <>
       <LojaDePontos semente={registrosSemeados()} contexto={CONTEXTO_DO_PRODUTOR} />
 
-      <BarraDoStudio
-        semente={registrosSemeados()}
-        contexto={CONTEXTO_DO_PRODUTOR}
-        pautasComFicha={PAUTAS_COM_FICHA}
-        imagens={catalogoComum().imagens}
-      />
+      <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </>
   );
 }

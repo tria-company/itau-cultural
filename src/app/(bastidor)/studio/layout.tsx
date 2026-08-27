@@ -1,5 +1,6 @@
 import { ProdutorNavegacao } from "@/componentes/produtor-navegacao";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
+import { catalogoComum } from "@/dados/mock/seed-produtor";
 
 /**
  * Layout do Studio, a superfície do perfil Produtor.
@@ -28,7 +29,7 @@ import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 export default function LayoutDoStudio({ children }: { children: React.ReactNode }) {
   return (
     <div className="prod-tela" data-superficie="studio">
-      <ProdutorNavegacao prontas={PAUTAS_COM_FICHA} />
+      <ProdutorNavegacao prontas={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
       {/* O INVÓLUCRO EXISTE POR CAUSA DA GRADE DA WEB, e a razão é mecânica.
           Na visão web `.prod-tela` é uma grade de duas colunas com o trilho à esquerda. Sem
           o invólucro, cada filho da página vira um item da grade e o trilho ocupa só a
