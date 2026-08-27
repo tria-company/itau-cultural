@@ -116,6 +116,12 @@ export function ProdutorNavegacao({
         })}
       </ul>
 
+      {/* NA RAIZ A COLUNA ENCOLHE: o painel de início JÁ é a navegação das pautas, com
+          os atalhos ilustrados, e a coluna repetir as onze ali seria a mesma escolha
+          oferecida duas vezes na mesma tela (pedido de 2026-08-27). Nas telas internas,
+          onde o painel não está à vista, a lista completa volta. */}
+      {caminho === "/studio" ? null : (
+        <>
       {/* ---- as onze pautas ---- */}
       <p className="prod-lateral-rotulo" aria-hidden>
         Publicar
@@ -177,6 +183,8 @@ export function ProdutorNavegacao({
           );
         })}
       </ul>
+        </>
+      )}
     </nav>
   );
 }
