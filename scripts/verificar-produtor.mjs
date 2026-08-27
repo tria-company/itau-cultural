@@ -354,12 +354,16 @@ async function gateDaPublicacao(cdp, base) {
   const trava = await cdp.avaliar(
     naPagina(`
       const b = document.querySelector('[data-acao="publicar"]');
-      const lista = document.querySelector('[data-impedimentos]');
+      // A CONTAGEM SAIU DO CARTAO E FOI PARA O BOTAO. O cartao laranja de conferencias
+      // nao existe mais dentro da ficha (2026-08-27): ele repetia no corpo o que a
+      // trava diz, e o portao passou a medir a trava em si, que e o que importa.
       return {
         existe: Boolean(b),
         desabilitado: b ? b.disabled : null,
         porque: b ? (b.getAttribute('title') || '') : '',
-        bloqueiam: lista ? lista.getAttribute('data-impedimentos') : null,
+        rotulo: b ? (b.textContent || '').trim() : '',
+        bloqueiam: b ? b.getAttribute('data-bloqueiam') : null,
+        cartao: document.querySelectorAll('.prod-impedimentos').length,
       };
     `),
   );
@@ -376,6 +380,13 @@ async function gateDaPublicacao(cdp, base) {
     "o registro em edição tem impedimento REAL — o gate não mede um caso que não aconteceu",
     `${trava.bloqueiam} impedimento(s) bloqueante(s)`,
     "ao menos 1",
+  );
+
+  exigir(
+    trava.cartao === 0 && /falta/i.test(trava.rotulo),
+    "a ficha NÃO tem cartão de conferências — o que falta se lê no próprio botão",
+    `cartões na ficha: ${trava.cartao} · rótulo do botão: ${JSON.stringify(trava.rotulo)}`,
+    "zero cartões, e o botão dizendo quanto falta",
   );
 
   // --- 2. resolver os impedimentos e publicar de verdade ---------------------
@@ -954,6 +965,19 @@ async function gateDaWeb(cdp, base) {
     "1",
   );
 
+  // A PRÉVIA TAMBÉM NÃO SE REPETE. O ato de publicação traz uma, a coluna colada traz
+  // outra: no aparelho é uma só porque a coluna não existe ali, mas na web eram duas
+  // idênticas lado a lado, com o mesmo parágrafo embaixo (visto em captura, 2026-08-27).
+  const previasWeb = await cdp.avaliar(
+    naPagina(`return { arvore: document.querySelectorAll('.prod-previa').length, visiveis: visiveis('.prod-previa').length };`),
+  );
+  exigir(
+    previasWeb.visiveis === 1 && previasWeb.arvore >= 1,
+    "a prévia aparece UMA vez na web — a do corpo cede lugar à da coluna",
+    `${previasWeb.visiveis} visível(eis) de ${previasWeb.arvore} na árvore`,
+    "1 visível",
+  );
+
   // NADA VAZA ENTRE VISÕES. A coluna colada não existe no app: em 370px o que ela mostra
   // vive dentro dos atos, e duplicá-lo poria a mesma informação duas vezes na mesma tela.
   await naVisao(cdp, `${base}/studio/publicar/`, "mobile");
@@ -983,6 +1007,7 @@ async function gateDaWeb(cdp, base) {
       return {
         existe: Boolean(c),
         visivel: visivel(c),
+        previasVisiveis: visiveis('.prod-previa').length,
         // O trilho é SÓ da web: no app o carrossel de pautas foi vetado (2026-08-26) e
         // o caminho entre telas é o painel, com a volta no cabeçalho de cada uma.
         trilhoVisivel: (() => {
@@ -993,6 +1018,46 @@ async function gateDaWeb(cdp, base) {
       };
     `),
   );
+  exigir(
+    noApp.previasVisiveis === 0,
+    "e no ato 1 do app nenhuma prévia aparece — a da coluna está escondida, e o ato não tem",
+    `${noApp.previasVisiveis} prévia(s) visível(eis) no primeiro ato`,
+    "0",
+  );
+
+  // ONDE A PRÉVIA EXISTE DE VERDADE: o ato de publicação, o último. Medir no ato 1 diria
+  // «zero» sem provar nada, porque ali nenhum dos dois lados a traz. Andar até o fim é o
+  // único jeito de ver a do corpo de pé com a da coluna escondida.
+  for (let i = 0; i < 12; i += 1) {
+    const andou = await cdp.avaliar(
+      naPagina(`
+        const b = [...document.querySelectorAll('button')]
+          .find((x) => x.textContent.trim() === 'Continuar');
+        if (b) b.click();
+        return Boolean(b);
+      `),
+    );
+    if (!andou) break;
+    await respirarProdutor(250);
+  }
+
+  const fimNoApp = await cdp.avaliar(
+    naPagina(`
+      return {
+        previas: visiveis('.prod-previa').length,
+        cartoes: document.querySelectorAll('.prod-impedimentos').length,
+        rotulo: (document.querySelector('[data-acao="publicar"]')?.textContent || '').trim(),
+      };
+    `),
+  );
+
+  exigir(
+    fimNoApp.previas === 1 && fimNoApp.cartoes === 0,
+    "no último ato do app a prévia aparece UMA vez, e sem cartão de conferências",
+    `prévias visíveis: ${fimNoApp.previas} · cartões: ${fimNoApp.cartoes} · botão: ${JSON.stringify(fimNoApp.rotulo)}`,
+    "1 prévia, 0 cartões",
+  );
+
   exigir(
     noApp.existe && !noApp.visivel,
     "a coluna colada NÃO aparece no app — a árvore é a mesma, quem esconde é o CSS",

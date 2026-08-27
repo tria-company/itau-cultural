@@ -7,7 +7,6 @@ import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
 import { Campo, FichaEmAtos } from "@/componentes/base/ficha-em-atos";
 import type { Ato } from "@/componentes/base/ficha-em-atos";
 import { FichaDeAcessibilidade } from "@/componentes/base/ficha-de-acessibilidade";
-import { ListaDeImpedimentos } from "@/componentes/base/lista-de-impedimentos";
 import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { SeletorDeVisibilidade } from "@/componentes/base/seletor-de-visibilidade";
 import { Previa } from "@/componentes/base/previa";
@@ -342,11 +341,6 @@ export function FichaSimples<P extends Pauta>({
     ),
     publicacao: (
       <>
-        <ListaDeImpedimentos
-          impedimentos={score.impedimentos}
-          total={score.total}
-          aoIrParaAto={setAtoPedido}
-        />
         <SeletorDeVisibilidade
           visibilidade={atual.visibilidade}
           agendadoPara={atual.agendadoPara}
@@ -406,11 +400,6 @@ export function FichaSimples<P extends Pauta>({
       colunaColada={
         <>
           {colunaDaPauta?.(atual)}
-          <ListaDeImpedimentos
-            impedimentos={score.impedimentos}
-            total={score.total}
-            aoIrParaAto={setAtoPedido}
-          />
           <Previa registro={atual} />
         </>
       }
@@ -424,6 +413,11 @@ export function FichaSimples<P extends Pauta>({
             if (foi && destinoAoPublicar) router.push(destinoAoPublicar);
           }}
           data-acao="publicar"
+          /* A CONTAGEM VIVE NO BOTAO, e nao mais num cartao laranja: o cartao repetia
+             no corpo da ficha o que a trava ja diz, e virava uma parede de avisos
+             (reprovado a olho, 2026-08-27). O que falta se le no rotulo, no title e
+             aqui, que e por onde o portao mede. */
+          data-bloqueiam={String(score.bloqueiam)}
         >
           {score.podePublicar ? "Publicar" : `Falta ${score.bloqueiam}`}
         </BotaoDoStudio>

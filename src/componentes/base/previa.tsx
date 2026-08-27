@@ -116,9 +116,8 @@ export function Previa({ registro, pagina }: PropsPrevia) {
 
       <p className="prod-campo-nota">
         {aba === "cartao"
-          ? `É assim que este registro aparece em ${d.telaPublica || "vitrine nenhuma, esta pauta é insumo"}.`
-          : "É assim que a página abre."}{" "}
-        O selo de motivo é uma prévia: o real nasce da aresta, depois de publicado.
+          ? `Assim aparece em ${d.telaPublica || "nenhuma vitrine"}.`
+          : "Assim a página abre."}
       </p>
     </div>
   );

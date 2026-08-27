@@ -4822,3 +4822,17 @@
   flex: none;
   color: var(--cor-acao-tinta);
 }
+
+/* ---- a previa aparece UMA vez ---------------------------------------------- */
+
+/**
+ * O ato de publicacao traz a previa no corpo, e a coluna colada tambem a traz: no
+ * aparelho isso e uma so, porque a coluna nao existe ali; na web eram DUAS previas
+ * identicas lado a lado, com o mesmo paragrafo embaixo (visto em captura, 2026-08-27).
+ * Quem some e a do corpo: a da coluna acompanha todos os atos, nao so o ultimo.
+ *
+ * A arvore JSX continua identica nas duas visoes (D-05) — quem diverge e o CSS.
+ */
+[data-view="web"] .prod-ficha-duas-colunas:has(> .prod-lado-fixo) .prod-lado-do-ato .prod-previa {
+  display: none;
+}

@@ -7,7 +7,6 @@ import { CampoComProposta } from "@/componentes/base/campo-com-proposta";
 import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
 import { Campo, FichaEmAtos } from "@/componentes/base/ficha-em-atos";
 import { FichaDeAcessibilidade } from "@/componentes/base/ficha-de-acessibilidade";
-import { ListaDeImpedimentos } from "@/componentes/base/lista-de-impedimentos";
 import { OpcaoDeSegmento, Segmento } from "@/componentes/base/segmento";
 import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { SeletorDeVisibilidade } from "@/componentes/base/seletor-de-visibilidade";
@@ -325,7 +324,6 @@ function Corpo({
           registro={registro}
           contexto={contexto}
           aoAlterar={aoAlterar}
-          aoIrParaAto={setAtoPedido}
         />
       ),
     },
@@ -343,11 +341,6 @@ function Corpo({
       colunaColada={
         <>
           <ChaveViva registro={registro} />
-          <ListaDeImpedimentos
-            impedimentos={score.impedimentos}
-            total={score.total}
-            aoIrParaAto={setAtoPedido}
-          />
           <Previa registro={registro} />
         </>
       }
@@ -361,6 +354,7 @@ function Corpo({
             .join(" · ")}`}
           aoClicar={aoPublicar}
           data-acao="publicar"
+          data-bloqueiam={String(impedimentos.filter((i) => i.bloqueia).length)}
         >
           {score.podePublicar ? "Publicar" : `Falta ${score.bloqueiam}`}
         </BotaoDoStudio>
@@ -1181,26 +1175,15 @@ function AtoPublicacao({
   registro,
   contexto,
   aoAlterar,
-  aoIrParaAto,
 }: {
   registro: RegistroDeAgenda;
   contexto: ContextoDoProdutor;
   aoAlterar: (m: Partial<RegistroDeAgenda>) => void;
-  aoIrParaAto: (ato: number) => void;
 }) {
-  const score = scoreDoRegistro(registro, contexto);
-
+  // O ATO SÃO DUAS DECISÕES: para quem isto aparece, e como fica. O que falta não se
+  // repete aqui: está no botão de publicar, que é quem barra.
   return (
     <>
-      {/* O TEXTO DO SCORE MUDOU DE DONO. Antes ele dizia «o que a moderação vai devolver»;
-          com a publicação direta, quem lê o que falta é o PÚBLICO. A frase acompanha. */}
-      <ListaDeImpedimentos
-        impedimentos={score.impedimentos}
-        total={score.total}
-        aoIrParaAto={aoIrParaAto}
-      />
-
-
       <SeletorDeVisibilidade
         visibilidade={registro.visibilidade}
         agendadoPara={registro.agendadoPara}
