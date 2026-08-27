@@ -275,6 +275,33 @@ async function gateDaDobra(cdp, base) {
       };
     `),
   );
+  // NADA COBRE O CONTEÚDO. O gate nasceu de um defeito que passou por TODOS os outros:
+  // o Adicionar movido para o canto herdou o `left: 0` da barra do app, virou um painel
+  // opaco de largura inteira, e a tela ficou vazia com o DOM inteiro correto e o console
+  // limpo. Presença e geometria não pegam isso; só perguntar QUEM ESTÁ POR CIMA pega.
+  await naVisao(cdp, `${base}/studio/publicar/`, "web");
+  const porCima = await cdp.avaliar(
+    naPagina(`
+      const alvo = document.querySelector('[data-inicio-da-pauta] .prod-melhor-nome')
+        || document.querySelector('[data-inicio-da-pauta]');
+      if (!alvo) return { achou: false };
+      const r = alvo.getBoundingClientRect();
+      const topo = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
+      return {
+        achou: true,
+        cobertoPor: topo ? (topo.className && String(topo.className)) || topo.tagName : null,
+        ehOAlvo: topo === alvo || (topo !== null && alvo.contains(topo)) || (topo !== null && topo.contains(alvo)),
+      };
+    `),
+  );
+  exigir(
+    porCima.achou && porCima.ehOAlvo,
+    "nada COBRE o conteúdo na web — o que está no ponto do registro é o próprio registro",
+    porCima.achou ? `no ponto: ${porCima.cobertoPor}` : "não achei o conteúdo da pauta",
+    "o próprio conteúdo",
+  );
+
+  await naVisao(cdp, `${base}/studio/`, "web");
   exigir(
     naWeb.colunaVisivel && naWeb.colunaColada === "sticky" && naWeb.criarVisivel,
     "na web a casca é a COLUNA LATERAL, colada, com o Criar à vista — na raiz inclusive",

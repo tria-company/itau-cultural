@@ -3941,13 +3941,28 @@
   position: relative;
 }
 
+/**
+ * O Adicionar sobe para o canto, e SOLTA as ancoras da barra do app.
+ *
+ * ELE COBRIU A TELA INTEIRA (2026-08-27) porque `position: absolute` herdou o
+ * `left: 0` da barra do telefone: a caixa esticou de ponta a ponta, com o fundo opaco
+ * de `--cor-superficie` e sombra por cima, e o conteudo continuou renderizado DEBAIXO
+ * dela. DOM certo, tela vazia, e nenhum erro de console para acusar. Ancora que se
+ * sobrescreve pela metade e uma caixa que nao encolhe: as duas juntas apagam a tela.
+ */
 [data-view="web"] .prod-conteudo:has(> [data-inicio-da-pauta]) > .prod-barra-acao {
   position: absolute;
   top: 2rem;
   right: 0;
+  left: auto;
+  bottom: auto;
+  z-index: 5;
+  width: auto;
   margin: 0;
   padding: 0;
   border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 /* ---- a capa do Play com cara de player ------------------------------------ */
