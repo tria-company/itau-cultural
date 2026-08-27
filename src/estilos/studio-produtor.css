@@ -3605,7 +3605,10 @@
   justify-content: center;
   gap: 0.25rem;
   min-height: 2.75rem;
-  padding: 0.25rem;
+  /* SEM GUTTER LATERAL: com quatro abas em 370px cada uma tem ~70px, e 4px de padding
+   * de cada lado eram a diferença entre «Comunidade» e «Comunida…». O alvo de toque
+   * continua sendo a altura de 2.75rem, que o portão mede. */
+  padding: 0.25rem 0;
   border-radius: var(--raio-pilula);
   color: var(--cor-tinta-2);
   text-decoration: none;
@@ -3619,6 +3622,7 @@
 .prod-aba-rotulo {
   font-size: var(--tipo-micro);
   line-height: 1.2;
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4101,10 +4105,30 @@
  * diagramacao dos paineis de canal, com a identidade da casa. Nenhum laranja em
  * dado: as barras por pauta sao tinta lavada, e o delta e pilula neutra.
  */
+/**
+ * DOIS POR LINHA NO APARELHO, e nao um. Com `auto-fill minmax(11rem)` os 370px uteis
+ * cabiam UMA coluna de 338px, e os quatro numeros viravam quatro paineis gigantes
+ * empilhados que comiam a tela inteira antes do grafico (reprovado a olho, 2026-08-27).
+ * Na web o auto-fill volta, porque la ha largura para quatro.
+ */
 .prod-vg-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
+}
+
+[data-view="web"] .prod-vg-kpis {
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+}
+
+/* No aparelho o numero desce um degrau da escala: 2 colunas de 165px nao comportam
+ * `--tipo-titulo-2` sem quebrar «11.304» no meio. */
+[data-view="mobile"] .prod-vg-card {
+  padding: 0.5rem 0.75rem;
+}
+
+[data-view="mobile"] .prod-vg-card > strong {
+  font-size: var(--tipo-titulo-3);
 }
 
 .prod-vg-card {

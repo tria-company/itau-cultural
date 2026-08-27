@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ICONE_APPS,
   ICONE_COMUNIDADE,
   ICONE_LOJA,
   ICONE_STUDIO_HOME,
@@ -42,6 +43,7 @@ interface ItemDeTopo {
 
 const TELAS_DE_TOPO: ItemDeTopo[] = [
   { href: "/studio", rotulo: "Início", icone: ICONE_STUDIO_HOME },
+  { href: "/studio/pautas", rotulo: "Studio", icone: ICONE_APPS },
   { href: "/studio/comunidade", rotulo: "Comunidade", icone: ICONE_COMUNIDADE },
   { href: "/studio/pontos", rotulo: "Loja de pontos", icone: ICONE_LOJA },
 ];

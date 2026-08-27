@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  ICONE_APPS,
   ICONE_COMUNIDADE,
   ICONE_LOJA,
   ICONE_MAIS,
@@ -33,6 +34,7 @@ import type { Pauta } from "@/dados/tipos-produtor";
 
 const ABAS = [
   { href: "/studio", rotulo: "Início", icone: ICONE_STUDIO_HOME },
+  { href: "/studio/pautas", rotulo: "Studio", icone: ICONE_APPS },
   { href: "/studio/comunidade", rotulo: "Comunidade", icone: ICONE_COMUNIDADE },
   { href: "/studio/pontos", rotulo: "Loja", icone: ICONE_LOJA },
 ] as const;

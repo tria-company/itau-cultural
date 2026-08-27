@@ -56,11 +56,14 @@ import type {
  *      ingressos, receita e dias para a próxima sessão; audiovisual em plays, tempo
  *      médio e conclusão. Números autorados (desempenho-produtor.ts), declarados na
  *      legenda do gráfico.
- *   4. ATALHOS com imagem, um por pauta: o painel É a navegação. O trilho de
- *      pastilhas não aparece na raiz, porque seria a mesma navegação duas vezes.
- *   5. GERENCIAR: linhas para Sessões, Perfil e Catálogos.
- *   6. RECENTES: quatro registros, e o resto numa folha com busca e seletores.
- *   7. Rodapé de dois links discretos: sobre a demonstração, e reiniciar.
+ *   4. GERENCIAR: linhas para Sessões, Perfil e Catálogos.
+ *   5. RECENTES: quatro registros, e o resto numa folha com busca e seletores.
+ *   6. Rodapé de dois links discretos: sobre a demonstração, e reiniciar.
+ *
+ * OS ATALHOS DE PAUTA SAÍRAM DAQUI (2026-08-27): eles são onze cartões com imagem, e
+ * empurravam o painel inteiro para baixo da dobra. Agora moram na aba «Studio» da barra,
+ * que é o lugar de escolher O QUE publicar; o início ficou sendo o quadro de como vai o
+ * que já está publicado.
  *
  * O «Criar» virou uma FOLHA EM DOIS PASSOS: escolher a pauta, ver o caminho, começar.
  * Guiado e direto, sem menu espremido dentro da barra.
@@ -208,55 +211,7 @@ export function ProdutorPainel({
           }}
         />
 
-        {/* ---- 4 · os atalhos: o painel é a navegação ---- */}
-        <section className="prod-secao" aria-labelledby="prod-atalhos-titulo">
-          <h2 className="prod-secao-titulo" id="prod-atalhos-titulo">
-            Publicar
-          </h2>
-          <div className="prod-atalhos" data-atalhos-pautas>
-            {PAUTAS.map((p) => {
-              const d = DESCRICAO_DA_PAUTA[p];
-              const img = imagemDaPauta(p);
-              const capa = (
-                <span className="prod-atalho-capa">
-                  {img ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- capa local do acervo
-                    <img src={img.caminho} alt="" loading="lazy" />
-                  ) : null}
-                  {img ? <span className="prod-atalho-credito">{img.credito}</span> : null}
-                </span>
-              );
-              if (!prontas.has(p)) {
-                return (
-                  <div
-                    key={p}
-                    className="prod-atalho"
-                    data-atalho={p}
-                    data-pronta="nao"
-                    title={`${d.objetivo} Ficha ainda não construída.`}
-                  >
-                    {capa}
-                    <span className="prod-atalho-rotulo">
-                      {d.rotulo}
-                      <span className="prod-atalho-breve">em breve</span>
-                    </span>
-                  </div>
-                );
-              }
-              return (
-                <Link key={p} href={d.rota} className="prod-atalho" data-atalho={p} title={d.objetivo}>
-                  {capa}
-                  <span className="prod-atalho-rotulo">
-                    {d.rotulo}
-                    <span aria-hidden>▸</span>
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ---- 5 · gerenciar ---- */}
+        {/* ---- 4 · gerenciar ---- */}
         <section className="prod-secao" aria-labelledby="prod-gerenciar-titulo">
           <h2 className="prod-secao-titulo" id="prod-gerenciar-titulo">
             Gerenciar
@@ -284,7 +239,7 @@ export function ProdutorPainel({
           </Link>
         </section>
 
-        {/* ---- 6 · recentes ---- */}
+        {/* ---- 5 · recentes ---- */}
         <section className="prod-secao" aria-labelledby="prod-recentes-titulo">
           <h2 className="prod-secao-titulo" id="prod-recentes-titulo">
             Recentes
@@ -326,7 +281,7 @@ export function ProdutorPainel({
           )}
         </section>
 
-        {/* ---- 7 · rodapé discreto ---- */}
+        {/* ---- 6 · rodapé discreto ---- */}
         <footer className="prod-rodape-limpo">
           <button
             type="button"
