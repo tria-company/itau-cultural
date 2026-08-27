@@ -244,7 +244,21 @@ function hidratar(sementeNova: Registro[], contextoNovo: ContextoDoProdutor) {
     return;
   }
 
-  estado = lido;
+  // NORMALIZA ANTES DE ACEITAR. `pareceRegistro` e estreita de proposito, e o preco
+  // disso e que um registro gravado por uma VERSAO ANTIGA desta demonstracao entra sem
+  // os campos que o codigo novo passou a ler, e `r.preco.inteira` derrubava a tela
+  // inteira em branco (2026-08-27, reproduzido). O que veio do armazenamento e entrada
+  // externa: cada registro e mesclado sobre a forma VAZIA da propria pauta, campo novo
+  // ganha default, dado antigo e preservado.
+  estado = {
+    ...lido,
+    registros: lido.registros.map((r) =>
+      comChavesDoRegistro({
+        ...registroVazio(r.id, r.pauta, contexto),
+        ...r,
+      } as Registro),
+    ),
+  };
   avisar();
 }
 

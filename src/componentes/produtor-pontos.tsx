@@ -62,7 +62,7 @@ const REGRAS: RegraDePonto[] = [
     id: "resumo",
     rotulo: "resumo escrito para a vitrine",
     valor: 5,
-    vale: (r) => r.resumo.trim().length >= 20,
+    vale: (r) => (r.resumo ?? "").trim().length >= 20,
   },
 ];
 

@@ -165,13 +165,18 @@ function desempenhoDeEvento(r: RegistroDeAgenda, dataDeReferencia: string): Dese
   const serie = serieDe(r.id, Math.max(4, Math.round(capacidade / 6)));
   const ingressos = soma(serie);
 
+  // TOLERANTE A CAMPO AUSENTE, deliberadamente: este módulo agrega registros vindos do
+  // ARMAZENAMENTO, e um registro gravado por versão antiga pode não ter `preco` nem
+  // `sessoes`. A hidratação normaliza, mas uma função de leitura que derruba a tela
+  // por causa de um campo é defeito dela também (reproduzido em 2026-08-27).
+  const sessoes = r.sessoes ?? [];
   // O PREÇO EFETIVO de uma sessão é o override dela, senão o preço-base do evento (a
   // inteira, senão a meia, senão o piso da faixa): o contrato diz que `SessaoDoProdutor.
   // preco` SOBRESCREVE o preço do evento, ele não é a única fonte. Ler só a sessão
   // fazia todo evento pago do fluxo normal aparecer como gratuito.
   const gratuito = r.cobranca !== "pago";
-  const base = r.preco.inteira ?? r.preco.meia ?? r.preco.de ?? null;
-  const efetivos = r.sessoes
+  const base = r.preco?.inteira ?? r.preco?.meia ?? r.preco?.de ?? null;
+  const efetivos = sessoes
     .filter((s) => !s.cancelada)
     .map((s) => s.preco ?? base)
     .filter((p): p is number => p !== null && p > 0);
@@ -185,7 +190,7 @@ function desempenhoDeEvento(r: RegistroDeAgenda, dataDeReferencia: string): Dese
   const receita = precoMedio === null ? null : ingressos * precoMedio;
 
   let proximaEmDias: number | null = null;
-  for (const s of r.sessoes) {
+  for (const s of sessoes) {
     if (s.cancelada) continue;
     const dias = diasAte(dataDeReferencia, s.inicio);
     if (dias === null || dias < 0) continue;
@@ -194,7 +199,7 @@ function desempenhoDeEvento(r: RegistroDeAgenda, dataDeReferencia: string): Dese
 
   const ocupacao = Math.min(
     100,
-    Math.round((ingressos / Math.max(1, capacidade * Math.max(1, r.sessoes.length))) * 100),
+    Math.round((ingressos / Math.max(1, capacidade * Math.max(1, sessoes.length))) * 100),
   );
 
   return {
