@@ -2841,7 +2841,10 @@
  * fallback de tela-sem-trilho saiu com ela. O conteudo preenche a coluna dois, com um
  * teto de leitura folgado em vez do centrado espremido que a revisao a olho reprovou. */
 [data-view="web"] .prod-painel {
-  max-width: 72rem;
+  /* SEM TETO: a largura e da janela, e quem governa a leitura sao as grades internas,
+   * que ganham colunas conforme o espaco (auto-fill abaixo). O teto de 72rem prendia
+   * tudo num canto de telas largas, e a revisao a olho reprovou. */
+  max-width: none;
   margin-inline: 0;
 }
 
@@ -2851,12 +2854,54 @@
   padding: 6rem 2rem 1.5rem;
 }
 
+/* As grades respondem a LARGURA REAL, nao a um numero de colunas fixado: 4 colunas em
+ * 1280, 6 em 1920, sem media query nenhuma. */
 [data-view="web"] .prod-atalhos {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
 [data-view="web"] .prod-opcoes-pauta {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+}
+
+/* ---- as listas longas em colunas, quando a janela da ---------------------- */
+
+/**
+ * Melhores, em edicao, comentarios e a loja viram DUAS colunas (ou mais) em tela larga:
+ * uma linha de 1400px para dizer um titulo e um numero e desperdicio de tela. O titulo
+ * da secao e as notas atravessam a largura toda; o que vira coluna e so a lista.
+ * A secao do saldo fica de fora: numero grande, legenda e barra sao um bloco so.
+ */
+[data-view="web"] [data-inicio-da-pauta] .prod-secao,
+[data-view="web"] [data-comunidade] .prod-secao,
+[data-view="web"] [data-registro-detalhe] .prod-secao,
+[data-view="web"] [data-loja-de-pontos] .prod-secao:not([aria-labelledby="prod-pontos-saldo"]) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+  column-gap: 3rem;
+  align-items: start;
+}
+
+[data-view="web"] [data-inicio-da-pauta] .prod-secao > .prod-secao-titulo,
+[data-view="web"] [data-comunidade] .prod-secao > .prod-secao-titulo,
+[data-view="web"] [data-registro-detalhe] .prod-secao > .prod-secao-titulo,
+[data-view="web"] [data-loja-de-pontos] .prod-secao > .prod-secao-titulo,
+[data-view="web"] [data-inicio-da-pauta] .prod-secao > .prod-campo-nota,
+[data-view="web"] [data-loja-de-pontos] .prod-secao > .prod-campo-nota,
+[data-view="web"] [data-comunidade] .prod-secao > .prod-grafico-legenda,
+[data-view="web"] [data-inicio-da-pauta] .prod-secao > .prod-grafico-legenda,
+[data-view="web"] [data-comunidade] .prod-secao > .prod-vazio,
+[data-view="web"] [data-inicio-da-pauta] .prod-secao > .prod-vazio,
+[data-view="web"] [data-registro-detalhe] .prod-secao > .prod-grafico,
+[data-view="web"] [data-registro-detalhe] .prod-secao > .prod-grafico-eixo,
+[data-view="web"] [data-registro-detalhe] .prod-secao > .prod-inicio-stats,
+[data-view="web"] [data-registro-detalhe] .prod-secao > .prod-detalhe-fotos {
+  grid-column: 1 / -1;
+}
+
+/* As fotos do detalhe tambem respondem a largura. */
+[data-view="web"] .prod-detalhe-fotos {
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
 }
 
 /* ---- o perfil ------------------------------------------------------------ */
