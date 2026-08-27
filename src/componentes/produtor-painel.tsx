@@ -14,6 +14,7 @@ import {
 } from "@/componentes/produtor-estado";
 import { PORTAS, ROTULO_DA_SITUACAO, SITUACOES } from "@/dados/tipos-acesso";
 import { GraficoDaSerie } from "@/componentes/base/grafico-da-serie";
+import { panoramaDe } from "@/dados/panorama-produtor";
 import {
   DESEMPENHO_E_AUTORADO,
   DIAS_DA_SERIE,
@@ -56,9 +57,12 @@ import type {
  *      ingressos, receita e dias para a próxima sessão; audiovisual em plays, tempo
  *      médio e conclusão. Números autorados (desempenho-produtor.ts), declarados na
  *      legenda do gráfico.
- *   4. GERENCIAR: linhas para Sessões, Perfil e Catálogos.
- *   5. RECENTES: quatro registros, e o resto numa folha com busca e seletores.
- *   6. Rodapé de dois links discretos: sobre a demonstração, e reiniciar.
+ *   4. RECENTES: quatro registros, e o resto numa folha com busca e seletores.
+ *   5. Rodapé de dois links discretos: sobre a demonstração, e reiniciar.
+ *
+ * A LISTA «GERENCIAR» SAIU (2026-08-27): os cartões de «Para onde ir» da visão geral
+ * levam às mesmas telas E trazem o número vivo de cada uma. Duas listas para os mesmos
+ * três destinos era a mesma escolha oferecida duas vezes, uma delas sem informação.
  *
  * OS ATALHOS DE PAUTA SAÍRAM DAQUI (2026-08-27): eles são onze cartões com imagem, e
  * empurravam o painel inteiro para baixo da dobra. Agora moram na aba «Studio» da barra,
@@ -211,35 +215,7 @@ export function ProdutorPainel({
           }}
         />
 
-        {/* ---- 4 · gerenciar ---- */}
-        <section className="prod-secao" aria-labelledby="prod-gerenciar-titulo">
-          <h2 className="prod-secao-titulo" id="prod-gerenciar-titulo">
-            Gerenciar
-          </h2>
-          <Link href="/studio/ocorrencias/" className="prod-atalho-linha" data-atalho="sessoes">
-            <span className="prod-atalho-linha-texto">
-              <strong>Sessões publicadas</strong>
-              <span>Horário, esgotado e cancelamento do que está no ar</span>
-            </span>
-            <span aria-hidden>▸</span>
-          </Link>
-          <Link href="/studio/perfil/" className="prod-atalho-linha" data-atalho="perfil">
-            <span className="prod-atalho-linha-texto">
-              <strong>Seu perfil</strong>
-              <span>Dados pessoais, foto e o estado da conta</span>
-            </span>
-            <span aria-hidden>▸</span>
-          </Link>
-          <Link href="/studio/catalogos/" className="prod-atalho-linha" data-atalho="catalogos">
-            <span className="prod-atalho-linha-texto">
-              <strong>Catálogos</strong>
-              <span>As listas de escolha das fichas: linguagens, temas, formatos</span>
-            </span>
-            <span aria-hidden>▸</span>
-          </Link>
-        </section>
-
-        {/* ---- 5 · recentes ---- */}
+        {/* ---- 4 · recentes ---- */}
         <section className="prod-secao" aria-labelledby="prod-recentes-titulo">
           <h2 className="prod-secao-titulo" id="prod-recentes-titulo">
             Recentes
@@ -281,7 +257,7 @@ export function ProdutorPainel({
           )}
         </section>
 
-        {/* ---- 6 · rodapé discreto ---- */}
+        {/* ---- 5 · rodapé discreto ---- */}
         <footer className="prod-rodape-limpo">
           <button
             type="button"
@@ -902,11 +878,21 @@ function Reiniciar({ aoReiniciar }: { aoReiniciar: () => void }) {
 }
 
 /**
- * A VISÃO GERAL do Início: KPIs, o gráfico agregado dos catorze dias e as duas colunas
- * de leitura rápida, no molde dos painéis de canal (o dash do Seu Elias foi a referência
- * de diagramação; a identidade é a da casa). Tudo AUTORADO E DETERMINÍSTICO, da mesma
- * fonte de desempenho-produtor.ts: os números daqui são os mesmos das telas de pauta e
- * de registro, porque duas fontes discordariam na primeira edição.
+ * A VISÃO GERAL do Início: o painel macro de tudo o que este perfil publica.
+ *
+ * OITO NÚMEROS, TRÊS GRÁFICOS E UM CARTÃO POR TELA. Ele responde, sem rolar duas vezes,
+ * às perguntas que um produtor faz ao abrir o dia: quanto alcance, quanto entrou, o que
+ * está no ar, o que falta declarar, quem comentou, e para onde ir agora.
+ *
+ * DUAS NATUREZAS DE NÚMERO, e a tela nunca as mistura sem dizer. Alcance, ingressos,
+ * receita, salvos e comentários são AUTORADOS (`desempenho-produtor.ts`, declarado na
+ * legenda). Publicados, em edição, pendências, sessões, vocabulário e a QUALIDADE DA
+ * FICHA são medidos do estado real dos registros: é o trabalho de quem publica, não uma
+ * simulação. A barra de qualidade é a que mais importa, porque é a única que a pessoa
+ * muda escrevendo.
+ *
+ * UM CÁLCULO SÓ: tudo vem de `panoramaDe`, a mesma função que a loja de pontos usa para
+ * o saldo. Duas telas somando por conta própria divergiriam no primeiro ajuste.
  */
 function VisaoGeral({
   registros,
@@ -919,177 +905,272 @@ function VisaoGeral({
   imagens: ImagemDeAtalho[];
   aoAbrirRegistro: (r: Registro) => void;
 }) {
-  const publicados = useMemo(
-    () => registros.filter((r) => r.situacao === "publicado"),
-    [registros],
+  const panorama = useMemo(
+    () => panoramaDe(registros, dataDeReferencia),
+    [registros, dataDeReferencia],
   );
 
   const medidos = useMemo(
     () =>
-      publicados.map((r) => {
-        const desempenho = desempenhoDe(r, dataDeReferencia);
-        return { r, desempenho, heroi: heroiDe(desempenho), metricas: metricasDe(desempenho) };
-      }),
-    [publicados, dataDeReferencia],
+      registros
+        .filter((r) => r.situacao === "publicado")
+        .map((r) => {
+          const desempenho = desempenhoDe(r, dataDeReferencia);
+          return { r, heroi: heroiDe(desempenho), metricas: metricasDe(desempenho) };
+        })
+        .sort((a, b) => b.heroi.valor - a.heroi.valor),
+    [registros, dataDeReferencia],
   );
 
-  const agregados = useMemo(() => {
-    const serie = Array.from({ length: DIAS_DA_SERIE }, () => 0);
-    let alcance = 0;
-    let ingressos = 0;
-    let salvos = 0;
-    let comentarios = 0;
-    const porPauta = new Map<string, number>();
-    for (const m of medidos) {
-      m.desempenho.serie.forEach((v, i) => {
-        serie[i] = (serie[i] ?? 0) + v;
-      });
-      alcance += m.heroi.valor;
-      salvos += Math.round(m.heroi.valor * 0.09);
-      comentarios += comentariosDe(m.r.id).length;
-      if (m.desempenho.familia === "evento") ingressos += m.desempenho.ingressos;
-      const rotulo = DESCRICAO_DA_PAUTA[m.r.pauta].rotulo;
-      porPauta.set(rotulo, (porPauta.get(rotulo) ?? 0) + m.heroi.valor);
-    }
-    return {
-      serie,
-      alcance,
-      ingressos,
-      salvos,
-      comentarios,
-      porPauta: [...porPauta.entries()].sort((a, b) => b[1] - a[1]),
-    };
-  }, [medidos]);
-
-  const delta = variacaoSemanal(agregados.serie);
-  const top = useMemo(
-    () => [...medidos].sort((a, b) => b.heroi.valor - a.heroi.valor).slice(0, 5),
-    [medidos],
-  );
   const conversas = useMemo(
     () =>
-      publicados
+      registros
+        .filter((r) => r.situacao === "publicado")
         .flatMap((r) => comentariosDe(r.id).map((c) => ({ ...c, r })))
         .sort((a, b) => a.haDias - b.haDias || a.r.id.localeCompare(b.r.id))
         .slice(0, 3),
-    [publicados],
+    [registros],
   );
-  const maiorPauta = Math.max(1, ...agregados.porPauta.map(([, v]) => v));
+
+  if (panorama.publicados === 0) return null;
+
+  const delta = variacaoSemanal(panorama.serie);
+  const maiorPauta = Math.max(1, ...panorama.porPauta.map((p) => p.valor));
   const capaDe = (r: Registro): string | null =>
     r.imagem?.caminho ?? imagens[0]?.caminho ?? null;
 
-  if (publicados.length === 0) return null;
+  // As três situações, em fatia: é o retrato do acervo inteiro numa barra só.
+  const situacoes = [
+    { rotulo: "no ar", valor: panorama.publicados },
+    { rotulo: "em edição", valor: panorama.rascunhos },
+    { rotulo: "devolvidos", valor: panorama.devolvidos },
+  ].filter((s) => s.valor > 0);
+  const somaDasSituacoes = Math.max(1, situacoes.reduce((n, s) => n + s.valor, 0));
+
+  const KPIS = [
+    { valor: milhar(panorama.alcance), rotulo: `alcance em ${DIAS_DA_SERIE} dias`, delta },
+    { valor: milhar(panorama.ingressos), rotulo: "ingressos" },
+    {
+      valor: panorama.receita > 0 ? emReais(panorama.receita) : "gratuito",
+      rotulo: "receita",
+    },
+    { valor: milhar(panorama.salvos), rotulo: "salvos" },
+    { valor: String(panorama.comentarios), rotulo: "comentários" },
+    { valor: String(panorama.publicados), rotulo: "no ar" },
+    { valor: String(panorama.sessoes), rotulo: "sessões" },
+    { valor: milhar(panorama.pontosGanhos), rotulo: `pontos · nível ${panorama.nivel}` },
+  ];
 
   return (
-    <section className="prod-secao" aria-labelledby="prod-vg-titulo" data-visao-geral>
-      <h2 className="prod-secao-titulo" id="prod-vg-titulo">
-        Visão geral
-      </h2>
+    <>
+      <section className="prod-secao" aria-labelledby="prod-vg-titulo" data-visao-geral>
+        <h2 className="prod-secao-titulo" id="prod-vg-titulo">
+          Visão geral
+        </h2>
 
-      {/* ---- os KPIs ---- */}
-      <div className="prod-vg-kpis">
-        <div className="prod-vg-card">
-          <strong>{milhar(agregados.alcance)}</strong>
-          <span>alcance em {DIAS_DA_SERIE} dias</span>
-          <span className="prod-vg-delta" data-sobe={delta >= 0 ? "sim" : "nao"}>
-            {delta >= 0 ? "↑" : "↓"} {Math.abs(delta)}% na semana
-          </span>
-        </div>
-        <div className="prod-vg-card">
-          <strong>{milhar(agregados.ingressos)}</strong>
-          <span>ingressos</span>
-        </div>
-        <div className="prod-vg-card">
-          <strong>{milhar(agregados.salvos)}</strong>
-          <span>salvos</span>
-        </div>
-        <div className="prod-vg-card">
-          <strong>{agregados.comentarios}</strong>
-          <span>comentários</span>
-        </div>
-      </div>
-
-      {/* ---- o grafico agregado ---- */}
-      <div className="prod-vg-grafico">
-        <GraficoDaSerie serie={agregados.serie} dataDeReferencia={dataDeReferencia} />
-      </div>
-
-      {/* ---- as duas colunas ---- */}
-      <div className="prod-vg-colunas">
-        <div className="prod-vg-coluna">
-          <h3 className="prod-vg-subtitulo">Top conteúdos</h3>
-          {top.map((m, i) => (
-            <button
-              key={m.r.id}
-              type="button"
-              className="prod-melhor"
-              data-abrir-registro={m.r.id}
-              onClick={() => aoAbrirRegistro(m.r)}
-            >
-              <span className="prod-posicao" aria-hidden>
-                {i + 1}
-              </span>
-              {capaDe(m.r) ? (
-                // eslint-disable-next-line @next/next/no-img-element -- capa local
-                <img src={capaDe(m.r) ?? ""} alt="" className="prod-melhor-capa" loading="lazy" />
+        {/* ---- os oito números ---- */}
+        <div className="prod-vg-kpis">
+          {KPIS.map((k) => (
+            <div className="prod-vg-card" key={k.rotulo}>
+              <strong>{k.valor}</strong>
+              <span>{k.rotulo}</span>
+              {k.delta !== undefined ? (
+                <span className="prod-vg-delta" data-sobe={k.delta >= 0 ? "sim" : "nao"}>
+                  {k.delta >= 0 ? "↑" : "↓"} {Math.abs(k.delta)}% na semana
+                </span>
               ) : null}
-              <span className="prod-melhor-texto">
-                <span className="prod-melhor-nome">
-                  {semTravessao(m.r.titulo) || DESCRICAO_DA_PAUTA[m.r.pauta].singular}
-                </span>
-                <span className="prod-melhor-sub">{DESCRICAO_DA_PAUTA[m.r.pauta].rotulo}</span>
-              </span>
-              <span className="prod-melhor-metricas">
-                {m.metricas.map((mm) => (
-                  <span
-                    className="prod-metrica"
-                    key={mm.rotulo}
-                    data-extra={mm.extra ? "sim" : "nao"}
-                  >
-                    <strong>{mm.valor}</strong>
-                    <span>{mm.rotulo}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* ---- a curva agregada ---- */}
+        <div className="prod-vg-grafico">
+          <GraficoDaSerie serie={panorama.serie} dataDeReferencia={dataDeReferencia} />
+        </div>
+
+        {/* ---- os dois gráficos de estado, lado a lado ---- */}
+        <div className="prod-vg-colunas">
+          <div className="prod-vg-coluna">
+            <h3 className="prod-vg-subtitulo">Qualidade da ficha</h3>
+            {panorama.porRegra
+              .filter((p) => p.regra.id !== "publicado")
+              .map((p) => (
+                <div className="prod-vg-barra" key={p.regra.id}>
+                  <span className="prod-vg-barra-rotulo">{p.regra.curto}</span>
+                  <span className="prod-vg-barra-trilho" aria-hidden>
+                    <span
+                      className="prod-vg-barra-cheia"
+                      style={{ width: `${Math.max(2, p.porcento)}%` }}
+                    />
                   </span>
-                ))}
-              </span>
-            </button>
-          ))}
-        </div>
+                  <span className="prod-vg-barra-valor">{p.porcento}%</span>
+                </div>
+              ))}
+            <p className="prod-grafico-legenda">
+              medido do que você escreveu, sobre {panorama.publicados} publicados
+            </p>
+          </div>
 
-        <div className="prod-vg-coluna">
-          <h3 className="prod-vg-subtitulo">Por pauta</h3>
-          {agregados.porPauta.slice(0, 6).map(([rotulo, valor]) => (
-            <div className="prod-vg-barra" key={rotulo}>
-              <span className="prod-vg-barra-rotulo">{rotulo}</span>
-              <span className="prod-vg-barra-trilho" aria-hidden>
+          <div className="prod-vg-coluna">
+            <h3 className="prod-vg-subtitulo">Situação do acervo</h3>
+            <div className="prod-vg-fatias" aria-hidden>
+              {situacoes.map((s, i) => (
                 <span
-                  className="prod-vg-barra-cheia"
-                  style={{ width: `${Math.max(4, Math.round((valor / maiorPauta) * 100))}%` }}
+                  key={s.rotulo}
+                  className="prod-vg-fatia"
+                  data-fatia={i === 0 ? "no-ar" : i === 1 ? "edicao" : "devolvido"}
+                  style={{ width: `${(s.valor / somaDasSituacoes) * 100}%` }}
                 />
-              </span>
-              <span className="prod-vg-barra-valor">{milhar(valor)}</span>
+              ))}
             </div>
-          ))}
-
-          <h3 className="prod-vg-subtitulo">Comentários recentes</h3>
-          {conversas.map((c) => (
-            <div className="prod-comentario" key={`${c.r.id}-${c.nome}-${c.haDias}`}>
-              <span className="prod-comentario-avatar" aria-hidden>
-                {(c.nome[0] ?? "?").toUpperCase()}
-              </span>
-              <span className="prod-comentario-texto">
-                <span className="prod-comentario-meta">
-                  {c.nome} · há {c.haDias} {c.haDias === 1 ? "dia" : "dias"}
+            <div className="prod-vg-legendas">
+              {situacoes.map((s, i) => (
+                <span className="prod-vg-legenda-item" key={s.rotulo}>
+                  <span
+                    className="prod-vg-ponto"
+                    data-fatia={i === 0 ? "no-ar" : i === 1 ? "edicao" : "devolvido"}
+                    aria-hidden
+                  />
+                  {s.valor} {s.rotulo}
                 </span>
-                {c.texto}
-              </span>
+              ))}
             </div>
+            <h3 className="prod-vg-subtitulo">Alcance por pauta</h3>
+            {panorama.porPauta.slice(0, 6).map((p) => (
+              <div className="prod-vg-barra" key={p.pauta}>
+                <span className="prod-vg-barra-rotulo">{p.rotulo}</span>
+                <span className="prod-vg-barra-trilho" aria-hidden>
+                  <span
+                    className="prod-vg-barra-cheia"
+                    style={{ width: `${Math.max(4, Math.round((p.valor / maiorPauta) * 100))}%` }}
+                  />
+                </span>
+                <span className="prod-vg-barra-valor">{milhar(p.valor)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ---- os tops e as conversas ---- */}
+        <div className="prod-vg-colunas">
+          <div className="prod-vg-coluna">
+            <h3 className="prod-vg-subtitulo">Top conteúdos</h3>
+            {medidos.slice(0, 5).map((m, i) => (
+              <button
+                key={m.r.id}
+                type="button"
+                className="prod-melhor"
+                data-abrir-registro={m.r.id}
+                onClick={() => aoAbrirRegistro(m.r)}
+              >
+                <span className="prod-posicao" aria-hidden>
+                  {i + 1}
+                </span>
+                {capaDe(m.r) ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- capa local
+                  <img src={capaDe(m.r) ?? ""} alt="" className="prod-melhor-capa" loading="lazy" />
+                ) : null}
+                <span className="prod-melhor-texto">
+                  <span className="prod-melhor-nome">
+                    {semTravessao(m.r.titulo) || DESCRICAO_DA_PAUTA[m.r.pauta].singular}
+                  </span>
+                  <span className="prod-melhor-sub">{DESCRICAO_DA_PAUTA[m.r.pauta].rotulo}</span>
+                </span>
+                <span className="prod-melhor-metricas">
+                  {m.metricas.map((mm) => (
+                    <span
+                      className="prod-metrica"
+                      key={mm.rotulo}
+                      data-extra={mm.extra ? "sim" : "nao"}
+                    >
+                      <strong>{mm.valor}</strong>
+                      <span>{mm.rotulo}</span>
+                    </span>
+                  ))}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="prod-vg-coluna">
+            <h3 className="prod-vg-subtitulo">Comentários recentes</h3>
+            {conversas.map((c) => (
+              <div className="prod-comentario" key={`${c.r.id}-${c.nome}-${c.haDias}`}>
+                <span className="prod-comentario-avatar" aria-hidden>
+                  {(c.nome[0] ?? "?").toUpperCase()}
+                </span>
+                <span className="prod-comentario-texto">
+                  <span className="prod-comentario-meta">
+                    {c.nome} · há {c.haDias} {c.haDias === 1 ? "dia" : "dias"}
+                  </span>
+                  {c.texto}
+                </span>
+              </div>
+            ))}
+            <Link href="/studio/comunidade/" className="prod-link" data-ver-comunidade>
+              ver a Comunidade ▸
+            </Link>
+          </div>
+        </div>
+
+        <p className="prod-grafico-legenda" title={DESEMPENHO_E_AUTORADO}>
+          alcance, ingressos, receita, salvos e comentários são números autorados da
+          demonstração; publicados, sessões, vocabulário e qualidade são medidos do acervo
+        </p>
+      </section>
+
+      {/* ---- um cartão por tela, com o número vivo de cada uma ---- */}
+      <section className="prod-secao" aria-labelledby="prod-vg-telas">
+        <h2 className="prod-secao-titulo" id="prod-vg-telas">
+          Para onde ir
+        </h2>
+        <div className="prod-vg-telas" data-cartoes-de-tela>
+          {[
+            {
+              href: "/studio/pautas/",
+              rotulo: "Studio",
+              numero: String(panorama.total),
+              nota: "registros nas onze pautas",
+            },
+            {
+              href: "/studio/comunidade/",
+              rotulo: "Comunidade",
+              numero: String(panorama.comentarios),
+              nota: "comentários recebidos",
+            },
+            {
+              href: "/studio/pontos/",
+              rotulo: "Loja de pontos",
+              numero: milhar(panorama.pontosGanhos),
+              nota: `pontos ganhos, nível ${panorama.nivel}`,
+            },
+            {
+              href: "/studio/ocorrencias/",
+              rotulo: "Sessões",
+              numero: String(panorama.sessoes),
+              nota: "sessões no ar para gerir",
+            },
+            {
+              href: "/studio/catalogos/",
+              rotulo: "Catálogos",
+              numero: `${panorama.linguagensUsadas}/${panorama.temasUsados}`,
+              nota: "linguagens e temas em uso",
+            },
+            {
+              href: "/studio/perfil/",
+              rotulo: "Perfil",
+              numero: String(panorama.pendencias),
+              nota: "pendências com outra equipe",
+            },
+          ].map((t) => (
+            <Link key={t.href} href={t.href} className="prod-vg-tela" data-cartao-de-tela={t.rotulo}>
+              <strong className="prod-vg-tela-numero">{t.numero}</strong>
+              <span className="prod-vg-tela-rotulo">{t.rotulo}</span>
+              <span className="prod-vg-tela-nota">{t.nota}</span>
+            </Link>
           ))}
         </div>
-      </div>
-
-      <p className="prod-grafico-legenda" title={DESEMPENHO_E_AUTORADO}>
-        números autorados da demonstração
-      </p>
-    </section>
+      </section>
+    </>
   );
 }

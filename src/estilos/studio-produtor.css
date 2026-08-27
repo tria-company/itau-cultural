@@ -4385,3 +4385,108 @@
   color: var(--cor-tinta-3);
   overflow-wrap: anywhere;
 }
+
+/* ---- o dashboard macro: fatias e cartoes de tela ---------------------------- */
+
+/**
+ * A barra de FATIAS e o unico grafico do painel que usa mais de um tom: as tres
+ * situacoes precisam se distinguir. Nenhum deles e laranja: laranja e acao, e estar
+ * publicado nao e acao. Tinta cheia, tinta a 45% e tinta a 20%.
+ */
+.prod-vg-fatias {
+  display: flex;
+  height: 0.75rem;
+  border-radius: var(--raio-pilula);
+  overflow: hidden;
+  background: var(--cor-superficie-2);
+}
+
+.prod-vg-fatia[data-fatia="no-ar"] {
+  background: var(--cor-tinta);
+}
+
+.prod-vg-fatia[data-fatia="edicao"] {
+  background: color-mix(in srgb, var(--cor-tinta) 45%, transparent);
+}
+
+.prod-vg-fatia[data-fatia="devolvido"] {
+  background: color-mix(in srgb, var(--cor-tinta) 20%, transparent);
+}
+
+.prod-vg-legendas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.prod-vg-legenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-2);
+}
+
+.prod-vg-ponto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+}
+
+.prod-vg-ponto[data-fatia="no-ar"] {
+  background: var(--cor-tinta);
+}
+
+.prod-vg-ponto[data-fatia="edicao"] {
+  background: color-mix(in srgb, var(--cor-tinta) 45%, transparent);
+}
+
+.prod-vg-ponto[data-fatia="devolvido"] {
+  background: color-mix(in srgb, var(--cor-tinta) 20%, transparent);
+}
+
+/* UM CARTAO POR TELA: o numero vivo primeiro, o nome depois, a nota por ultimo. */
+.prod-vg-telas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+[data-view="web"] .prod-vg-telas {
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+}
+
+.prod-vg-tela {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--dur-1) var(--ease-padrao);
+}
+
+.prod-vg-tela:hover {
+  border-color: var(--cor-borda-forte);
+}
+
+.prod-vg-tela-numero {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1.1;
+}
+
+.prod-vg-tela-rotulo {
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+}
+
+.prod-vg-tela-nota {
+  font-size: var(--tipo-micro);
+  line-height: 1.35;
+  color: var(--cor-tinta-3);
+}

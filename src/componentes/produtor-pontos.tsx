@@ -4,6 +4,12 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { usePontos } from "@/componentes/pontos-estado";
 import { useProdutor } from "@/componentes/produtor-estado";
+import {
+  LOJA_DE_PONTOS as LOJA,
+  PONTOS_POR_NIVEL,
+  REGRAS_DE_PONTO as REGRAS,
+  panoramaDe,
+} from "@/dados/panorama-produtor";
 import { DESCRICAO_DA_PAUTA, semTravessao } from "@/dados/tipos-produtor";
 import type { ContextoDoProdutor, Registro } from "@/dados/tipos-produtor";
 
@@ -24,84 +30,6 @@ import type { ContextoDoProdutor, Registro } from "@/dados/tipos-produtor";
  * AS RECOMPENSAS SÃO DECLARADAS. Não há loja atrás disto: resgatar marca o item neste
  * navegador e desconta o saldo, e a tela diz que é assim.
  */
-
-interface RegraDePonto {
-  id: string;
-  rotulo: string;
-  valor: number;
-  /** Quem pontua. Recebe o registro publicado. */
-  vale: (r: Registro) => boolean;
-}
-
-const REGRAS: RegraDePonto[] = [
-  {
-    id: "publicado",
-    rotulo: "registro no ar",
-    valor: 20,
-    vale: () => true,
-  },
-  {
-    id: "credito",
-    rotulo: "foto com crédito de quem a fez",
-    valor: 10,
-    vale: (r) => (r.imagem?.credito ?? "").trim() !== "",
-  },
-  {
-    id: "alt",
-    rotulo: "imagem com descrição para quem não vê",
-    valor: 10,
-    vale: (r) => (r.imagem?.alt ?? "").trim() !== "",
-  },
-  {
-    id: "acessibilidade",
-    rotulo: "ficha de acessibilidade resolvida",
-    valor: 15,
-    vale: (r) => r.declaraAcessibilidade,
-  },
-  {
-    id: "resumo",
-    rotulo: "resumo escrito para a vitrine",
-    valor: 5,
-    vale: (r) => (r.resumo ?? "").trim().length >= 20,
-  },
-];
-
-interface Recompensa {
-  id: string;
-  rotulo: string;
-  descricao: string;
-  custo: number;
-}
-
-const LOJA: Recompensa[] = [
-  {
-    id: "destaque",
-    rotulo: "Destaque na vitrine",
-    descricao: "Sete dias em posição de topo em Descobrir.",
-    custo: 120,
-  },
-  {
-    id: "selo",
-    rotulo: "Selo de ficha completa",
-    descricao: "A marca que diz que nada foi declarado em silêncio.",
-    custo: 200,
-  },
-  {
-    id: "mentoria",
-    rotulo: "Sessão de curadoria",
-    descricao: "Uma hora com a equipe editorial sobre a sua programação.",
-    custo: 320,
-  },
-  {
-    id: "impulso",
-    rotulo: "Impulso na busca",
-    descricao: "Prioridade de ordenação por trinta dias.",
-    custo: 480,
-  },
-];
-
-/** A cada 250 pontos, um nível. É o único número redondo da tela, e ele é declarado. */
-const PONTOS_POR_NIVEL = 250;
 
 export function LojaDePontos({
   semente,
