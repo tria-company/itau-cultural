@@ -98,6 +98,7 @@ export function FichaDoPlay({
           conteudo: pecas.publicacao,
         },
       ]}
+      colunaDaPauta={(r) => <PlayerDaPrevia registro={r} />}
       montarExtrasDoInicio={(daPauta, operacoes) => ({
         // A TRILHA de um vídeo é a série que ele declara; sem série, «Avulsos».
         // Playlists ficam fora do agrupamento: elas são a seção de baixo.
@@ -497,5 +498,44 @@ function AtoPontes({
         </ul>
       ) : null}
     </>
+  );
+}
+
+/**
+ * O PLAYER DA PRÉVIA: a moldura 16/9 com a capa que será a miniatura, e a fonte
+ * declarada embaixo. É o que o público vê antes de tocar.
+ *
+ * A MINIATURA É A CAPA LOCAL, nunca a do YouTube: buscar `img.youtube.com` seria uma
+ * requisição externa em runtime, e a promessa medida do projeto é que não existe
+ * nenhuma. O `<iframe>` também não nasce aqui, pelo mesmo motivo: ele nasce depois do
+ * clique, na tela pública.
+ */
+function PlayerDaPrevia({ registro }: { registro: RegistroDePlay }) {
+  const fonte =
+    registro.fonte_video === "externo"
+      ? registro.linkExterno
+      : registro.idDoVideo
+        ? `${registro.fonte_video} · ${registro.idDoVideo}`
+        : "";
+  return (
+    <div className="prod-player-previa" data-player-previa>
+      <span className="prod-imagem-palco">
+        {registro.imagem ? (
+          // eslint-disable-next-line @next/next/no-img-element -- capa local do acervo
+          <img src={registro.imagem.caminho} alt="" className="prod-imagem-grande" />
+        ) : (
+          <span className="prod-imagem-vazia">a capa aparece aqui</span>
+        )}
+        {registro.imagem ? (
+          <span className="prod-player-glifo" aria-hidden>
+            ▶
+          </span>
+        ) : null}
+      </span>
+      <span className="prod-player-fonte">
+        {fonte === "" ? "nenhuma fonte declarada ainda" : fonte}
+        {registro.duracaoMinutos !== null ? ` · ${registro.duracaoMinutos} min` : ""}
+      </span>
+    </div>
   );
 }

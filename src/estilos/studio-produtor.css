@@ -4263,3 +4263,101 @@
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+/* ---- o aproveitamento da largura no Play ---------------------------------- */
+
+/**
+ * O grupo de trilha e UM filho da secao, entao a grade da secao o punha numa coluna
+ * de 520px e as oito linhas empilhavam nela, deixando 1.700px vazios (reprovado a
+ * olho, 2026-08-27). Agora o grupo atravessa a largura e sao as LINHAS que viram
+ * colunas, com o nome da trilha por cima delas.
+ */
+[data-view="web"] [data-inicio-da-pauta] .prod-trilha-grupo,
+[data-view="web"] [data-inicio-da-pauta] .prod-nova-playlist,
+[data-view="web"] [data-inicio-da-pauta] .prod-campo-nota {
+  grid-column: 1 / -1;
+}
+
+[data-view="web"] .prod-trilha-grupo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(34rem, 1fr));
+  column-gap: 3rem;
+  align-items: start;
+}
+
+[data-view="web"] .prod-trilha-nome {
+  grid-column: 1 / -1;
+}
+
+/* O campo de playlist nova nao precisa de 2.000px para caber um nome. */
+[data-view="web"] .prod-nova-playlist {
+  max-width: 34rem;
+}
+
+/* A LINHA COM METRICAS precisa de piso para o titulo: sem isto as quatro colunas de
+ * numero comem o nome e sobra «Est...». O texto tem prioridade, os numeros encolhem
+ * o gap antes. */
+[data-view="web"] .prod-melhor-texto {
+  flex: 1 1 14rem;
+}
+
+[data-view="web"] .prod-melhor-metricas {
+  gap: 1.25rem;
+}
+
+/* Em telas largas as secoes de melhores tambem abrem em mais colunas. */
+[data-view="web"] [data-inicio-da-pauta] .prod-secao {
+  grid-template-columns: repeat(auto-fill, minmax(34rem, 1fr));
+}
+
+/* ---- o popup largo: duas colunas de verdade -------------------------------- */
+
+/**
+ * Dentro da janela do popup a coluna colada vale 26rem (a de pagina inteira vale 22),
+ * e o formulario fica com o resto: era metade da janela vazia enquanto os campos se
+ * espremiam em 800px (reprovado a olho, 2026-08-27).
+ */
+[data-view="web"] .prod-ficha-janela .prod-ficha-duas-colunas {
+  grid-template-columns: minmax(0, 1fr) 26rem;
+  gap: 2.5rem;
+}
+
+/* Os campos param de esticar para 1.400px: linha longa demais nao se le, e o resto
+ * da largura ja e da coluna da direita. */
+[data-view="web"] .prod-ficha-janela .prod-lado-do-ato {
+  max-width: 46rem;
+}
+
+/* ---- o player da previa ---------------------------------------------------- */
+
+.prod-player-previa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.prod-player-glifo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 60%, transparent);
+  color: var(--ic-branco);
+  font-size: var(--tipo-destaque);
+}
+
+.prod-player-fonte {
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  color: var(--cor-tinta-3);
+  overflow-wrap: anywhere;
+}

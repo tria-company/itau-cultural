@@ -95,6 +95,11 @@ export interface PropsFichaSimples<P extends Pauta> {
    * e playlists). Recebe os registros da pauta e as operações do armazém, devolve o
    * que o painel monta.
    */
+  /**
+   * O que a pauta acrescenta NO TOPO da coluna colada da web (o Play põe o player).
+   * Abaixo dele, a coluna traz os impedimentos e a prévia, iguais para todas.
+   */
+  colunaDaPauta?: (r: PorPauta<P>) => ReactNode;
   montarExtrasDoInicio?: (
     daPauta: PorPauta<P>[],
     operacoes: {
@@ -126,6 +131,7 @@ export function FichaSimples<P extends Pauta>({
   temLugarFisico,
   destinoAoPublicar,
   composicao,
+  colunaDaPauta,
   montarExtrasDoInicio,
 }: PropsFichaSimples<P>) {
   const router = useRouter();
@@ -398,6 +404,20 @@ export function FichaSimples<P extends Pauta>({
       noAr={atual.situacao === "publicado"}
       aoVoltar={() => setModo(atual.situacao === "publicado" ? "detalhe" : "inicio")}
       rotuloDaVolta={d.rotulo}
+      /* A COLUNA COLADA vale para TODAS as pautas, e não só para a agenda: na web a
+         ficha é um popup largo, e sem ela a metade direita ficava vazia enquanto os
+         impedimentos moravam no fim do formulário, longe de quem preenche. */
+      colunaColada={
+        <>
+          {colunaDaPauta?.(atual)}
+          <ListaDeImpedimentos
+            impedimentos={score.impedimentos}
+            total={score.total}
+            aoIrParaAto={setAtoPedido}
+          />
+          <Previa registro={atual} />
+        </>
+      }
       acaoFinal={
         <BotaoDoStudio
           primaria
