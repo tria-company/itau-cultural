@@ -262,11 +262,6 @@ function AtoAutor({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        Hoje o autor só existe quando o crawl achou <code>columnist: true</code> na página de
-        origem, ou seja, nas colunas, e em mais nada. Uma notícia assinada e uma entrevista
-        conduzida saem sem nome.
-      </p>
 
       <Campo rotulo="Nome" obrigatorio={registro.familia === "coluna" || registro.familia === "opiniao"}>
         <input
@@ -313,10 +308,6 @@ function AtoLigacoes({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        A ligação é o que faz a matéria pertencer ao acervo em vez de flutuar ao lado dele. E
-        o <strong>motivo é o selo que o público lê</strong>, não uma anotação interna.
-      </p>
 
       {RELACOES.map((rel) => (
         <Campo key={rel.id} rotulo={`Esta matéria ${rel.rotulo}…`}>

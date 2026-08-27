@@ -157,11 +157,6 @@ function AtoPassos({
             {semMotivo.length}{" "}
             {semMotivo.length === 1 ? "passo sem motivo" : "passos sem motivo"}
           </strong>
-          <p className="prod-campo-nota">
-            O primeiro é «{semMotivo[0]?.deTitulo} → {semMotivo[0]?.paraTitulo}». Um passo sem
-            motivo impede publicar a trilha inteira: o motivo é o selo que o público lê, e uma
-            cadeia que não explica a si mesma não é mediação.
-          </p>
         </div>
       ) : null}
 
@@ -246,11 +241,6 @@ function AtoDestino({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        Uma trilha de primeira vez <strong>termina em algo a que se possa IR</strong> (D-38).
-        Dos eventos do acervo, <strong>{catalogo.destinosValidos.length}</strong> têm sessão
-        datada, são esses os destinos válidos.
-      </p>
 
       <Campo rotulo="Destino final" obrigatorio>
         <CampoComProposta
@@ -275,10 +265,6 @@ function AtoDestino({
       {registro.destinoId !== null && !registro.destinoTemSessaoDatada ? (
         <div className="prod-duplicata" data-destino-sem-sessao>
           <strong>Este destino não tem sessão datada.</strong>
-          <p className="prod-campo-nota">
-            A trilha não publica: ela terminaria num lugar aonde não se pode ir. Escolha um
-            evento com sessão, ou dê sessão a este pela ficha da Agenda.
-          </p>
         </div>
       ) : null}
     </>
@@ -299,11 +285,6 @@ function AtoDestaque({
       {/* UM POR FEED. O novo substitui o anterior, dois destaques no mesmo feed fariam a
           vitrine escolher um deles por ordem de leitura, e a curadoria perderia o controle
           do que ela mesma destacou. */}
-      <p className="prod-campo-nota">
-        <strong>Um destaque por feed.</strong> Publicar um novo substitui o anterior daquele
-        feed, dois ao mesmo tempo fariam a vitrine escolher por ordem de leitura, e a
-        curadoria perderia o controle do que ela destacou.
-      </p>
 
       <Campo rotulo="Feed" obrigatorio>
         <SeletorDeCatalogo
@@ -382,12 +363,6 @@ function AtoPonte({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        Uma ponte é UMA aresta de sentido, afirmada por uma pessoa. As quatro relações medem,
-        somadas,{" "}
-        <strong>{catalogo.relacoes.reduce((n, r) => n + r.arestas, 0)}</strong> arestas contra
-        as 51.600 que a máquina produziu por semelhança.
-      </p>
 
       <Campo rotulo="Relação" obrigatorio>
         <SeletorDeCatalogo

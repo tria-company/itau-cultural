@@ -95,12 +95,10 @@ export function FichaDeAcessibilidade({
           ))}
         </fieldset>
       ) : (
-        // A AUSÊNCIA É DECLARADA, com o motivo. Sumir com o bloco sem dizer nada faria
+        // A AUSÊNCIA É DECLARADA, numa linha: sumir com o bloco sem dizer nada faria
         // parecer que a ficha esqueceu metade das perguntas.
-        <p className="prod-campo-nota" data-sem-recursos-fisicos>
-          Os cinco recursos físicos, rampa, elevador, banheiro adaptado, piso tátil e vaga
-          reservada, não aparecem porque este registro não tem lugar físico. Rampa não
-          existe numa transmissão.
+        <p className="prod-campo-nota">
+          Os cinco recursos físicos não se aplicam: este registro não tem lugar físico.
         </p>
       )}
 

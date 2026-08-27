@@ -400,11 +400,6 @@ function AtoEducativo({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        A área do educador (funcionalidade 146). O educador NÃO é um nono nível de acesso:
-        ele é o público desta pauta, e o que ele precisa, material e visita, é campo do
-        curso, não perfil próprio.
-      </p>
 
       <Campo rotulo="Material didático" nota="Um endereço por linha. Não há upload neste protótipo.">
         <textarea
@@ -466,11 +461,6 @@ function AtoSituacao({
         <span className="prod-dimensao-rotulo">este curso foi cancelado</span>
       </label>
 
-      <p className="prod-campo-nota">
-        Hoje o cancelamento é adivinhado procurando «cancelad» no título: um curso sobre
-        «arte cancelada» vira cancelado, e um curso realmente cancelado cujo título não diz
-        continua anunciado no ar.
-      </p>
 
       {registro.cancelado ? (
         <Campo

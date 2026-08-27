@@ -114,7 +114,7 @@ export function CampoDeImagem({
       <Campo
         rotulo={rotulo}
         obrigatorio={obrigatoria}
-        nota="A foto enviada fica só neste aparelho: não há servidor para recebê-la."
+        nota="A foto fica só neste aparelho."
       >
         {/* O PALCO: a foto em tamanho de decisão, ou o vazio dizendo o que fazer. */}
         <div className="prod-imagem-palco" data-palco-imagem>
@@ -175,7 +175,7 @@ export function CampoDeImagem({
           <Campo
             rotulo="Crédito da imagem"
             obrigatorio
-            nota="Sem crédito o registro não publica."
+            nota="Sem crédito não publica."
           >
             <input
               type="text"
@@ -191,7 +191,7 @@ export function CampoDeImagem({
           <Campo
             rotulo="Texto alternativo"
             obrigatorio
-            nota="O que a imagem mostra, para quem não a vê."
+            nota="O que a imagem mostra, para quem não vê."
           >
             <textarea
               value={atual.alt}

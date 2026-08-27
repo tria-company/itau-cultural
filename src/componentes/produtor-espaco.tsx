@@ -225,11 +225,6 @@ function AtoFotos({
       {/* AS 21 FACHADAS DE HOJE VÊM DA WIKIMEDIA, e é por isso que a licença é um campo e
           não uma nota de rodapé: quem republica uma foto CC tem obrigação de dizer sob que
           licença o faz. */}
-      <p className="prod-campo-nota">
-        As fachadas que o acervo tem vêm da Wikimedia, sob licença livre. Toda foto pede
-        crédito, texto alternativo e licença, republicar uma foto CC sem dizer a licença é
-        republicá-la fora dos termos dela.
-      </p>
 
       {registro.fotos.map((f, i) => (
         <CampoDeImagem

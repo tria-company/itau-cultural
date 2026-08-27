@@ -85,25 +85,35 @@ function Item({
   impedimento: Impedimento;
   aoIrParaAto?: (ato: number) => void;
 }) {
-  const podeIr = aoIrParaAto !== undefined && impedimento.ato >= 0;
-  return (
-    <div className="prod-impedimento" data-bloqueia={impedimento.bloqueia ? "sim" : "nao"}>
+  // UMA LINHA, CLICÁVEL. Antes cada falta trazia o texto, o nome do ato e um link
+  // «resolver em «X» ▸» embaixo: três linhas por item, num cartão de seis itens. A
+  // própria linha leva ao ato, e o nome do ato vai no fim, discreto.
+  const vaiPara = impedimento.ato >= 0 && aoIrParaAto !== undefined;
+  const conteudo = (
+    <>
       <span className="prod-impedimento-texto">{impedimento.texto}</span>
-      {impedimento.dono ? (
-        <span className="prod-pendencia-dono">{impedimento.dono}</span>
+      {impedimento.rotuloDoAto ? (
+        <span className="prod-impedimento-onde">{impedimento.rotuloDoAto}</span>
       ) : null}
-      {podeIr ? (
-        <button
-          type="button"
-          className="prod-impedimento-ir"
-          onClick={() => aoIrParaAto(impedimento.ato)}
-          data-ir-para-ato={String(impedimento.ato)}
-        >
-          resolver em «{impedimento.rotuloDoAto}» ▸
-        </button>
-      ) : (
-        <span className="prod-campo-nota">em «{impedimento.rotuloDoAto}»</span>
-      )}
-    </div>
+      {vaiPara ? (
+        <span className="prod-impedimento-seta" aria-hidden>
+          ▸
+        </span>
+      ) : null}
+    </>
+  );
+
+  if (!vaiPara) {
+    return <span className="prod-impedimento">{conteudo}</span>;
+  }
+  return (
+    <button
+      type="button"
+      className="prod-impedimento"
+      onClick={() => aoIrParaAto?.(impedimento.ato)}
+      data-ir-para-ato={String(impedimento.ato)}
+    >
+      {conteudo}
+    </button>
   );
 }

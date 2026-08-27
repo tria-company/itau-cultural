@@ -285,7 +285,7 @@ export function GestaoDeSessoes({
               <Campo
                 rotulo="Motivo do cancelamento"
                 obrigatorio
-                nota="O público lê este texto no alerta. «Cancelado» sem motivo é um aviso que não explica nada."
+                nota="O público lê este texto no alerta."
               >
                 <textarea
                   value={motivo}

@@ -958,11 +958,11 @@
 /* A OBRIGATORIEDADE É UMA COISA SÓ, e é esta. Espalhada, ela vira asterisco numa tela, a
  * palavra «obrigatório» noutra e borda vermelha na terceira — três gramáticas para a mesma
  * informação. Laranja aqui é legítimo: é a AÇÃO que falta. */
+/* O asterisco discreto que substituiu a etiqueta «OBRIGATÓRIO» em caixa alta: ela
+ * aparecia em todo campo e transformava o formulário inteiro num alarme. */
 .prod-campo-exigido {
-  font-size: var(--tipo-micro);
+  font-size: var(--tipo-detalhe);
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--cor-acao-tinta);
 }
 
@@ -4454,7 +4454,7 @@
 }
 
 [data-view="web"] .prod-vg-telas {
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
 }
 
 .prod-vg-tela {
@@ -4722,10 +4722,18 @@
 
 /* ---- os medidores ----------------------------------------------------------- */
 
+/**
+ * `auto-fit`, e não `auto-fill`: com `auto-fill` o navegador cria as trilhas vazias que
+ * cabem na largura e os cinco medidores ficavam amontoados no canto esquerdo de um
+ * cartão de 2.000px (reprovado a olho, 2026-08-27). `auto-fit` colapsa o vazio e as
+ * colunas existentes esticam, distribuindo os medidores pela largura inteira.
+ */
 .prod-medidores {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+  align-items: start;
+  padding-block: 0.5rem;
 }
 
 .prod-medidor {
@@ -4737,8 +4745,8 @@
 }
 
 .prod-medidor svg {
-  width: 5rem;
-  height: 5rem;
+  width: 6rem;
+  height: 6rem;
   transform: rotate(-90deg);
 }
 
@@ -4760,13 +4768,57 @@
 
 .prod-medidor-centro {
   position: absolute;
-  top: 1.75rem;
+  top: 2.25rem;
   font-family: var(--fonte-display);
-  font-size: var(--tipo-detalhe);
+  font-size: var(--tipo-destaque);
   font-weight: 700;
 }
 
 .prod-medidor-rotulo {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+/* ---- a conferencia em UMA linha -------------------------------------------- */
+
+/**
+ * Cada falta era tres linhas: o texto, o nome do ato e um link "resolver em X". Num
+ * cartao de seis faltas isso e uma parede (reprovado a olho, 2026-08-27). Agora a
+ * propria linha e o botao, e o nome do ato vai no fim, discreto.
+ */
+.prod-impedimento {
+  display: flex;
+  /* `row` EXPLICITO: a regra antiga (linha ~1539) declara `column`, e como ela nao e
+   * sobrescrita por esta a direcao sobrevivia e a seta caia numa linha propria. */
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.prod-impedimento-texto {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.4;
+}
+
+.prod-impedimento-onde {
+  flex: none;
   font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: var(--cor-tinta-3);
+}
+
+.prod-impedimento-seta {
+  flex: none;
+  color: var(--cor-acao-tinta);
 }

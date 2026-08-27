@@ -179,10 +179,6 @@ export function PerfilDoProdutorTela({
             />
           </Campo>
 
-          <p className="prod-campo-nota">
-            Salvo automaticamente neste navegador, a cada tecla. Reiniciar a demonstração
-            não apaga o seu perfil: o reinício é sobre o conteúdo, não sobre você.
-          </p>
         </section>
 
         {/* ---- a conta ---- */}

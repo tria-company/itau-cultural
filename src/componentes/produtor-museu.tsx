@@ -170,11 +170,6 @@ function EspacoMuseu({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        Um espaço-museu é um <strong>espaço</strong>: endereço, horário, entrada, fotos e
-        acessibilidade física. A ficha dele é a de Espaços, aqui ele só é vinculado, para
-        não haver dois cadastros do mesmo lugar.
-      </p>
       <Campo rotulo="Qual espaço" obrigatorio>
         <CampoComProposta
           nome="Espaço"
@@ -207,12 +202,6 @@ function EmCartaz({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        Uma exposição em cartaz é um <strong>evento</strong> com formato «exposição» ou
-        «ocupação» e programação por vigência contínua, ela abre num dia e fecha em outro,
-        sem sessão por horário. Dar-lhe ficha separada produziria dois caminhos para o mesmo
-        objeto, e a fila de duplicatas passaria a acusar o Studio.
-      </p>
       <Campo rotulo="Qual evento" obrigatorio>
         <CampoComProposta
           nome="Evento"
@@ -350,11 +339,6 @@ function AtoGaleria({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        {registro.galeria.length} foto(s). Toda foto pede crédito e texto alternativo,
-        numa exposição de arte, a descrição da imagem é o que a torna visitável por quem não
-        vê.
-      </p>
       {registro.galeria.map((f, i) => (
         <CampoDeImagem
           key={`g${i}`}
@@ -449,10 +433,6 @@ function AtoTextos({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        Os textos de parede, com quem os assina. <strong>A assinatura é parte do texto</strong>:
-        um texto curatorial sem nome de curador é a instituição falando com voz de ninguém.
-      </p>
       {registro.textos.map((t, i) => (
         <div className="prod-temporada" key={`t${i}`}>
           <Campo rotulo="Título" obrigatorio>

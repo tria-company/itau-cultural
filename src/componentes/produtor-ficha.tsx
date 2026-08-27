@@ -281,7 +281,7 @@ export function FichaSimples<P extends Pauta>({
       </Campo>
     ),
     resumo: (
-      <Campo rotulo="Resumo" nota="É o que o cartão mostra na vitrine.">
+      <Campo rotulo="Resumo" nota="Aparece no cartão da vitrine.">
         <textarea
           value={atual.resumo}
           onChange={(e) => alterar({ resumo: e.target.value } as Partial<PorPauta<P>>)}
@@ -347,10 +347,6 @@ export function FichaSimples<P extends Pauta>({
           total={score.total}
           aoIrParaAto={setAtoPedido}
         />
-        <p className="prod-campo-nota">
-          O que falta acima é <strong>o que o público não vai ver</strong>, não o que uma
-          fila vai devolver. Publicar aqui é publicar: a fiscalização é posterior.
-        </p>
         <SeletorDeVisibilidade
           visibilidade={atual.visibilidade}
           agendadoPara={atual.agendadoPara}

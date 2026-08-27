@@ -302,11 +302,6 @@ export function TelaDeCatalogos({
               </p>
             ) : null}
 
-            <p className="prod-campo-nota" data-mock-catalogo>
-              <strong>Mock explícito:</strong> esta demonstração não reescreve o vocabulário
-              gerado, que é lido do build. O que a tela prova é o MECANISMO, o alcance
-              medido antes, a consequência dita antes, e o arquivamento que não apaga.
-            </p>
           </>
         ) : null}
       </Folha>

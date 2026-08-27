@@ -213,12 +213,6 @@ function AtoDireitos({
   const d = registro.direito;
   return (
     <>
-      <p className="prod-campo-nota">
-        Um ativo sem direito declarado NÃO BAIXA. Dois booleanos em <code>false</code>
-        significam «não permite» e «ninguém declarou» ao mesmo tempo, e distribuir porque
-        ninguém disse que não seria a leitura mais cara que este produto poderia fazer de um
-        silêncio.
-      </p>
 
       <Campo rotulo="Titular do direito" obrigatorio nota="Texto, porque o titular pode não estar no grafo.">
         <input

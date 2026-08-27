@@ -456,10 +456,6 @@ function AtoIdentidade({
               </li>
             ))}
           </ul>
-          <p className="prod-campo-nota">
-            Isto não impede publicar. A chave de identidade é título + agente realizador +
-            obra: dois eventos com o mesmo título e obras diferentes são coisas diferentes.
-          </p>
         </div>
       ) : null}
 
@@ -722,11 +718,6 @@ function AtoElenco({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        Hoje <strong>0 de 129</strong> eventos datados do acervo declaram elenco, e as 508
-        arestas <code>atua_em</code> existentes exigem papel. É por isso que o papel vem
-        antes da pessoa: sem ele o vínculo não existe.
-      </p>
 
       {/* O PAPEL VEM ANTES. Escolher a pessoa primeiro e o papel depois produz o vínculo
           sem papel, que a aresta não aceita, e a tela teria de recusar o que ela mesma
@@ -970,11 +961,6 @@ function AtoComercial({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        Hoje <strong>2 de 300</strong> eventos declaram ingresso, e os dois links são
-        escritos pela curadoria em <code>ingressos.ts</code>, o acervo não publica esse
-        campo. Este ato é o que faz o campo passar a existir.
-      </p>
 
       <Campo rotulo="Cobrança" obrigatorio>
         <Segmento rotulo="como se paga" data-seletor-cobranca>
@@ -1158,11 +1144,6 @@ function AtoAcessibilidade({
 }) {
   return (
     <>
-      <p className="prod-campo-nota">
-        <strong>2.702 registros</strong> do acervo não declaram nada nesta ficha, nem que
-        oferecem, nem que não oferecem. É o silêncio que a plataforma se proibiu de
-        interpretar.
-      </p>
 
       <FichaDeAcessibilidade
         dimensoes={registro.acessibilidade}
@@ -1219,11 +1200,6 @@ function AtoPublicacao({
         aoIrParaAto={aoIrParaAto}
       />
 
-      <p className="prod-campo-nota">
-        O que falta acima é <strong>o que o público não vai ver</strong>, não o que uma fila
-        vai devolver. Publicar aqui é publicar: o registro vai ao ar, e a fiscalização é
-        posterior.
-      </p>
 
       <SeletorDeVisibilidade
         visibilidade={registro.visibilidade}

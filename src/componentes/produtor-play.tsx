@@ -164,7 +164,7 @@ function AtoTipo({
           <Campo
             rotulo="Série"
             obrigatorio
-            nota="Hoje a série é DERIVADA do prefixo repetido no título. Aqui ela é campo, e é isso que permite uma série nova nascer com um episódio só."
+            nota="Decide em que prateleira o item aparece."
           >
             <SeletorDeCatalogo
               nome="Série"
@@ -210,7 +210,6 @@ function AtoTipo({
         <Campo
           rotulo="Itens, em ordem"
           obrigatorio
-          nota="Uma playlist vazia é uma prateleira sem nada dentro."
         >
           <CampoComProposta
             nome="Mídia"
@@ -294,7 +293,7 @@ function AtoFonte({
         <Campo
           rotulo={registro.fonte_video === "youtube" ? "Id do YouTube" : "Id do Vimeo"}
           obrigatorio
-          nota="SÓ O ID, nunca a URL inteira. O iframe continua nascendo depois do clique, é essa disciplina que sustenta a promessa de zero requisição externa em runtime."
+          nota="Cole a URL: o id é extraído sozinho."
         >
           <input
             type="text"
@@ -316,7 +315,6 @@ function AtoFonte({
 
       <Campo
         rotulo="Duração (minutos)"
-        nota="O acervo não declara duração em campo nenhum, é por isso que «player com retomada» está registrado como não sustentado, e não como faltando."
       >
         <input
           type="number"
@@ -355,12 +353,6 @@ function AtoDireitos({
   const d = registro.direito;
   return (
     <>
-      <p className="prod-campo-nota">
-        Um item sem direito declarado NÃO BAIXA. Dois booleanos em <code>false</code>
-        significam «não permite» e «ninguém declarou» ao mesmo tempo, e distribuir porque
-        ninguém disse que não seria a leitura mais cara que este produto poderia fazer de um
-        silêncio, a mesma razão de existir do ato de declarar acessibilidade.
-      </p>
 
       <Campo rotulo="Titular do direito" obrigatorio>
         <input
@@ -431,13 +423,8 @@ function AtoPontes({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        Das <strong>{catalogo.totalDeMidias}</strong> mídias do acervo,{" "}
-        <strong>{catalogo.midiasComPonte}</strong> apontam para um evento ou uma matéria. É
-        dessa aresta que vive o bloco «não pode ir? veja isto».
-      </p>
 
-      <Campo rotulo="Fala sobre um evento" nota="A relação `fala_sobre`.">
+      <Campo rotulo="Fala sobre um evento">
         <CampoComProposta
           nome="Evento"
           acervo={catalogo.eventos}
@@ -447,7 +434,7 @@ function AtoPontes({
         />
       </Campo>
 
-      <Campo rotulo="Aprofunda uma matéria" nota="A relação `aprofunda`.">
+      <Campo rotulo="Aprofunda uma matéria">
         <CampoComProposta
           nome="Matéria"
           acervo={catalogo.materias}
@@ -467,7 +454,7 @@ function AtoPontes({
                 </strong>
                 {/* O MOTIVO É O SELO QUE O PÚBLICO LÊ. Selo em branco não publica, é a
                     diferença entre mediação legível e recomendador opaco. */}
-                <Campo rotulo="Por quê" obrigatorio nota="Este texto é o selo que o público lê no cartão.">
+                <Campo rotulo="Por quê" obrigatorio nota="O público lê este texto no cartão.">
                   <textarea
                     value={p.motivo}
                     onChange={(e) =>

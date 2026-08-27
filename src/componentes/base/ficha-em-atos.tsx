@@ -365,7 +365,14 @@ export function Campo({
     <div className="prod-campo">
       <label className="prod-campo-rotulo" htmlFor={htmlFor}>
         {rotulo}
-        {obrigatorio ? <span className="prod-campo-exigido">obrigatório</span> : null}
+        {/* UM ASTERISCO, e nao a palavra em caixa alta e laranja: a etiqueta gritava em
+            todo campo e virava ruído (2026-08-27). O que falta de verdade está no cartão
+            de conferências, que é onde se resolve. */}
+        {obrigatorio ? (
+          <span className="prod-campo-exigido" aria-label="obrigatório">
+            *
+          </span>
+        ) : null}
       </label>
       {children}
       {nota ? <p className="prod-campo-nota">{nota}</p> : null}

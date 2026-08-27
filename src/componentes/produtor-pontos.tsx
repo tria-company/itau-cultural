@@ -138,10 +138,6 @@ export function LojaDePontos({
               </div>
             ))}
           </div>
-          <p className="prod-campo-nota">
-            Os pontos premiam o cuidado com o dado, não o volume: crédito, descrição
-            alternativa, acessibilidade declarada e resumo escrito.
-          </p>
         </section>
 
         {/* ---- o que dá para melhorar ---- */}

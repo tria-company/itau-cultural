@@ -156,11 +156,6 @@ function AtoPrograma({
       {/* A RÉGUA DE FILEIRAS. Um programa novo entra na régua por TAMANHO, destaque para o
           maior, trilho para os medianos, lista compacta para os de menos de oito. Dizer
           isso aqui evita a surpresa de o episódio publicado aparecer numa lista miúda. */}
-      <p className="prod-campo-nota" data-regua-de-fileiras>
-        Onde o programa aparece no Cast depende do TAMANHO dele: o maior vira painel de
-        destaque, os medianos viram trilho, e os de menos de oito episódios viram lista
-        compacta com data. Um programa novo nasce na lista compacta.
-      </p>
     </>
   );
 }
@@ -255,11 +250,6 @@ function AtoParticipantes({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        Não há aresta <code>atua_em</code> saindo de mídia no acervo: quem fala num episódio
-        não está registrado em lugar nenhum. Como no elenco do evento, o <strong>papel vem
-        antes da pessoa</strong>, a aresta o exige.
-      </p>
 
       <Campo rotulo="Papel" obrigatorio>
         <SeletorDeCatalogo
@@ -353,14 +343,6 @@ function AtoTranscricao({
     <>
       {/* O NÚMERO COM DENOMINADOR. Zero de 336 é a medida, e é ela que explica por que esta
           tela existe, não uma frase sobre a importância da acessibilidade. */}
-      <p className="prod-campo-nota" data-lacuna-transcricao>
-        <strong>{catalogo.comTranscricao} de {catalogo.totalDePodcasts}</strong> podcasts do
-        acervo têm transcrição, e{" "}
-        <strong>{catalogo.comAcessibilidade} de {catalogo.totalDePodcasts}</strong> declaram
-        alguma das oito dimensões de acessibilidade. Não é silêncio da fonte: os 336
-        preencheram a ficha e marcaram zero. A transcrição é o que torna um podcast
-        acessível a quem não ouve.
-      </p>
 
       <Campo
         rotulo="Transcrição"
@@ -376,11 +358,6 @@ function AtoTranscricao({
         />
       </Campo>
 
-      <p className="prod-campo-nota">
-        No áudio, das oito dimensões, as que contam são <strong>transcrição</strong> e{" "}
-        <strong>legenda</strong>: audiodescrição e Libras são de vídeo, e marcar as oito num
-        podcast seria declarar o que ele não tem como oferecer.
-      </p>
     </>
   );
 }

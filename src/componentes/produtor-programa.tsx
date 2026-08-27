@@ -79,10 +79,6 @@ function AtoEdicoes({
 
   return (
     <>
-      <p className="prod-campo-nota">
-        Uma edição é uma temporada do programa: «Rumos 2024», «Rumos 2026». É ela que dá
-        contorno ao que, sem programa, aparece na agenda como eventos soltos.
-      </p>
 
       {registro.edicoes.map((e, i) => (
         <div className="prod-temporada" key={`e${i}`} data-edicao={String(i)}>
