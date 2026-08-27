@@ -14,6 +14,12 @@ import {
 } from "@/componentes/produtor-estado";
 import { PORTAS, ROTULO_DA_SITUACAO, SITUACOES } from "@/dados/tipos-acesso";
 import { GraficoDaSerie } from "@/componentes/base/grafico-da-serie";
+import {
+  BarrasVerticais,
+  LegendaDaRosca,
+  Medidor,
+  Rosca,
+} from "@/componentes/base/graficos";
 import { panoramaDe } from "@/dados/panorama-produtor";
 import {
   DESEMPENHO_E_AUTORADO,
@@ -34,6 +40,7 @@ import {
   minutosEntre,
   podePublicar,
   semTravessao,
+  somarMinutos,
 } from "@/dados/tipos-produtor";
 import type {
   ContextoDoProdutor,
@@ -877,22 +884,25 @@ function Reiniciar({ aoReiniciar }: { aoReiniciar: () => void }) {
   );
 }
 
+/** Os dias da semana das barras, na ordem em que a pessoa lê a semana. */
+const DIAS_DA_SEMANA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"] as const;
+
 /**
- * A VISÃO GERAL do Início: o painel macro de tudo o que este perfil publica.
+ * A VISÃO GERAL do Início: o painel macro, em cartões.
  *
- * OITO NÚMEROS, TRÊS GRÁFICOS E UM CARTÃO POR TELA. Ele responde, sem rolar duas vezes,
- * às perguntas que um produtor faz ao abrir o dia: quanto alcance, quanto entrou, o que
- * está no ar, o que falta declarar, quem comentou, e para onde ir agora.
+ * UMA GRADE DE CARTÕES, e não uma pilha de seções. A versão anterior era rasa por
+ * construção: uma linha de números, um gráfico e duas colunas que deixavam metade da
+ * tela vazia. Aqui cada pergunta tem o próprio cartão, com o próprio gráfico, e a grade
+ * de doze colunas os reacomoda conforme a janela: o número grande ocupa quatro, a rosca
+ * ocupa quatro, a tabela dos tops ocupa oito.
  *
- * DUAS NATUREZAS DE NÚMERO, e a tela nunca as mistura sem dizer. Alcance, ingressos,
- * receita, salvos e comentários são AUTORADOS (`desempenho-produtor.ts`, declarado na
- * legenda). Publicados, em edição, pendências, sessões, vocabulário e a QUALIDADE DA
- * FICHA são medidos do estado real dos registros: é o trabalho de quem publica, não uma
- * simulação. A barra de qualidade é a que mais importa, porque é a única que a pessoa
- * muda escrevendo.
+ * TRÊS FORMAS DE GRÁFICO, cada uma para a pergunta que ela responde: a CURVA para o
+ * tempo, a ROSCA para a fatia de um todo, as BARRAS para comparação. O medidor entra
+ * onde o número é ação que falta (a qualidade da ficha), e é o único que usa laranja.
  *
- * UM CÁLCULO SÓ: tudo vem de `panoramaDe`, a mesma função que a loja de pontos usa para
- * o saldo. Duas telas somando por conta própria divergiriam no primeiro ajuste.
+ * DUAS NATUREZAS DE NÚMERO, e a tela nunca as mistura sem dizer: alcance, ingressos,
+ * receita, salvos e comentários são AUTORADOS (`desempenho-produtor.ts`); publicados,
+ * sessões, vocabulário e qualidade são MEDIDOS do acervo real.
  */
 function VisaoGeral({
   registros,
@@ -928,249 +938,270 @@ function VisaoGeral({
         .filter((r) => r.situacao === "publicado")
         .flatMap((r) => comentariosDe(r.id).map((c) => ({ ...c, r })))
         .sort((a, b) => a.haDias - b.haDias || a.r.id.localeCompare(b.r.id))
-        .slice(0, 3),
+        .slice(0, 4),
     [registros],
   );
+
+  /**
+   * O alcance somado por DIA DA SEMANA. O índice da série vira data por aritmética UTC
+   * (`somarMinutos`), e a data vira dia da semana por `Date.UTC`: sem relógio local, o
+   * mesmo gráfico em qualquer fuso.
+   */
+  const porDiaDaSemana = useMemo(() => {
+    const soma = [0, 0, 0, 0, 0, 0, 0];
+    panorama.serie.forEach((v, i) => {
+      const dia = somarMinutos(
+        `${dataDeReferencia}T00:00`,
+        -(panorama.serie.length - 1 - i) * 24 * 60,
+      ).slice(0, 10);
+      const [a, m, d] = dia.split("-").map((n) => Number.parseInt(n, 10));
+      if (!Number.isFinite(a) || !Number.isFinite(m) || !Number.isFinite(d)) return;
+      const indice = new Date(Date.UTC(a as number, (m as number) - 1, d as number)).getUTCDay();
+      soma[indice] = (soma[indice] ?? 0) + v;
+    });
+    return DIAS_DA_SEMANA.map((rotulo, i) => ({ rotulo, valor: soma[i] ?? 0 }));
+  }, [panorama.serie, dataDeReferencia]);
 
   if (panorama.publicados === 0) return null;
 
   const delta = variacaoSemanal(panorama.serie);
-  const maiorPauta = Math.max(1, ...panorama.porPauta.map((p) => p.valor));
   const capaDe = (r: Registro): string | null =>
     r.imagem?.caminho ?? imagens[0]?.caminho ?? null;
 
-  // As três situações, em fatia: é o retrato do acervo inteiro numa barra só.
-  const situacoes = [
+  const fatiasDePauta = panorama.porPauta.slice(0, 5).map((p) => ({
+    rotulo: p.rotulo,
+    valor: p.valor,
+  }));
+  const restoDasPautas = panorama.porPauta.slice(5).reduce((n, p) => n + p.valor, 0);
+  if (restoDasPautas > 0) fatiasDePauta.push({ rotulo: "outras", valor: restoDasPautas });
+
+  const fatiasDeSituacao = [
     { rotulo: "no ar", valor: panorama.publicados },
     { rotulo: "em edição", valor: panorama.rascunhos },
     { rotulo: "devolvidos", valor: panorama.devolvidos },
-  ].filter((s) => s.valor > 0);
-  const somaDasSituacoes = Math.max(1, situacoes.reduce((n, s) => n + s.valor, 0));
+  ].filter((f) => f.valor > 0);
 
-  const KPIS = [
-    { valor: milhar(panorama.alcance), rotulo: `alcance em ${DIAS_DA_SERIE} dias`, delta },
-    { valor: milhar(panorama.ingressos), rotulo: "ingressos" },
-    {
-      valor: panorama.receita > 0 ? emReais(panorama.receita) : "gratuito",
-      rotulo: "receita",
-    },
-    { valor: milhar(panorama.salvos), rotulo: "salvos" },
-    { valor: String(panorama.comentarios), rotulo: "comentários" },
-    { valor: String(panorama.publicados), rotulo: "no ar" },
-    { valor: String(panorama.sessoes), rotulo: "sessões" },
-    { valor: milhar(panorama.pontosGanhos), rotulo: `pontos · nível ${panorama.nivel}` },
-  ];
+  const qualidade = panorama.porRegra.filter((p) => p.regra.id !== "publicado");
+  const completos = Math.round(
+    qualidade.reduce((n, p) => n + p.porcento, 0) / Math.max(1, qualidade.length),
+  );
 
   return (
-    <>
-      <section className="prod-secao" aria-labelledby="prod-vg-titulo" data-visao-geral>
-        <h2 className="prod-secao-titulo" id="prod-vg-titulo">
-          Visão geral
-        </h2>
+    <section className="prod-secao" aria-labelledby="prod-vg-titulo" data-visao-geral>
+      <h2 className="prod-secao-titulo" id="prod-vg-titulo">
+        Visão geral
+      </h2>
 
-        {/* ---- os oito números ---- */}
-        <div className="prod-vg-kpis">
-          {KPIS.map((k) => (
-            <div className="prod-vg-card" key={k.rotulo}>
-              <strong>{k.valor}</strong>
-              <span>{k.rotulo}</span>
-              {k.delta !== undefined ? (
-                <span className="prod-vg-delta" data-sobe={k.delta >= 0 ? "sim" : "nao"}>
-                  {k.delta >= 0 ? "↑" : "↓"} {Math.abs(k.delta)}% na semana
-                </span>
-              ) : null}
-            </div>
-          ))}
-        </div>
-
-        {/* ---- a curva agregada ---- */}
-        <div className="prod-vg-grafico">
+      <div className="prod-grade-dash">
+        {/* ---- o alcance, com a curva ---- */}
+        <article className="prod-cartao-dash" data-largura="8">
+          <header className="prod-cartao-dash-topo">
+            <h3 className="prod-cartao-dash-titulo">Alcance</h3>
+            <span className="prod-vg-delta" data-sobe={delta >= 0 ? "sim" : "nao"}>
+              {delta >= 0 ? "↑" : "↓"} {Math.abs(delta)}% na semana
+            </span>
+          </header>
+          <strong className="prod-cartao-dash-numero">{milhar(panorama.alcance)}</strong>
+          <span className="prod-cartao-dash-nota">
+            visualizações, plays e leituras somados em {DIAS_DA_SERIE} dias
+          </span>
           <GraficoDaSerie serie={panorama.serie} dataDeReferencia={dataDeReferencia} />
-        </div>
+        </article>
 
-        {/* ---- os dois gráficos de estado, lado a lado ---- */}
-        <div className="prod-vg-colunas">
-          <div className="prod-vg-coluna">
-            <h3 className="prod-vg-subtitulo">Qualidade da ficha</h3>
-            {panorama.porRegra
-              .filter((p) => p.regra.id !== "publicado")
-              .map((p) => (
-                <div className="prod-vg-barra" key={p.regra.id}>
-                  <span className="prod-vg-barra-rotulo">{p.regra.curto}</span>
-                  <span className="prod-vg-barra-trilho" aria-hidden>
-                    <span
-                      className="prod-vg-barra-cheia"
-                      style={{ width: `${Math.max(2, p.porcento)}%` }}
-                    />
-                  </span>
-                  <span className="prod-vg-barra-valor">{p.porcento}%</span>
-                </div>
-              ))}
-            <p className="prod-grafico-legenda">
-              medido do que você escreveu, sobre {panorama.publicados} publicados
-            </p>
-          </div>
-
-          <div className="prod-vg-coluna">
-            <h3 className="prod-vg-subtitulo">Situação do acervo</h3>
-            <div className="prod-vg-fatias" aria-hidden>
-              {situacoes.map((s, i) => (
-                <span
-                  key={s.rotulo}
-                  className="prod-vg-fatia"
-                  data-fatia={i === 0 ? "no-ar" : i === 1 ? "edicao" : "devolvido"}
-                  style={{ width: `${(s.valor / somaDasSituacoes) * 100}%` }}
-                />
-              ))}
-            </div>
-            <div className="prod-vg-legendas">
-              {situacoes.map((s, i) => (
-                <span className="prod-vg-legenda-item" key={s.rotulo}>
-                  <span
-                    className="prod-vg-ponto"
-                    data-fatia={i === 0 ? "no-ar" : i === 1 ? "edicao" : "devolvido"}
-                    aria-hidden
-                  />
-                  {s.valor} {s.rotulo}
-                </span>
-              ))}
-            </div>
-            <h3 className="prod-vg-subtitulo">Alcance por pauta</h3>
-            {panorama.porPauta.slice(0, 6).map((p) => (
-              <div className="prod-vg-barra" key={p.pauta}>
-                <span className="prod-vg-barra-rotulo">{p.rotulo}</span>
-                <span className="prod-vg-barra-trilho" aria-hidden>
-                  <span
-                    className="prod-vg-barra-cheia"
-                    style={{ width: `${Math.max(4, Math.round((p.valor / maiorPauta) * 100))}%` }}
-                  />
-                </span>
-                <span className="prod-vg-barra-valor">{milhar(p.valor)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ---- os tops e as conversas ---- */}
-        <div className="prod-vg-colunas">
-          <div className="prod-vg-coluna">
-            <h3 className="prod-vg-subtitulo">Top conteúdos</h3>
-            {medidos.slice(0, 5).map((m, i) => (
-              <button
-                key={m.r.id}
-                type="button"
-                className="prod-melhor"
-                data-abrir-registro={m.r.id}
-                onClick={() => aoAbrirRegistro(m.r)}
-              >
-                <span className="prod-posicao" aria-hidden>
-                  {i + 1}
-                </span>
-                {capaDe(m.r) ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- capa local
-                  <img src={capaDe(m.r) ?? ""} alt="" className="prod-melhor-capa" loading="lazy" />
-                ) : null}
-                <span className="prod-melhor-texto">
-                  <span className="prod-melhor-nome">
-                    {semTravessao(m.r.titulo) || DESCRICAO_DA_PAUTA[m.r.pauta].singular}
-                  </span>
-                  <span className="prod-melhor-sub">{DESCRICAO_DA_PAUTA[m.r.pauta].rotulo}</span>
-                </span>
-                <span className="prod-melhor-metricas">
-                  {m.metricas.map((mm) => (
-                    <span
-                      className="prod-metrica"
-                      key={mm.rotulo}
-                      data-extra={mm.extra ? "sim" : "nao"}
-                    >
-                      <strong>{mm.valor}</strong>
-                      <span>{mm.rotulo}</span>
-                    </span>
-                  ))}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          <div className="prod-vg-coluna">
-            <h3 className="prod-vg-subtitulo">Comentários recentes</h3>
-            {conversas.map((c) => (
-              <div className="prod-comentario" key={`${c.r.id}-${c.nome}-${c.haDias}`}>
-                <span className="prod-comentario-avatar" aria-hidden>
-                  {(c.nome[0] ?? "?").toUpperCase()}
-                </span>
-                <span className="prod-comentario-texto">
-                  <span className="prod-comentario-meta">
-                    {c.nome} · há {c.haDias} {c.haDias === 1 ? "dia" : "dias"}
-                  </span>
-                  {c.texto}
-                </span>
-              </div>
-            ))}
-            <Link href="/studio/comunidade/" className="prod-link" data-ver-comunidade>
-              ver a Comunidade ▸
-            </Link>
-          </div>
-        </div>
-
-        <p className="prod-grafico-legenda" title={DESEMPENHO_E_AUTORADO}>
-          alcance, ingressos, receita, salvos e comentários são números autorados da
-          demonstração; publicados, sessões, vocabulário e qualidade são medidos do acervo
-        </p>
-      </section>
-
-      {/* ---- um cartão por tela, com o número vivo de cada uma ---- */}
-      <section className="prod-secao" aria-labelledby="prod-vg-telas">
-        <h2 className="prod-secao-titulo" id="prod-vg-telas">
-          Para onde ir
-        </h2>
-        <div className="prod-vg-telas" data-cartoes-de-tela>
+        {/* ---- os números soltos, empilhados ---- */}
+        <div className="prod-cartao-dash-pilha" data-largura="4">
           {[
+            { valor: milhar(panorama.ingressos), rotulo: "ingressos" },
             {
-              href: "/studio/pautas/",
-              rotulo: "Studio",
-              numero: String(panorama.total),
-              nota: "registros nas onze pautas",
+              valor: panorama.receita > 0 ? emReais(panorama.receita) : "gratuito",
+              rotulo: "receita",
             },
-            {
-              href: "/studio/comunidade/",
-              rotulo: "Comunidade",
-              numero: String(panorama.comentarios),
-              nota: "comentários recebidos",
-            },
-            {
-              href: "/studio/pontos/",
-              rotulo: "Loja de pontos",
-              numero: milhar(panorama.pontosGanhos),
-              nota: `pontos ganhos, nível ${panorama.nivel}`,
-            },
-            {
-              href: "/studio/ocorrencias/",
-              rotulo: "Sessões",
-              numero: String(panorama.sessoes),
-              nota: "sessões no ar para gerir",
-            },
-            {
-              href: "/studio/catalogos/",
-              rotulo: "Catálogos",
-              numero: `${panorama.linguagensUsadas}/${panorama.temasUsados}`,
-              nota: "linguagens e temas em uso",
-            },
-            {
-              href: "/studio/perfil/",
-              rotulo: "Perfil",
-              numero: String(panorama.pendencias),
-              nota: "pendências com outra equipe",
-            },
-          ].map((t) => (
-            <Link key={t.href} href={t.href} className="prod-vg-tela" data-cartao-de-tela={t.rotulo}>
-              <strong className="prod-vg-tela-numero">{t.numero}</strong>
-              <span className="prod-vg-tela-rotulo">{t.rotulo}</span>
-              <span className="prod-vg-tela-nota">{t.nota}</span>
-            </Link>
+            { valor: milhar(panorama.salvos), rotulo: "salvos" },
+            { valor: String(panorama.comentarios), rotulo: "comentários" },
+          ].map((k) => (
+            <article className="prod-cartao-dash prod-cartao-dash-mini" key={k.rotulo}>
+              <strong className="prod-cartao-dash-numero">{k.valor}</strong>
+              <span className="prod-cartao-dash-nota">{k.rotulo}</span>
+            </article>
           ))}
         </div>
-      </section>
-    </>
+
+        {/* ---- a rosca do alcance por pauta ---- */}
+        <article className="prod-cartao-dash" data-largura="4">
+          <h3 className="prod-cartao-dash-titulo">Alcance por pauta</h3>
+          <div className="prod-cartao-dash-rosca">
+            <Rosca
+              fatias={fatiasDePauta}
+              centroValor={String(panorama.porPauta.length)}
+              centroRotulo="pautas no ar"
+            />
+            <LegendaDaRosca fatias={fatiasDePauta} />
+          </div>
+        </article>
+
+        {/* ---- a rosca da situação ---- */}
+        <article className="prod-cartao-dash" data-largura="4">
+          <h3 className="prod-cartao-dash-titulo">Situação do acervo</h3>
+          <div className="prod-cartao-dash-rosca">
+            <Rosca
+              fatias={fatiasDeSituacao}
+              centroValor={String(panorama.total)}
+              centroRotulo="registros"
+            />
+            <LegendaDaRosca fatias={fatiasDeSituacao} />
+          </div>
+        </article>
+
+        {/* ---- o ritmo por dia da semana ---- */}
+        <article className="prod-cartao-dash" data-largura="4">
+          <h3 className="prod-cartao-dash-titulo">Por dia da semana</h3>
+          <BarrasVerticais barras={porDiaDaSemana} />
+          <span className="prod-cartao-dash-nota">
+            o alcance dos {DIAS_DA_SERIE} dias, somado por dia
+          </span>
+        </article>
+
+        {/* ---- a qualidade da ficha, em medidores ---- */}
+        <article className="prod-cartao-dash" data-largura="12">
+          <header className="prod-cartao-dash-topo">
+            <h3 className="prod-cartao-dash-titulo">Qualidade da ficha</h3>
+            <span className="prod-cartao-dash-nota">
+              {completos}% em média, medido de {panorama.publicados} publicados
+            </span>
+          </header>
+          <div className="prod-medidores">
+            {qualidade.map((p) => (
+              <Medidor key={p.regra.id} porcento={p.porcento} rotulo={p.regra.curto} />
+            ))}
+            <Medidor
+              porcento={
+                panorama.total === 0
+                  ? 0
+                  : Math.round((panorama.publicados / panorama.total) * 100)
+              }
+              rotulo="no ar"
+            />
+          </div>
+        </article>
+
+        {/* ---- os tops ---- */}
+        <article className="prod-cartao-dash" data-largura="8">
+          <h3 className="prod-cartao-dash-titulo">Top conteúdos</h3>
+          {medidos.slice(0, 5).map((m, i) => (
+            <button
+              key={m.r.id}
+              type="button"
+              className="prod-melhor"
+              data-abrir-registro={m.r.id}
+              onClick={() => aoAbrirRegistro(m.r)}
+            >
+              <span className="prod-posicao" aria-hidden>
+                {i + 1}
+              </span>
+              {capaDe(m.r) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- capa local
+                <img src={capaDe(m.r) ?? ""} alt="" className="prod-melhor-capa" loading="lazy" />
+              ) : null}
+              <span className="prod-melhor-texto">
+                <span className="prod-melhor-nome">
+                  {semTravessao(m.r.titulo) || DESCRICAO_DA_PAUTA[m.r.pauta].singular}
+                </span>
+                <span className="prod-melhor-sub">{DESCRICAO_DA_PAUTA[m.r.pauta].rotulo}</span>
+              </span>
+              <span className="prod-melhor-metricas">
+                {m.metricas.map((mm) => (
+                  <span
+                    className="prod-metrica"
+                    key={mm.rotulo}
+                    data-extra={mm.extra ? "sim" : "nao"}
+                  >
+                    <strong>{mm.valor}</strong>
+                    <span>{mm.rotulo}</span>
+                  </span>
+                ))}
+              </span>
+            </button>
+          ))}
+        </article>
+
+        {/* ---- as conversas ---- */}
+        <article className="prod-cartao-dash" data-largura="4">
+          <h3 className="prod-cartao-dash-titulo">Comentários recentes</h3>
+          {conversas.map((c) => (
+            <div className="prod-comentario" key={`${c.r.id}-${c.nome}-${c.haDias}`}>
+              <span className="prod-comentario-avatar" aria-hidden>
+                {(c.nome[0] ?? "?").toUpperCase()}
+              </span>
+              <span className="prod-comentario-texto">
+                <span className="prod-comentario-meta">
+                  {c.nome} · há {c.haDias} {c.haDias === 1 ? "dia" : "dias"}
+                </span>
+                {c.texto}
+              </span>
+            </div>
+          ))}
+          <Link href="/studio/comunidade/" className="prod-link" data-ver-comunidade>
+            ver a Comunidade ▸
+          </Link>
+        </article>
+
+        {/* ---- um cartão por tela ---- */}
+        {[
+          {
+            href: "/studio/pautas/",
+            rotulo: "Studio",
+            numero: String(panorama.total),
+            nota: "registros nas onze pautas",
+          },
+          {
+            href: "/studio/comunidade/",
+            rotulo: "Comunidade",
+            numero: String(panorama.comentarios),
+            nota: "comentários recebidos",
+          },
+          {
+            href: "/studio/pontos/",
+            rotulo: "Loja de pontos",
+            numero: milhar(panorama.pontosGanhos),
+            nota: `pontos ganhos, nível ${panorama.nivel}`,
+          },
+          {
+            href: "/studio/ocorrencias/",
+            rotulo: "Sessões",
+            numero: String(panorama.sessoes),
+            nota: "sessões no ar para gerir",
+          },
+          {
+            href: "/studio/catalogos/",
+            rotulo: "Catálogos",
+            numero: `${panorama.linguagensUsadas}/${panorama.temasUsados}`,
+            nota: "linguagens e temas em uso",
+          },
+          {
+            href: "/studio/perfil/",
+            rotulo: "Perfil",
+            numero: String(panorama.pendencias),
+            nota: "pendências com outra equipe",
+          },
+        ].map((t) => (
+          <Link
+            key={t.href}
+            href={t.href}
+            className="prod-cartao-dash prod-cartao-dash-tela"
+            data-largura="2"
+            data-cartao-de-tela={t.rotulo}
+          >
+            <strong className="prod-cartao-dash-numero">{t.numero}</strong>
+            <span className="prod-cartao-dash-titulo">{t.rotulo}</span>
+            <span className="prod-cartao-dash-nota">{t.nota}</span>
+          </Link>
+        ))}
+      </div>
+
+      <p className="prod-grafico-legenda" title={DESEMPENHO_E_AUTORADO}>
+        alcance, ingressos, receita, salvos e comentários são números autorados da
+        demonstração; publicados, sessões, vocabulário e qualidade são medidos do acervo
+      </p>
+    </section>
   );
 }

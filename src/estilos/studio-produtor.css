@@ -4490,3 +4490,283 @@
   line-height: 1.35;
   color: var(--cor-tinta-3);
 }
+
+/* ---- a grade de cartoes do painel ------------------------------------------ */
+
+/**
+ * DOZE COLUNAS na web, duas no aparelho. Cada cartao declara quantas ocupa em
+ * `data-largura`, e a grade os reacomoda sem media query nenhuma: o alcance pede 8, as
+ * roscas pedem 4, os cartoes de tela pedem 2. Era uma pilha de secoes que deixava metade
+ * da tela vazia (reprovado a olho, 2026-08-27).
+ */
+.prod-grade-dash {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+[data-view="mobile"] .prod-grade-dash > :not([data-largura="2"]) {
+  grid-column: span 2;
+}
+
+[data-view="web"] .prod-grade-dash {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+[data-view="web"] .prod-grade-dash > [data-largura="12"] { grid-column: span 12; }
+[data-view="web"] .prod-grade-dash > [data-largura="8"] { grid-column: span 8; }
+[data-view="web"] .prod-grade-dash > [data-largura="4"] { grid-column: span 4; }
+[data-view="web"] .prod-grade-dash > [data-largura="2"] { grid-column: span 2; }
+
+.prod-cartao-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie-2);
+  color: inherit;
+  text-decoration: none;
+}
+
+.prod-cartao-dash-pilha {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.prod-cartao-dash-mini {
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.prod-cartao-dash-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.prod-cartao-dash-titulo {
+  margin: 0;
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.prod-cartao-dash-numero {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-2);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.prod-cartao-dash-nota {
+  font-size: var(--tipo-micro);
+  line-height: 1.35;
+  color: var(--cor-tinta-3);
+}
+
+.prod-cartao-dash-tela {
+  gap: 0.25rem;
+  transition: border-color var(--dur-1) var(--ease-padrao);
+}
+
+.prod-cartao-dash-tela:hover {
+  border-color: var(--cor-borda-forte);
+}
+
+.prod-cartao-dash-rosca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ---- a rosca ---------------------------------------------------------------- */
+
+.prod-rosca {
+  position: relative;
+  flex: none;
+  width: 8rem;
+  height: 8rem;
+}
+
+.prod-rosca svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.prod-rosca circle {
+  fill: none;
+  stroke-width: 4;
+}
+
+.prod-rosca-trilho {
+  stroke: var(--cor-superficie);
+}
+
+/* Os seis tons sao a MESMA tinta em opacidades decrescentes: laranja e acao, e uma pauta
+ * nao e uma acao. */
+.prod-rosca-fatia[data-tom="0"] { stroke: var(--cor-tinta); }
+.prod-rosca-fatia[data-tom="1"] { stroke: color-mix(in srgb, var(--cor-tinta) 75%, transparent); }
+.prod-rosca-fatia[data-tom="2"] { stroke: color-mix(in srgb, var(--cor-tinta) 55%, transparent); }
+.prod-rosca-fatia[data-tom="3"] { stroke: color-mix(in srgb, var(--cor-tinta) 40%, transparent); }
+.prod-rosca-fatia[data-tom="4"] { stroke: color-mix(in srgb, var(--cor-tinta) 28%, transparent); }
+.prod-rosca-fatia[data-tom="5"] { stroke: color-mix(in srgb, var(--cor-tinta) 18%, transparent); }
+
+.prod-vg-ponto[data-tom="0"] { background: var(--cor-tinta); }
+.prod-vg-ponto[data-tom="1"] { background: color-mix(in srgb, var(--cor-tinta) 75%, transparent); }
+.prod-vg-ponto[data-tom="2"] { background: color-mix(in srgb, var(--cor-tinta) 55%, transparent); }
+.prod-vg-ponto[data-tom="3"] { background: color-mix(in srgb, var(--cor-tinta) 40%, transparent); }
+.prod-vg-ponto[data-tom="4"] { background: color-mix(in srgb, var(--cor-tinta) 28%, transparent); }
+.prod-vg-ponto[data-tom="5"] { background: color-mix(in srgb, var(--cor-tinta) 18%, transparent); }
+
+.prod-rosca-centro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+
+.prod-rosca-centro > strong {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1;
+}
+
+/* Sem `text-align`: o pai e flex com align-items center, e o portao do design system
+ * proibe centralizar bloco (a regra existe porque texto centralizado em coluna larga e
+ * o defeito visual mais repetido do projeto). */
+.prod-rosca-centro > span {
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
+
+.prod-rosca-legenda {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prod-rosca-legenda > li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--tipo-micro);
+}
+
+.prod-rosca-legenda-rotulo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--cor-tinta-2);
+}
+
+.prod-rosca-legenda-valor {
+  font-weight: 700;
+}
+
+/* ---- as barras verticais ---------------------------------------------------- */
+
+.prod-barras-v {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  height: 8rem;
+}
+
+.prod-barra-v {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  height: 100%;
+}
+
+.prod-barra-v-cheia {
+  width: 100%;
+  border-radius: var(--raio-p);
+  background: color-mix(in srgb, var(--cor-tinta) 35%, transparent);
+}
+
+.prod-barra-v-cheia[data-maior="sim"] {
+  background: var(--cor-tinta);
+}
+
+.prod-barra-v-rotulo {
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
+
+/* ---- os medidores ----------------------------------------------------------- */
+
+.prod-medidores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.75rem;
+}
+
+.prod-medidor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.prod-medidor svg {
+  width: 5rem;
+  height: 5rem;
+  transform: rotate(-90deg);
+}
+
+.prod-medidor circle {
+  fill: none;
+  stroke-width: 4;
+}
+
+.prod-medidor-trilho {
+  stroke: var(--cor-superficie);
+}
+
+/* LARANJA AQUI E LEGITIMO: a porcentagem que falta e acao a fazer, a mesma razao do
+ * trilho de progresso da ficha. */
+.prod-medidor-arco {
+  stroke: var(--cor-acao);
+  stroke-linecap: round;
+}
+
+.prod-medidor-centro {
+  position: absolute;
+  top: 1.75rem;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+.prod-medidor-rotulo {
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
