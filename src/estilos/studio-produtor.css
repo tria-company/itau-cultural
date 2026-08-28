@@ -5070,3 +5070,54 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* ---- o dropdown da coluna --------------------------------------------------- */
+
+/**
+ * A LINHA DE UMA SECAO: o link ocupa o que sobra, e a seta fica no fim.
+ *
+ * Sao dois alvos e nao um: clicar no nome LEVA a tela, clicar na seta ABRE a lista. Um
+ * alvo so obrigaria a escolher entre navegar e expandir, e a pessoa perderia um dos dois.
+ */
+[data-view="web"] .prod-lateral-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-view="web"] .prod-lateral-linha > .prod-lateral-item {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-view="web"] .prod-lateral-abrir {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--raio-p);
+  background: transparent;
+  color: var(--cor-tinta-3);
+  font-size: var(--tipo-detalhe);
+  line-height: 1;
+  cursor: pointer;
+}
+
+[data-view="web"] .prod-lateral-abrir:hover {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta);
+}
+
+/* A seta aponta para baixo quando aberta: e o gesto que a lista fez. */
+[data-view="web"] .prod-lateral-abrir[aria-expanded="true"] > span {
+  display: block;
+  transform: rotate(90deg);
+}
+
+[data-view="web"] .prod-lateral-abrir[aria-expanded="false"] > span {
+  display: block;
+  transform: rotate(90deg) scaleX(-1);
+}
