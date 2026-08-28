@@ -67,6 +67,16 @@ const GESTAO = [
     rotulo: "Perfil",
     objetivo: "Seus dados pessoais e o estado da conta.",
   },
+  {
+    // A PORTA DA ORGANIZAÇÃO, aberta em 2026-08-27 com a mudança de endereço das dez
+    // telas institucionais. Elas moravam sob /studio/<tela>/, e cinco delas empilhadas
+    // embaixo da pauta do Produtor que trata do mesmo assunto. Sem este item, a
+    // superfície inteira só se alcançaria por URL digitada.
+    id: "organizacao",
+    rota: "/studio/organizacao/",
+    rotulo: "Organização",
+    objetivo: "As dez telas da instituição: ficha, equipe, acervo medido e conformidade.",
+  },
 ] as const;
 
 export function ProdutorNavegacao({

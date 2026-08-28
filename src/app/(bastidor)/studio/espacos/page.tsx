@@ -1,78 +1,51 @@
-import { SeparacaoDaOrganizacao } from "@/componentes/separacao-da-organizacao";
 import { FichaDoEspaco } from "@/componentes/produtor-espaco";
-import { StudioOrgEspacos } from "@/componentes/studio-org-espacos";
 import {
   CONTEXTO_DO_PRODUTOR,
   catalogoDoEspaco,
   registrosSemeados,
 } from "@/dados/mock/seed-produtor";
-import {
-  DATA_DA_MEDIDA,
-  GESTOR_DA_ORGANIZACAO,
-  GESTOR_E_AUTORADO,
-  ORGANIZACAO_DA_DEMONSTRACAO,
-  declaracoesDosEspacos,
-  espacosDoAcervo,
-  numerosDosEspacos,
-} from "@/dados/organizacao";
+import { numerosDosEspacos } from "@/dados/organizacao";
 
 /**
- * Studio · O2 · Espaços e acessibilidade (funcionalidade 142).
+ * Studio · Espaços, a pauta do Produtor (funcionalidade 142).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * AS DUAS CONVIVEM, E A DA ORGANIZAÇÃO VEIO PRIMEIRO, porque a nova quase a apagou.
+ * A PAREDE DA ORGANIZAÇÃO SAIU DAQUI em 2026-08-27, e foi para `/studio/organizacao/espacos/`.
  *
- * O sprint pedia «portar `/studio/espacos` para a ficha nova», e a primeira versão deste arquivo fez
- * isso literalmente: trocou o conteúdo inteiro. `verificar-organizacao.mjs` acusou, e o que
- * ele acusava não era layout, eram contratos:
+ * Até então esta rota entregava duas telas empilhadas: o painel do Produtor no topo e,
+ * logo abaixo, a tela inteira da Organização, com banner, kicker de nível 6, dez abas e
+ * parágrafos de declaração. Medido na véspera, a parede ocupava 72% da altura da página.
+ * Quem abria «Espaços» para cadastrar um lugar recebia junto a prestação de contas
+ * institucional do acervo.
  *
- * · a ficha do espaço abrindo com as 13 dimensões em «não declarado»;
- * · o ATO explícito de declarar ausência, que move as 13 para «declarado ausente»
- *   e NÃO para «não declarado», a distinção que D-43 existe para manter;
- * · o selo de procedência de saída;
- * · a coordenada trocando de MÉTODO e continuando derivada.
+ * NADA DO QUE ELA PROVAVA FOI PERDIDO. Os contratos continuam sendo medidos, na rota
+ * própria, numa tela que uma pessoa consegue ver: esconder com `display: none` e manter o
+ * portão medindo por `querySelector` seria portão verde sobre tela invisível, que é o pior
+ * defeito registrado nesta casa.
  *
- * Apagá-los teria sido destruir a demonstração de decisões de ontologia para acomodar uma
- * ficha nova. As duas cabem, e a ordem diz de quem é cada uma: a tela da Organização
- * continua no topo, com o que ela prova; a ficha do Produtor entra abaixo, com o que ela
- * acrescenta.
- *
- * A SEPARAÇÃO CONTINUA DECLARADA. Esta tela passou ao Produtor, quem cadastra o espaço
- * onde o próprio evento acontece é quem produz, não a instituição. O que muda é que a
- * transição é VISÍVEL na tela, em vez de ser uma substituição silenciosa.
+ * O QUE FICOU: os números do acervo, que são o que esta pauta tem de verdade a mostrar.
+ * Espaço não tem vitrine nem audiência, então o trio genérico do painel abria zerado. Eles
+ * atravessam como PRIMITIVOS, e é isso que mantém DP-F de pé.
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build, e o que
- * atravessa para os componentes de cliente são DTOs de primitivo (DP-F).
+ * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build.
  */
 export default function Pagina() {
-  const numeros = numerosDosEspacos();
+  const n = numerosDosEspacos();
 
   return (
-    <>
-      <FichaDoEspaco
-        semente={registrosSemeados()}
-        contexto={CONTEXTO_DO_PRODUTOR}
-        catalogo={catalogoDoEspaco()}
-      />
-
-      {/* A TELA HERDADA DA ORGANIZAÇÃO, abaixo do conteúdo novo e SÓ NA WEB.
-          A revisão a olho (2026-08-26) reprovou a parede herdada abrindo a rota. Os
-          contratos que verificar-organizacao.mjs mede continuam aqui, presentes no
-          DOM e visíveis na web, onde a suíte roda; no app, o CSS esconde o bloco
-          ([data-herdado-da-organizacao] em studio-produtor.css). */}
-      <div data-herdado-da-organizacao>
-        <SeparacaoDaOrganizacao lado="passou-ao-produtor" />
-        <StudioOrgEspacos
-        espacos={espacosDoAcervo()}
-        numeros={numeros}
-        declaracoes={declaracoesDosEspacos(numeros)}
-        organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
-        autor={GESTOR_DA_ORGANIZACAO}
-        gestorEAutorado={GESTOR_E_AUTORADO}
-        dataDeReferencia={DATA_DA_MEDIDA}
-      />
-      </div>
-    </>
+    <FichaDoEspaco
+      semente={registrosSemeados()}
+      contexto={CONTEXTO_DO_PRODUTOR}
+      catalogo={catalogoDoEspaco()}
+      acervo={{
+        total: n.total,
+        declaramAcessibilidade: n.declaramAcessibilidade,
+        comCoordenada: n.comCoordenada,
+        ocorrencias: n.ocorrencias,
+        ocorrenciasComEspaco: n.ocorrenciasComEspaco,
+        porMetodo: n.porMetodo.map((m) => ({ metodo: m.metodo, quantos: m.quantos })),
+      }}
+    />
   );
 }

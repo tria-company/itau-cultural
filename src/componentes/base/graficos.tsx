@@ -129,14 +129,20 @@ export function Medidor({ porcento, rotulo }: { porcento: number; rotulo: string
       <svg viewBox="0 0 42 42" role="img" aria-labelledby={id}>
         <title id={id}>{`${preenchido}% ${rotulo}`}</title>
         <circle className="prod-medidor-trilho" cx="21" cy="21" r={raio} />
-        <circle
-          className="prod-medidor-arco"
-          cx="21"
-          cy="21"
-          r={raio}
-          strokeDasharray={`${preenchido} ${100 - preenchido}`}
-          strokeDashoffset="25"
-        />
+        {/* ZERO NAO DESENHA NADA. Com `stroke-linecap: round`, um arco de comprimento 0
+            ainda pinta as duas pontas arredondadas uma sobre a outra, e o resultado era
+            um ponto laranja solto no anel vazio, que se le como resto de progresso
+            (reprovado a olho, 2026-08-27). Zero por cento e o trilho limpo. */}
+        {preenchido > 0 ? (
+          <circle
+            className="prod-medidor-arco"
+            cx="21"
+            cy="21"
+            r={raio}
+            strokeDasharray={`${preenchido} ${100 - preenchido}`}
+            strokeDashoffset="25"
+          />
+        ) : null}
       </svg>
       <span className="prod-medidor-centro">{preenchido}%</span>
       <span className="prod-medidor-rotulo">{rotulo}</span>

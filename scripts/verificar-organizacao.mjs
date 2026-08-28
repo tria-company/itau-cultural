@@ -373,7 +373,7 @@ async function portoesEstaticos() {
 
   // 8. As dez telas existem como rota, e a navegação não promete o que não existe.
   {
-    const dir = path.join(SRC, "app", "(bastidor)", "studio");
+    const dir = path.join(SRC, "app", "(bastidor)", "studio", "organizacao");
     const rotas = new Set(
       (await readdir(dir, { withFileTypes: true }))
         .filter((e) => e.isDirectory())
@@ -431,10 +431,10 @@ const denominador = (cdp, re) =>
 async function portoesDeNavegador(cdp) {
   // ---- O2 · espaços: conversão, ato explícito, coordenada -----------------
   titulo("── (b) O2 · espaços ──");
-  await cdp.navegar(`${BASE}/studio/espacos/`);
+  await cdp.navegar(`${BASE}/studio/organizacao/espacos/`);
   await cdp.avaliar(`localStorage.setItem('agenda-cultural:visao','web')`);
   await cdp.avaliar(`localStorage.removeItem('studio.org.v1')`);
-  await cdp.navegar(`${BASE}/studio/espacos/`);
+  await cdp.navegar(`${BASE}/studio/organizacao/espacos/`);
   exigir(await esperar(cdp, "Cadastro"), "a tela de espaços hidrata", "sim");
 
   const naoDeclarado = await cdp.avaliar(
@@ -485,7 +485,7 @@ async function portoesDeNavegador(cdp) {
 
   // ---- O5 · mídia: nenhuma publica sem crédito ---------------------------
   titulo("── (b) O5 · mídia ──");
-  await cdp.navegar(`${BASE}/studio/midia/`);
+  await cdp.navegar(`${BASE}/studio/organizacao/midia/`);
   exigir(await esperar(cdp, "Direito de distribuição"), "a tela de mídia hidrata", "sim");
   const fila = await denominador(cdp, /na fila, sem publicar/);
   const naFila = Number(fila.split(" ")[0]);
@@ -509,7 +509,7 @@ async function portoesDeNavegador(cdp) {
 
   // ---- O7 · equipe: sucessão com autor e carimbo -------------------------
   titulo("── (b) O7 · equipe ──");
-  await cdp.navegar(`${BASE}/studio/equipe/`);
+  await cdp.navegar(`${BASE}/studio/organizacao/equipe/`);
   exigir(await esperar(cdp, "Sucessão de titularidade"), "a tela de equipe hidrata", "sim");
   await clicar(cdp, /^Transferir para/);
   await pausa(cdp);
@@ -525,7 +525,7 @@ async function portoesDeNavegador(cdp) {
 
   // ---- O8 · integração: nada grava sem chave de identidade ---------------
   titulo("── (b) O8 · integração ──");
-  await cdp.navegar(`${BASE}/studio/integracao/`);
+  await cdp.navegar(`${BASE}/studio/organizacao/integracao/`);
   exigir(await esperar(cdp, "Prévia do lote"), "a tela de integração hidrata", "sim");
   await digitar(
     cdp,
@@ -545,7 +545,7 @@ async function portoesDeNavegador(cdp) {
 
   // ---- O9 · alcance: nenhum número que o acervo não sustenta -------------
   titulo("── (b) O9 · alcance ──");
-  await cdp.navegar(`${BASE}/studio/alcance/`);
+  await cdp.navegar(`${BASE}/studio/organizacao/alcance/`);
   exigir(await esperar(cdp, "O que este painel não exibe"), "a tela de alcance hidrata", "sim");
   const recusadas = await cdp.avaliar(`document.querySelectorAll('aside .org-falta-item').length`);
   exigir(recusadas >= 5, "as medidas recusadas aparecem nomeadas, com motivo", `${recusadas}`, "≥ 5");
@@ -596,7 +596,7 @@ async function portoesDeNavegador(cdp) {
   // janela, que nunca rola até o próprio fim.
   titulo("── (b) as dez telas, em sequência: medida e console ──");
   for (const tela of TELAS) {
-    await cdp.navegar(`${BASE}/studio/${tela}/`);
+    await cdp.navegar(`${BASE}/studio/organizacao/${tela}/`);
     await esperar(cdp, "Studio · Organização", 40);
     const medida = await cdp.avaliar(`(() => {
       const colada = document.querySelector('.org-colada, .web-colada');

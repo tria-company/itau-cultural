@@ -75,11 +75,14 @@ export const TELAS_DE_GESTAO: readonly TelaDoStudio[] = [
   { id: "ocorrencias", rota: "/studio/ocorrencias/", rotulo: "Sessões publicadas", ato: -1 },
   { id: "duplicatas", rota: "/studio/duplicatas/", rotulo: "Duplicatas", ato: -1 },
   { id: "catalogos", rota: "/studio/catalogos/", rotulo: "Catálogos", ato: -1 },
-  { id: "alcance", rota: "/studio/alcance/", rotulo: "Alcance", ato: -1 },
-  { id: "integracao", rota: "/studio/integracao/", rotulo: "Importação em lote", ato: -1 },
-  { id: "conformidade", rota: "/studio/conformidade/", rotulo: "Conformidade", ato: -1 },
-  { id: "instituicao", rota: "/studio/instituicao/", rotulo: "Ficha da instituição", ato: -1 },
-  { id: "equipe", rota: "/studio/equipe/", rotulo: "Equipe", ato: -1 },
+  // AS CINCO DA ORGANIZAÇÃO mudaram de endereço em 2026-08-27, para
+  // `/studio/organizacao/<tela>/`. Elas continuam listadas aqui porque são telas que o
+  // produtor alcança, mas quem responde por elas é a instituição.
+  { id: "alcance", rota: "/studio/organizacao/alcance/", rotulo: "Alcance", ato: -1 },
+  { id: "integracao", rota: "/studio/organizacao/integracao/", rotulo: "Importação em lote", ato: -1 },
+  { id: "conformidade", rota: "/studio/organizacao/conformidade/", rotulo: "Conformidade", ato: -1 },
+  { id: "instituicao", rota: "/studio/organizacao/instituicao/", rotulo: "Ficha da instituição", ato: -1 },
+  { id: "equipe", rota: "/studio/organizacao/equipe/", rotulo: "Equipe", ato: -1 },
 ];
 
 /** A rota do ato `n` da ficha da agenda. `null` fora da faixa, quem chama trata. */

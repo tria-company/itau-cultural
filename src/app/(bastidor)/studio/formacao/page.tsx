@@ -1,78 +1,41 @@
-import { SeparacaoDaOrganizacao } from "@/componentes/separacao-da-organizacao";
 import { FichaDosCursos } from "@/componentes/produtor-cursos";
-import { StudioOrgFormacao } from "@/componentes/studio-org-formacao";
 import {
   CONTEXTO_DO_PRODUTOR,
   catalogoDoEspaco,
   registrosSemeados,
 } from "@/dados/mock/seed-produtor";
-import {
-  DATA_DA_MEDIDA,
-  GESTOR_DA_ORGANIZACAO,
-  GESTOR_E_AUTORADO,
-  ORGANIZACAO_DA_DEMONSTRACAO,
-  declaracoesDasFormacoes,
-  formacoesDoAcervo,
-  numerosDasFormacoes,
-  publicacoesDoAcervo,
-} from "@/dados/organizacao";
 
 /**
- * Studio · O4 · Formação e área do educador (funcionalidades 144 a 146).
+ * Studio · Cursos, a pauta do Produtor (funcionalidades 144 a 146).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * AS DUAS CONVIVEM, E A DA ORGANIZAÇÃO VEIO PRIMEIRO, porque a nova quase a apagou.
+ * A PAREDE DA ORGANIZAÇÃO SAIU DAQUI em 2026-08-27, e foi para
+ * `/studio/organizacao/formacao/`.
  *
- * O sprint pedia «portar `/studio/formacao` para a ficha nova», e a primeira versão deste arquivo fez
- * isso literalmente: trocou o conteúdo inteiro. `verificar-organizacao.mjs` acusou, e o que
- * ele acusava não era layout, eram contratos:
+ * Esta é a quinta das telas híbridas, e a única fora do pedido: as quatro nomeadas foram
+ * programa, espaços, editais e mídia. Ela veio junto por necessidade, e não por escolha.
+ * A barra de dez abas da Organização liga uma tela à outra; deixar quatro no endereço novo
+ * e esta no antigo teria quebrado a navegação da superfície inteira.
  *
- * · a visita educativa com escola, data, horário e número de pessoas;
- * · a biblioteca de material didático;
- * · o educador NÃO sendo um nono nível de acesso, ele é o público desta pauta.
+ * NADA DO QUE ELA PROVAVA FOI PERDIDO: a visita educativa com escola, data, horário e
+ * número de pessoas, a biblioteca de material didático e o educador como PÚBLICO desta
+ * pauta (e não como um nono nível de acesso) continuam medidos, na rota própria.
  *
- * Apagá-los teria sido destruir a demonstração de decisões de ontologia para acomodar uma
- * ficha nova. As duas cabem, e a ordem diz de quem é cada uma: a tela da Organização
- * continua no topo, com o que ela prova; a ficha do Produtor entra abaixo, com o que ela
- * acrescenta.
- *
- * A SEPARAÇÃO CONTINUA DECLARADA. Esta tela passou ao Produtor, quem cadastra o espaço
- * onde o próprio evento acontece é quem produz, não a instituição. O que muda é que a
- * transição é VISÍVEL na tela, em vez de ser uma substituição silenciosa.
+ * DIFERENÇA PARA AS QUATRO IRMÃS: elas ganharam painel de acervo (`acervo` → `panorama`);
+ * esta só perdeu a parede. Cursos tem vitrine pública e registros publicados, então o trio
+ * genérico do painel já responde «quantos no ar, quanta audiência, quantos em edição», que
+ * é a pergunta certa aqui. Por isso não há chamada a `@/dados/organizacao` nesta página:
+ * a que existia alimentava a parede, e saiu com ela.
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build, e o que
- * atravessa para os componentes de cliente são DTOs de primitivo (DP-F).
+ * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build.
  */
 export default function Pagina() {
-  const numeros = numerosDasFormacoes();
-
   return (
-    <>
-      <FichaDosCursos
-        semente={registrosSemeados()}
-        contexto={CONTEXTO_DO_PRODUTOR}
-        catalogo={catalogoDoEspaco()}
-      />
-
-      {/* A TELA HERDADA DA ORGANIZAÇÃO, abaixo do conteúdo novo e SÓ NA WEB.
-          A revisão a olho (2026-08-26) reprovou a parede herdada abrindo a rota. Os
-          contratos que verificar-organizacao.mjs mede continuam aqui, presentes no
-          DOM e visíveis na web, onde a suíte roda; no app, o CSS esconde o bloco
-          ([data-herdado-da-organizacao] em studio-produtor.css). */}
-      <div data-herdado-da-organizacao>
-        <SeparacaoDaOrganizacao lado="passou-ao-produtor" />
-        <StudioOrgFormacao
-        formacoes={formacoesDoAcervo()}
-        publicacoes={publicacoesDoAcervo()}
-        numeros={numeros}
-        declaracoes={declaracoesDasFormacoes(numeros)}
-        organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
-        autor={GESTOR_DA_ORGANIZACAO}
-        gestorEAutorado={GESTOR_E_AUTORADO}
-        dataDeReferencia={DATA_DA_MEDIDA}
-      />
-      </div>
-    </>
+    <FichaDosCursos
+      semente={registrosSemeados()}
+      contexto={CONTEXTO_DO_PRODUTOR}
+      catalogo={catalogoDoEspaco()}
+    />
   );
 }

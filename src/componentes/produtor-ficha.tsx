@@ -20,7 +20,7 @@ import {
   useProdutor,
 } from "@/componentes/produtor-estado";
 import { PautaInicio } from "@/componentes/produtor-pauta-inicio";
-import type { ExtrasDoInicio } from "@/componentes/produtor-pauta-inicio";
+import type { ExtrasDoInicio, PanoramaDaPauta } from "@/componentes/produtor-pauta-inicio";
 import { RegistroDetalhe } from "@/componentes/produtor-registro-detalhe";
 import { DESCRICAO_DA_PAUTA, podePublicar, impedimentosDe, scoreDoRegistro } from "@/dados/tipos-produtor";
 import type {
@@ -106,6 +106,14 @@ export interface PropsFichaSimples<P extends Pauta> {
       alterarId: (id: string, m: Partial<PorPauta<P>>) => void;
     },
   ) => ExtrasDoInicio;
+  /**
+   * O PANORAMA DO PAINEL, quando a pauta tem números próprios a mostrar.
+   *
+   * Espaço, mídia, programa e edital medem o ACERVO, e não audiência: o trio genérico
+   * abria «0 no ar / 0 visualizações / 8 em edição» e não dizia nada. A pauta devolve
+   * aqui os números que ela sustenta, e o painel os desenha.
+   */
+  painelDaPauta?: (daPauta: PorPauta<P>[]) => PanoramaDaPauta;
 }
 
 /** Os campos comuns, prontos para a pauta recombinar. */
@@ -132,6 +140,7 @@ export function FichaSimples<P extends Pauta>({
   composicao,
   colunaDaPauta,
   montarExtrasDoInicio,
+  painelDaPauta,
 }: PropsFichaSimples<P>) {
   const router = useRouter();
   const armazem = useProdutor(semente, contexto);
@@ -210,6 +219,7 @@ export function FichaSimples<P extends Pauta>({
           criar: () => armazem.criar(pauta),
           alterarId: (id, m) => armazem.alterarId(id, m as Partial<Registro>),
         })}
+        panorama={painelDaPauta?.(daPauta)}
       />
     );
   }

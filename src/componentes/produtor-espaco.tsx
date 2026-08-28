@@ -5,7 +5,7 @@ import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
 import { Campo } from "@/componentes/base/ficha-em-atos";
 import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { FichaSimples } from "@/componentes/produtor-ficha";
-import { imagemVazia } from "@/dados/tipos-produtor";
+import { imagemVazia, semTravessao } from "@/dados/tipos-produtor";
 import type { CatalogoDoEspaco } from "@/dados/mock/seed-produtor";
 import type {
   ContextoDoProdutor,
@@ -35,14 +35,70 @@ import type {
  * PORTADA DA ORGANIZAÇÃO (tela O2), pelo mesmo critério das outras seis: cadastrar o espaço
  * onde o próprio evento acontece é ação de quem produz, não da instituição.
  */
+/**
+ * O ACERVO DE ESPAÇOS, medido no build e atravessado como primitivo (DP-F).
+ *
+ * Estes números moravam na parede da Organização empilhada embaixo desta tela, e mudaram
+ * de andar em 2026-08-27: eles são o que a pauta tem de verdade a mostrar. Espaço não tem
+ * vitrine nem audiência, então o trio genérico do painel abria «0 no ar / 0 visualizações»
+ * e não dizia nada.
+ */
+export interface AcervoDeEspacos {
+  total: number;
+  declaramAcessibilidade: number;
+  comCoordenada: number;
+  ocorrencias: number;
+  ocorrenciasComEspaco: number;
+  porMetodo: { metodo: string; quantos: number }[];
+}
+
+/**
+ * O método que produziu mais coordenadas, escrito para gente ler.
+ *
+ * «centroide-municipio» vira «município». O acervo usa um método só, então isto é uma
+ * frase, e não uma distribuição.
+ */
+function metodoDominante(porMetodo: { metodo: string; quantos: number }[]): string {
+  const maior = [...porMetodo].sort((a, b) => b.quantos - a.quantos)[0];
+  if (!maior) return "sem coordenada no acervo";
+  // Os identificadores do dado vêm sem acento; a tela é texto, e texto leva acento.
+  const NOME: Record<string, string> = {
+    "centroide-municipio": "centroide de município",
+    "centroide-estado": "centroide de estado",
+    "centroide-pais": "centroide de país",
+    "deslocamento-por-espaco": "deslocamento a partir do espaço",
+  };
+  return `${maior.quantos} por ${NOME[maior.metodo] ?? maior.metodo.replace(/-/g, " ")}`;
+}
+
+/**
+ * Os rascunhos agrupados pelo estado que cada um declara.
+ *
+ * O painel genérico listava oito linhas iguais, todas dizendo «continue de onde parou».
+ * Agrupar por UF é o único corte que os dados sustentam, e é o que um produtor procura:
+ * onde ficam os lugares que ele ainda não cadastrou.
+ */
+function agrupar(daPauta: RegistroDeEspaco[]): { nome: string; registros: Registro[] }[] {
+  const mapa = new Map<string, Registro[]>();
+  for (const r of daPauta) {
+    const uf = r.estado.trim() === "" ? "sem estado" : r.estado.trim();
+    mapa.set(uf, [...(mapa.get(uf) ?? []), r]);
+  }
+  return [...mapa.entries()]
+    .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .map(([nome, registros]) => ({ nome, registros }));
+}
+
 export function FichaDoEspaco({
   semente,
   contexto,
   catalogo,
+  acervo,
 }: {
   semente: Registro[];
   contexto: ContextoDoProdutor;
   catalogo: CatalogoDoEspaco;
+  acervo: AcervoDeEspacos;
 }) {
   return (
     <FichaSimples<"espacos">
@@ -52,12 +108,73 @@ export function FichaDoEspaco({
       catalogo={catalogo}
       destinoAoPublicar="/mapa/"
       temLugarFisico={() => true}
+      painelDaPauta={(daPauta) => {
+        // `daPauta` traz a pauta INTEIRA, publicados inclusive. «Em edição» é um recorte,
+        // e chamá-lo de total fazia a tela contar publicado como rascunho.
+        const emEdicao = daPauta.filter(
+          (r) => r.situacao === "rascunho" || r.situacao === "devolvido",
+        );
+        return {
+        contagem: `${acervo.total} no acervo`,
+        numeros: [
+          { valor: String(acervo.total), rotulo: "no acervo" },
+          {
+            valor: `${acervo.declaramAcessibilidade}/${acervo.total}`,
+            rotulo: "declaram acessibilidade",
+          },
+          { valor: String(emEdicao.length), rotulo: "em edição" },
+        ],
+        frase:
+          "Os espaços do acervo são inferência do território: nenhum deles é cadastro.",
+        cartoes: [
+          {
+            titulo: "Coordenada",
+            largura: 4,
+            medidor: {
+              porcento: Math.round((acervo.comCoordenada / Math.max(1, acervo.total)) * 100),
+              rotulo: "têm coordenada",
+            },
+            // O MÉTODO CABE NA NOTA. Ele era um cartão de barras, e como o acervo usa um
+            // método só, a barra ocupava a largura inteira e virava um bloco branco
+            // (reprovado a olho, 2026-08-27). Um valor único não é distribuição.
+            nota: `Sempre derivada, nunca digitada: ${metodoDominante(acervo.porMetodo)}.`,
+          },
+          {
+            titulo: "Acessibilidade",
+            largura: 4,
+            medidor: {
+              porcento: Math.round(
+                (acervo.declaramAcessibilidade / Math.max(1, acervo.total)) * 100,
+              ),
+              rotulo: "declaram",
+            },
+            nota: "Silêncio não é ausência: falta o ato de declarar.",
+          },
+          {
+            titulo: "Sessões que dizem onde acontecem",
+            largura: 4,
+            medidor: {
+              porcento: Math.round(
+                (acervo.ocorrenciasComEspaco / Math.max(1, acervo.ocorrencias)) * 100,
+              ),
+              rotulo: `de ${acervo.ocorrencias}`,
+            },
+            nota: "É o que o cadastro daqui resolve.",
+          },
+        ],
+        grupos: agrupar(emEdicao),
+        tituloDosGrupos: "Em edição, por estado",
+        subDe: (r) => {
+          const e = r as RegistroDeEspaco;
+          const onde = [e.cidade, e.estado].filter((x) => x.trim() !== "").join(", ");
+          return onde === "" ? "sem cidade ainda" : semTravessao(onde);
+        },
+        };
+      }}
       cabecalhoDaIdentidade={() => (
         <p className="prod-campo-nota">
-          Os <strong>{catalogo.totalDeEspacos}</strong> espaços do acervo trazem cidade,
-          estado e país, e mais nada. Sem endereço não há cadastro: o resto do formulário
-          pode ficar vazio e o espaço continua declarado, mas um cadastro sem endereço não
-          acrescenta nada ao que a derivação já tinha.
+          <strong>{catalogo.totalDeEspacos}</strong> espaços no acervo: o que falta em
+          todos é endereço.
         </p>
       )}
       atosProprios={(r, alterar) => [

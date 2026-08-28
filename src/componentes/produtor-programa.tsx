@@ -7,6 +7,7 @@ import { SeletorDeCatalogo } from "@/componentes/base/seletor-de-catalogo";
 import { FichaSimples } from "@/componentes/produtor-ficha";
 import { ESTADOS_DO_EDITAL, EXPLICACAO_DO_EDITAL, ROTULO_DO_EDITAL } from "@/dados/tipos-organizacao";
 import type { CatalogoDoEdital, CatalogoDoPrograma } from "@/dados/mock/seed-produtor";
+import type { EstadoDoEdital } from "@/dados/tipos-organizacao";
 import type {
   ContextoDoProdutor,
   EdicaoDoPrograma,
@@ -28,14 +29,29 @@ import type {
  * pelo mesmo critério das outras seis. O casamento com o perfil de quem produz, linguagem,
  * território, público-alvo, é o que faz o alerta do painel valer alguma coisa.
  */
+/**
+ * O ACERVO VISTO DO PROGRAMA, medido no build e atravessado como primitivo (DP-F).
+ *
+ * Vinha da parede da Organização empilhada embaixo desta tela, que mudou de endereço em
+ * 2026-08-27. O número que importa aqui é um ZERO: `programa` é a única das vinte classes
+ * da ontologia sem nenhuma instância no acervo.
+ */
+export interface AcervoDoPrograma {
+  programas: number;
+  eventos: number;
+  eventosComRealizador: number;
+}
+
 export function FichaDoPrograma({
   semente,
   contexto,
   catalogo,
+  acervo,
 }: {
   semente: Registro[];
   contexto: ContextoDoProdutor;
   catalogo: CatalogoDoPrograma;
+  acervo: AcervoDoPrograma;
 }) {
   return (
     <FichaSimples<"programa">
@@ -43,11 +59,71 @@ export function FichaDoPrograma({
       semente={semente}
       contexto={contexto}
       catalogo={catalogo}
+      painelDaPauta={(daPauta) => {
+        // `daPauta` traz a pauta INTEIRA; «em edição» é um recorte, e contar publicado
+        // como rascunho era o defeito que a revisão adversarial pegou (2026-08-27).
+        const emEdicao = daPauta.filter(
+          (r) => r.situacao === "rascunho" || r.situacao === "devolvido",
+        );
+        const temEvento = (r: RegistroDePrograma) =>
+          r.edicoes.some((e) => e.eventos.length > 0);
+        const comEvento = emEdicao.filter(temEvento);
+        const semEvento = emEdicao.filter((r) => !temEvento(r));
+        return {
+          contagem: `${acervo.programas} no acervo`,
+          numeros: [
+            { valor: String(acervo.programas), rotulo: "no acervo" },
+            { valor: String(emEdicao.length), rotulo: "em edição" },
+            { valor: String(acervo.eventos), rotulo: "eventos para reunir" },
+          ],
+          frase:
+            "A classe programa é a única da ontologia sem nenhuma instância no acervo: estes são os primeiros.",
+          cartoes: [
+            {
+              titulo: "Eventos com instituição realizadora",
+              largura: 6,
+              medidor: {
+                porcento: Math.round(
+                  (acervo.eventosComRealizador / Math.max(1, acervo.eventos)) * 100,
+                ),
+                rotulo: `de ${acervo.eventos}`,
+              },
+              nota: "Só esses já sabem quem responde por eles.",
+            },
+            {
+              titulo: "Os rascunhos que já reúnem evento",
+              largura: 6,
+              medidor: {
+                porcento: Math.round(
+                  (comEvento.length / Math.max(1, emEdicao.length)) * 100,
+                ),
+                rotulo: `de ${emEdicao.length}`,
+              },
+              nota: "Um programa sem evento é um guarda-chuva sem nada embaixo.",
+            },
+          ],
+          grupos: [
+            { nome: "com evento reunido", registros: comEvento },
+            { nome: "sem nenhum evento", registros: semEvento },
+          ].filter((g) => g.registros.length > 0),
+          tituloDosGrupos: "Em edição",
+          subDe: (r) => {
+            const p = r as RegistroDePrograma;
+            const edicoes = p.edicoes.length;
+            const eventos = p.edicoes.reduce(
+              (n: number, e) => n + e.eventos.length,
+              0,
+            );
+            return `${edicoes} ${edicoes === 1 ? "edição" : "edições"} · ${eventos} ${
+              eventos === 1 ? "evento" : "eventos"
+            }`;
+          },
+        };
+      }}
       cabecalhoDaIdentidade={() => (
         <p className="prod-campo-nota" data-programa-mede-zero>
-          A classe <code>programa</code> mede <strong>zero instâncias</strong> no acervo: ela
-          existe na ontologia, o motor a percorre, e nada a povoa. Não é lacuna de tela, é
-          lacuna de dado.
+          A classe <code>programa</code> mede <strong>zero instâncias</strong> no acervo:
+          lacuna de dado, não de tela.
         </p>
       )}
       atosProprios={(r, alterar) => [
@@ -222,14 +298,23 @@ function AtoEventos({
 
 // ---------------------------------------------------------------------------
 
+/** O vocabulário do recorte, medido no build e atravessado como primitivo (DP-F). */
+export interface AcervoDoEdital {
+  linguagens: number;
+  ufsComAcervo: number;
+  ufs: number;
+}
+
 export function FichaDoEdital({
   semente,
   contexto,
   catalogo,
+  acervo,
 }: {
   semente: Registro[];
   contexto: ContextoDoProdutor;
   catalogo: CatalogoDoEdital;
+  acervo: AcervoDoEdital;
 }) {
   return (
     <FichaSimples<"editais">
@@ -237,11 +322,64 @@ export function FichaDoEdital({
       semente={semente}
       contexto={contexto}
       catalogo={catalogo}
+      painelDaPauta={(daPauta) => {
+        const hoje = contexto.dataDeReferencia;
+        const comPrazo = daPauta.filter((r) => r.prazo.trim() !== "");
+        const abertos = daPauta.filter((r) => r.estado === "aberto");
+        const vencidos = comPrazo.filter((r) => r.prazo < hoje);
+        const porEstado = new Map<EstadoDoEdital, number>();
+        for (const r of daPauta) {
+          porEstado.set(r.estado, (porEstado.get(r.estado) ?? 0) + 1);
+        }
+        return {
+          numeros: [
+            { valor: String(daPauta.length), rotulo: "editais" },
+            { valor: String(abertos.length), rotulo: "declarados abertos" },
+            { valor: String(vencidos.length), rotulo: "com prazo vencido" },
+          ],
+          frase:
+            "Um edital sem recorte casa com todo mundo, e alerta que vale para todos não vale para ninguém.",
+          cartoes: [
+            {
+              titulo: "Em que estado eles estão",
+              largura: 6,
+              rosca: {
+                fatias: [...porEstado.entries()].map(([estado, quantos]) => ({
+                  rotulo: ROTULO_DO_EDITAL[estado] ?? estado,
+                  valor: quantos,
+                })),
+                centroValor: String(daPauta.length),
+                centroRotulo: "editais",
+              },
+            },
+            {
+              // O DENOMINADOR SÃO OS QUE TÊM PRAZO. Edital sem prazo não tem prazo à
+               // frente nem atrás, e contá-lo como futuro inflava o número.
+              titulo: "Prazo ainda à frente",
+              largura: 6,
+              medidor: {
+                porcento: Math.round(
+                  ((comPrazo.length - vencidos.length) / Math.max(1, comPrazo.length)) * 100,
+                ),
+                rotulo: `de ${comPrazo.length} com prazo`,
+              },
+              nota: `O recorte tem ${acervo.linguagens} linguagens e ${acervo.ufsComAcervo} das ${acervo.ufs} UFs com acervo.`,
+            },
+          ],
+          subDe: (r) => {
+            const e = r as RegistroDeEdital;
+            const rotulo = ROTULO_DO_EDITAL[e.estado] ?? e.estado;
+            if (e.prazo.trim() === "") return `${rotulo}, sem prazo`;
+            const [ano, mes, dia] = e.prazo.split("-");
+            const data = `${dia}.${mes}.${ano}`;
+            return e.prazo < hoje ? `${rotulo} · prazo vencido em ${data}` : `${rotulo} · até ${data}`;
+          },
+        };
+      }}
       cabecalhoDaIdentidade={() => (
         <p className="prod-campo-nota">
-          O edital não tem vitrine própria: ele casa com o PERFIL de quem produz, linguagem,
-          território, público-alvo, e o casamento vira alerta no painel. Um edital sem
-          recorte casa com todo mundo, e um alerta que vale para todos não vale para ninguém.
+          O edital casa com o <strong>perfil</strong> de quem produz, e o casamento vira
+          alerta no painel.
         </p>
       )}
       atosProprios={(r, alterar) => [

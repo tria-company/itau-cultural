@@ -43,6 +43,15 @@ const ROTAS = [
   "/moderacao/fila/",
   "/observatorio/",
   "/roteiro/",
+  // AS QUATRO PAUTAS REFEITAS em 2026-08-27, quando a parede da Organização saiu de cima
+  // delas: são as que a revisão a olho reprovou, e por isso são as que ela reconfere.
+  "/studio/programa/",
+  "/studio/espacos/",
+  "/studio/editais/",
+  "/studio/midia/",
+  // E a superfície nova onde a parede foi morar, mais uma das dez.
+  "/studio/organizacao/",
+  "/studio/organizacao/midia/",
 ];
 
 const VISOES = ["mobile", "web"];

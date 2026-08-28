@@ -15,7 +15,7 @@
  *   · mídia com crédito (147, 148)   → /studio/midia/
  *   · programa e formação (143–146)  → /studio/programa/ e /studio/formacao/
  *   · editais (149)                  → /studio/editais/
- *   · lote e chave (150, 151)        → /studio/integracao/
+ *   · lote e chave (150, 151)        → /studio/organizacao/integracao/
  *   · alcance e conformidade (152, 168)
  *
  * TRÊS FICAM COM ELA: a ficha da instituição e a verificação (141), a equipe (139) e as

@@ -1,76 +1,54 @@
-import { SeparacaoDaOrganizacao } from "@/componentes/separacao-da-organizacao";
 import { FichaDaMidia } from "@/componentes/produtor-midia";
-import { StudioOrgMidia } from "@/componentes/studio-org-midia";
 import {
   CONTEXTO_DO_PRODUTOR,
   catalogoComum,
   registrosSemeados,
 } from "@/dados/mock/seed-produtor";
-import {
-  DATA_DA_MEDIDA,
-  GESTOR_DA_ORGANIZACAO,
-  GESTOR_E_AUTORADO,
-  ORGANIZACAO_DA_DEMONSTRACAO,
-  declaracoesDasMidias,
-  midiasDoAcervo,
-  numerosDasMidias,
-} from "@/dados/organizacao";
+import { numerosDasMidias } from "@/dados/organizacao";
 
 /**
- * Studio · O5 · Mídia com crédito (funcionalidades 147 e 148).
+ * Studio · Mídia, a pauta do Produtor (funcionalidades 147 e 148).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * AS DUAS CONVIVEM, E A DA ORGANIZAÇÃO VEIO PRIMEIRO, porque a nova quase a apagou.
+ * A PAREDE DA ORGANIZAÇÃO SAIU DAQUI em 2026-08-27, e foi para `/studio/organizacao/midia/`.
  *
- * O sprint pedia «portar `/studio/midia` para a ficha nova», e a primeira versão deste arquivo fez
- * isso literalmente: trocou o conteúdo inteiro. `verificar-organizacao.mjs` acusou, e o que
- * ele acusava não era layout, eram contratos:
+ * Até então esta rota entregava duas telas empilhadas, e a de baixo ocupava 73% da altura
+ * da página: banner, kicker de nível 6, dez abas, a fila do crédito com 529 linhas e
+ * quatro parágrafos de declaração. Quem abria «Mídia» para subir um ativo recebia junto a
+ * auditoria do acervo inteiro.
  *
- * · a fila do crédito abrindo NOMEADA e não vazia;
- * · a lista abrindo NA fila, os itens sem crédito, e só eles;
- * · creditar tirando o item da fila, porque o crédito é a CONDIÇÃO de publicar (165).
+ * NADA DO QUE ELA PROVAVA FOI PERDIDO: os contratos continuam medidos na rota própria,
+ * numa tela visível. Esconder e continuar medindo por `querySelector` seria portão verde
+ * sobre tela invisível.
  *
- * Apagá-los teria sido destruir a demonstração de decisões de ontologia para acomodar uma
- * ficha nova. As duas cabem, e a ordem diz de quem é cada uma: a tela da Organização
- * continua no topo, com o que ela prova; a ficha do Produtor entra abaixo, com o que ela
- * acrescenta.
- *
- * A SEPARAÇÃO CONTINUA DECLARADA. Esta tela passou ao Produtor, quem cadastra o espaço
- * onde o próprio evento acontece é quem produz, não a instituição. O que muda é que a
- * transição é VISÍVEL na tela, em vez de ser uma substituição silenciosa.
+ * O QUE FICOU: os denominadores do acervo, que são o que esta pauta sustenta. Eles
+ * atravessam como PRIMITIVOS, e é isso que mantém DP-F de pé.
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build, e o que
- * atravessa para os componentes de cliente são DTOs de primitivo (DP-F).
+ * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build.
  */
 export default function Pagina() {
-  const numeros = numerosDasMidias();
+  const n = numerosDasMidias();
+  const libras = n.porDimensao.find((d) => /libras/i.test(d.rotulo))?.quantos ?? 0;
 
   return (
-    <>
-      <FichaDaMidia
-        semente={registrosSemeados()}
-        contexto={CONTEXTO_DO_PRODUTOR}
-        catalogo={catalogoComum()}
-      />
-
-      {/* A TELA HERDADA DA ORGANIZAÇÃO, abaixo do conteúdo novo e SÓ NA WEB.
-          A revisão a olho (2026-08-26) reprovou a parede herdada abrindo a rota. Os
-          contratos que verificar-organizacao.mjs mede continuam aqui, presentes no
-          DOM e visíveis na web, onde a suíte roda; no app, o CSS esconde o bloco
-          ([data-herdado-da-organizacao] em studio-produtor.css). */}
-      <div data-herdado-da-organizacao>
-        <SeparacaoDaOrganizacao lado="passou-ao-produtor" />
-        <StudioOrgMidia
-        midias={midiasDoAcervo()}
-        numeros={numeros}
-        declaracoes={declaracoesDasMidias(numeros)}
-        organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
-        autor={GESTOR_DA_ORGANIZACAO}
-        gestorEAutorado={GESTOR_E_AUTORADO}
-        dataDeReferencia={DATA_DA_MEDIDA}
-      />
-      </div>
-    </>
+    <FichaDaMidia
+      semente={registrosSemeados()}
+      contexto={CONTEXTO_DO_PRODUTOR}
+      catalogo={catalogoComum()}
+      acervo={{
+        total: n.total,
+        comCredito: n.comCredito,
+        semCredito: n.semCredito,
+        comImagemAlt: n.comImagemAlt,
+        comLibras: libras,
+        declaramAcessibilidade: n.declaramAcessibilidade,
+        dimensoesEmZero: n.porDimensao.filter((d) => d.quantos === 0).length,
+        porCategoria: n.porCategoria.map((c) => ({
+          categoria: c.categoria,
+          quantos: c.quantos,
+        })),
+      }}
+    />
   );
 }

@@ -26,25 +26,155 @@ import type {
  * que «player com retomada» e «download e offline» estão registrados como NÃO SUSTENTADOS,
  * e não como faltando: o que falta é dado, não tela.
  */
+/**
+ * O ACERVO DE ATIVOS, medido no build e atravessado como primitivo (DP-F).
+ *
+ * Estes números moravam na parede da Organização empilhada embaixo desta tela, e mudaram
+ * de andar em 2026-08-27. Eles são o que a pauta tem: mídia não tem vitrine própria, e o
+ * trio genérico do painel abria «0 no ar / 0 visualizações / 8 em edição».
+ */
+export interface AcervoDeMidias {
+  total: number;
+  comCredito: number;
+  semCredito: number;
+  comImagemAlt: number;
+  comLibras: number;
+  declaramAcessibilidade: number;
+  dimensoesEmZero: number;
+  porCategoria: { categoria: string; quantos: number }[];
+}
+
+/**
+ * As categorias viram fatias: as cinco maiores, e o resto somado em «outras».
+ *
+ * A rosca tem seis tons declarados; nove fatias fariam duas delas repetirem o mesmo tom,
+ * e duas fatias da mesma cor num gráfico de composição é pior do que uma fatia a menos.
+ */
+function fatiasDasCategorias(
+  porCategoria: { categoria: string; quantos: number }[],
+): { rotulo: string; valor: number }[] {
+  // Os identificadores do CMS vem sem acento; a legenda e texto, e texto leva acento.
+  const NOME: Record<string, string> = {
+    series: "séries",
+    videos: "vídeos",
+    noticias: "notícias",
+    colunistas: "colunistas",
+    "agenda-cultural": "agenda cultural",
+  };
+  const maiores = porCategoria.slice(0, 5);
+  const resto = porCategoria.slice(5).reduce((n, c) => n + c.quantos, 0);
+  const fatias = maiores.map((c) => ({
+    rotulo: NOME[c.categoria] ?? c.categoria,
+    valor: c.quantos,
+  }));
+  return resto > 0 ? [...fatias, { rotulo: "outras", valor: resto }] : fatias;
+}
+
 export function FichaDaMidia({
   semente,
   contexto,
   catalogo,
+  acervo,
 }: {
   semente: Registro[];
   contexto: ContextoDoProdutor;
   catalogo: CatalogoComum;
+  acervo: AcervoDeMidias;
 }) {
+  const porcento = (parte: number) =>
+    Math.round((parte / Math.max(1, acervo.total)) * 100);
+
   return (
     <FichaSimples<"midia">
       pauta="midia"
       semente={semente}
       contexto={contexto}
       catalogo={catalogo}
+      painelDaPauta={(daPauta) => {
+        const emEdicao = daPauta.filter(
+          (r) => r.situacao === "rascunho" || r.situacao === "devolvido",
+        );
+        return {
+        contagem: `${acervo.total} no acervo`,
+        numeros: [
+          { valor: String(acervo.total), rotulo: "ativos no acervo" },
+          { valor: String(acervo.semCredito), rotulo: "sem crédito, não publicam" },
+          { valor: String(emEdicao.length), rotulo: "em edição" },
+        ],
+        frase: "Crédito é condição de publicar, e é por ele que a fila anda.",
+        cartoes: [
+          {
+            // ROSCA, E NÃO BARRAS. As categorias são partes de um todo de 529, e com
+            // podcasts em 336 contra acervos em 1 a barra mais alta virava um bloco
+            // branco e as outras oito, tocos (reprovado a olho, 2026-08-27). Rosca
+            // responde «que fatia», que é a pergunta quando o total importa.
+            titulo: "As categorias do CMS",
+            largura: 8,
+            rosca: {
+              fatias: fatiasDasCategorias(acervo.porCategoria),
+              centroValor: String(acervo.total),
+              centroRotulo: "ativos",
+            },
+            nota: "Categoria não é formato: um podcast é áudio, e a categoria diz outra coisa.",
+          },
+          {
+            titulo: "Crédito",
+            largura: 4,
+            medidor: { porcento: porcento(acervo.comCredito), rotulo: "creditados" },
+            nota: `${acervo.semCredito} esperam por quem os creditou.`,
+          },
+          {
+            titulo: "Descrição alternativa",
+            largura: 4,
+            medidor: { porcento: porcento(acervo.comImagemAlt), rotulo: "com alt" },
+            nota: "Sem alt, a imagem não existe para quem usa leitor de tela.",
+          },
+          {
+            titulo: "Libras",
+            largura: 4,
+            medidor: {
+              porcento: porcento(acervo.comLibras),
+              rotulo: `${acervo.comLibras} de ${acervo.total}`,
+            },
+            nota: `${acervo.dimensoesEmZero} das 8 dimensões medem zero no acervo inteiro.`,
+          },
+          {
+            // MEDIDO, E NÃO CRAVADO. Este 100 era um literal: acertava por coincidência, e
+            // mentiria no dia em que um ativo entrasse sem ficha.
+            titulo: "Ficha de acessibilidade",
+            largura: 4,
+            medidor: {
+              porcento: porcento(acervo.declaramAcessibilidade),
+              rotulo: "declaram a ficha",
+            },
+            nota: "Declarar não é oferecer: a ficha está preenchida, e quase toda em ausência.",
+          },
+        ],
+        // O QUE FALTA É LIDO DO REGISTRO. A frase era fixa, e por isso continuaria
+        // dizendo «falta o arquivo» depois de alguém preencher o arquivo.
+        subDe: (r) => {
+          if (r.situacao === "publicado") return null;
+          const m = r as RegistroDeMidia;
+          const faltas = [
+            m.arquivo.trim() === "" ? "o arquivo" : null,
+            m.formato === null ? "o formato" : null,
+            !m.direito.declarado || m.direito.titular.trim() === ""
+              ? "o direito de distribuição"
+              : null,
+          ].filter((x): x is string => x !== null);
+          if (faltas.length === 0) return "pronto para publicar";
+          // Tres faltas com «e» entre todas viram ladainha: vírgula até a última.
+          const lista =
+            faltas.length === 1
+              ? faltas[0]
+              : `${faltas.slice(0, -1).join(", ")} e ${faltas[faltas.length - 1]}`;
+          return `falta ${lista}`;
+        },
+        };
+      }}
       cabecalhoDaIdentidade={() => (
         <p className="prod-campo-nota">
-          O ativo é <strong>transversal</strong>: ele não tem vitrine própria: é o que o
-          evento, o episódio e a matéria usam. Subir uma vez, usar em muitas.
+          O ativo é <strong>transversal</strong>: subir uma vez, usar em muitas.
         </p>
       )}
       atosProprios={(r, alterar) => [
@@ -81,7 +211,7 @@ function AtoArquivo({
     <Campo
       rotulo="Arquivo ou URL"
       obrigatorio
-      nota="Não há upload neste protótipo, ele é um artefato estático, sem servidor para receber arquivo. Cole o endereço, ou o id do vídeo."
+      nota="Cole o endereço, ou o id do vídeo."
     >
       <input
         type="text"

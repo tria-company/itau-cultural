@@ -1,73 +1,44 @@
-import { SeparacaoDaOrganizacao } from "@/componentes/separacao-da-organizacao";
 import { FichaDoEdital } from "@/componentes/produtor-programa";
-import { StudioOrgEditais } from "@/componentes/studio-org-editais";
 import {
   CONTEXTO_DO_PRODUTOR,
   catalogoDoEdital,
   registrosSemeados,
 } from "@/dados/mock/seed-produtor";
-import {
-  DATA_DA_MEDIDA,
-  GESTOR_DA_ORGANIZACAO,
-  GESTOR_E_AUTORADO,
-  ORGANIZACAO_DA_DEMONSTRACAO,
-  declaracoesDosEditais,
-  vocabularioDoEdital,
-} from "@/dados/organizacao";
+import { vocabularioDoEdital } from "@/dados/organizacao";
 
 /**
- * Studio · O6 · Editais e chamadas (funcionalidade 149).
+ * Studio · Editais, a pauta do Produtor (funcionalidade 149).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * AS DUAS CONVIVEM, E A DA ORGANIZAÇÃO VEIO PRIMEIRO, porque a nova quase a apagou.
+ * A PAREDE DA ORGANIZAÇÃO SAIU DAQUI em 2026-08-27, e foi para
+ * `/studio/organizacao/editais/`.
  *
- * O sprint pedia «portar `/studio/editais` para a ficha nova», e a primeira versão deste arquivo fez
- * isso literalmente: trocou o conteúdo inteiro. `verificar-organizacao.mjs` acusou, e o que
- * ele acusava não era layout, eram contratos:
+ * Até então esta rota entregava duas telas empilhadas, e a de baixo ocupava 60% da altura
+ * da página. Quem abria «Editais» para publicar uma chamada recebia junto o histórico de
+ * como a forma nasceu sem classe na ontologia.
  *
- * · o casamento entre o edital e o PERFIL de quem produz, território e linguagem;
- * · o vocabulário do recorte vindo do acervo, não digitado.
+ * NADA DO QUE ELA PROVAVA FOI PERDIDO: os contratos continuam medidos na rota própria,
+ * numa tela visível.
  *
- * Apagá-los teria sido destruir a demonstração de decisões de ontologia para acomodar uma
- * ficha nova. As duas cabem, e a ordem diz de quem é cada uma: a tela da Organização
- * continua no topo, com o que ela prova; a ficha do Produtor entra abaixo, com o que ela
- * acrescenta.
- *
- * A SEPARAÇÃO CONTINUA DECLARADA. Esta tela passou ao Produtor, quem cadastra o espaço
- * onde o próprio evento acontece é quem produz, não a instituição. O que muda é que a
- * transição é VISÍVEL na tela, em vez de ser uma substituição silenciosa.
+ * O QUE FICOU: o tamanho do vocabulário do recorte, que é o que decide se o alerta de
+ * edital compatível vale alguma coisa. Atravessa como primitivo (DP-F).
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build, e o que
- * atravessa para os componentes de cliente são DTOs de primitivo (DP-F).
+ * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build.
  */
 export default function Pagina() {
-  const vocabulario = vocabularioDoEdital();
+  const v = vocabularioDoEdital();
 
   return (
-    <>
-      <FichaDoEdital
-        semente={registrosSemeados()}
-        contexto={CONTEXTO_DO_PRODUTOR}
-        catalogo={catalogoDoEdital()}
-      />
-
-      {/* A TELA HERDADA DA ORGANIZAÇÃO, abaixo do conteúdo novo e SÓ NA WEB.
-          A revisão a olho (2026-08-26) reprovou a parede herdada abrindo a rota. Os
-          contratos que verificar-organizacao.mjs mede continuam aqui, presentes no
-          DOM e visíveis na web, onde a suíte roda; no app, o CSS esconde o bloco
-          ([data-herdado-da-organizacao] em studio-produtor.css). */}
-      <div data-herdado-da-organizacao>
-        <SeparacaoDaOrganizacao lado="passou-ao-produtor" />
-        <StudioOrgEditais
-        vocabulario={vocabulario}
-        declaracoes={declaracoesDosEditais(vocabulario)}
-        organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
-        autor={GESTOR_DA_ORGANIZACAO}
-        gestorEAutorado={GESTOR_E_AUTORADO}
-        dataDeReferencia={DATA_DA_MEDIDA}
-      />
-      </div>
-    </>
+    <FichaDoEdital
+      semente={registrosSemeados()}
+      contexto={CONTEXTO_DO_PRODUTOR}
+      catalogo={catalogoDoEdital()}
+      acervo={{
+        linguagens: v.linguagens.length,
+        ufsComAcervo: v.territorios.filter((t) => t.noAcervo).length,
+        ufs: v.territorios.length,
+      }}
+    />
   );
 }

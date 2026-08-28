@@ -1,75 +1,45 @@
-import { SeparacaoDaOrganizacao } from "@/componentes/separacao-da-organizacao";
 import { FichaDoPrograma } from "@/componentes/produtor-programa";
-import { StudioOrgPrograma } from "@/componentes/studio-org-programa";
 import {
   CONTEXTO_DO_PRODUTOR,
   catalogoDoPrograma,
   registrosSemeados,
 } from "@/dados/mock/seed-produtor";
-import {
-  DATA_DA_MEDIDA,
-  GESTOR_DA_ORGANIZACAO,
-  GESTOR_E_AUTORADO,
-  ORGANIZACAO_DA_DEMONSTRACAO,
-  declaracoesDosProgramas,
-  eventosParaPrograma,
-  numerosDosProgramas,
-} from "@/dados/organizacao";
+import { numerosDosProgramas } from "@/dados/organizacao";
 
 /**
- * Studio · O3 · Programa e edições (funcionalidade 143).
+ * Studio · Programa, a pauta do Produtor (funcionalidade 143).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * AS DUAS CONVIVEM, E A DA ORGANIZAÇÃO VEIO PRIMEIRO, porque a nova quase a apagou.
+ * A PAREDE DA ORGANIZAÇÃO SAIU DAQUI em 2026-08-27, e foi para
+ * `/studio/organizacao/programa/`.
  *
- * O sprint pedia «portar `/studio/programa` para a ficha nova», e a primeira versão deste arquivo fez
- * isso literalmente: trocou o conteúdo inteiro. `verificar-organizacao.mjs` acusou, e o que
- * ele acusava não era layout, eram contratos:
+ * Até então esta rota entregava duas telas empilhadas, e a de baixo ocupava 58% da altura
+ * da página. Quem abria «Programa» para agrupar eventos numa temporada recebia junto o
+ * ensaio sobre a classe vazia.
  *
- * · a tela que povoa a classe `programa`, que mede ZERO instâncias no acervo;
- * · as edições reunindo eventos reais, com o denominador à vista.
+ * NADA DO QUE ELA PROVAVA FOI PERDIDO: os contratos continuam medidos na rota própria,
+ * numa tela visível.
  *
- * Apagá-los teria sido destruir a demonstração de decisões de ontologia para acomodar uma
- * ficha nova. As duas cabem, e a ordem diz de quem é cada uma: a tela da Organização
- * continua no topo, com o que ela prova; a ficha do Produtor entra abaixo, com o que ela
- * acrescenta.
- *
- * A SEPARAÇÃO CONTINUA DECLARADA. Esta tela passou ao Produtor, quem cadastra o espaço
- * onde o próprio evento acontece é quem produz, não a instituição. O que muda é que a
- * transição é VISÍVEL na tela, em vez de ser uma substituição silenciosa.
+ * O ZERO CONTINUA DITO, e em uma linha: `programa` é a única das vinte classes da
+ * ontologia sem nenhuma instância no acervo. O número atravessa como primitivo (DP-F),
+ * medido no build, e não digitado na tela.
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build, e o que
- * atravessa para os componentes de cliente são DTOs de primitivo (DP-F).
+ * PÁGINA DE SERVIDOR: os módulos de dado são chamados aqui, por valor, no build.
  */
 export default function Pagina() {
-  const numeros = numerosDosProgramas();
+  const n = numerosDosProgramas();
 
   return (
-    <>
-      <FichaDoPrograma
-        semente={registrosSemeados()}
-        contexto={CONTEXTO_DO_PRODUTOR}
-        catalogo={catalogoDoPrograma()}
-      />
-
-      {/* A TELA HERDADA DA ORGANIZAÇÃO, abaixo do conteúdo novo e SÓ NA WEB.
-          A revisão a olho (2026-08-26) reprovou a parede herdada abrindo a rota. Os
-          contratos que verificar-organizacao.mjs mede continuam aqui, presentes no
-          DOM e visíveis na web, onde a suíte roda; no app, o CSS esconde o bloco
-          ([data-herdado-da-organizacao] em studio-produtor.css). */}
-      <div data-herdado-da-organizacao>
-        <SeparacaoDaOrganizacao lado="passou-ao-produtor" />
-        <StudioOrgPrograma
-        eventos={eventosParaPrograma()}
-        numeros={numeros}
-        declaracoes={declaracoesDosProgramas(numeros)}
-        organizacao={ORGANIZACAO_DA_DEMONSTRACAO}
-        autor={GESTOR_DA_ORGANIZACAO}
-        gestorEAutorado={GESTOR_E_AUTORADO}
-        dataDeReferencia={DATA_DA_MEDIDA}
-      />
-      </div>
-    </>
+    <FichaDoPrograma
+      semente={registrosSemeados()}
+      contexto={CONTEXTO_DO_PRODUTOR}
+      catalogo={catalogoDoPrograma()}
+      acervo={{
+        programas: n.programas,
+        eventos: n.eventos,
+        eventosComRealizador: n.eventosComRealizador,
+      }}
+    />
   );
 }

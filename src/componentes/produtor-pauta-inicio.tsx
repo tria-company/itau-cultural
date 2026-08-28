@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BarraDeAcao, BotaoDoStudio } from "@/componentes/base/barra-de-acao";
+import {
+  BarrasVerticais,
+  LegendaDaRosca,
+  Medidor,
+  Rosca,
+} from "@/componentes/base/graficos";
+import type { FatiaDaRosca } from "@/componentes/base/graficos";
 import { Folha } from "@/componentes/base/folha";
 import {
   DESEMPENHO_E_AUTORADO,
@@ -39,6 +46,49 @@ export interface ImagemDoAcervo {
   de: string;
 }
 
+/**
+ * O PANORAMA DE UMA PAUTA: os números que só ela tem, e a forma de mostrá-los.
+ *
+ * O painel genérico responde «quantos no ar, quanto de audiência, quantos em edição», e
+ * para Play ou Eventos isso basta. Para as pautas de INSUMO não basta: espaço e ativo não
+ * têm vitrine nem audiência, então dois dos três números abriam zerados e a tela dizia
+ * nada. O que essas pautas têm de verdade é o ACERVO medido, e era justamente ele que
+ * morava na parede da Organização empilhada embaixo (mudou de endereço em 2026-08-27).
+ *
+ * Tudo é opcional: as pautas que não passam panorama renderizam exatamente como antes.
+ */
+export interface PanoramaDaPauta {
+  /** Os três números do topo, quando o trio genérico não serve. */
+  numeros?: { valor: string; rotulo: string }[];
+  /** Uma linha de cartões de gráfico, na grade de doze colunas do painel do Início. */
+  cartoes?: CartaoDoPanorama[];
+  /** Os registros agrupados por algo que a pauta sabe (a UF do espaço, o estado do edital). */
+  grupos?: { nome: string; registros: Registro[] }[];
+  tituloDosGrupos?: string;
+  /** A legenda de cada linha, no lugar do «continue de onde parou» genérico. */
+  subDe?: (r: Registro) => string | null;
+  /** UMA linha sobre o recorte. Uma, e não um parágrafo. */
+  frase?: string;
+  /**
+   * O que o cabeçalho conta, quando «no ar» não é a pergunta.
+   *
+   * Mídia e espaço não têm vitrine: o cabeçalho dizia «0 no ar» ao lado de «529 ativos
+   * no acervo», e as duas frases pareciam se contradizer.
+   */
+  contagem?: string;
+}
+
+/** Um cartão do panorama: um gráfico e o título dele. */
+export interface CartaoDoPanorama {
+  titulo: string;
+  /** Quantas das doze colunas ele ocupa na web. No aparelho todos ocupam a largura. */
+  largura: 4 | 6 | 8 | 12;
+  barras?: { rotulo: string; valor: number }[];
+  medidor?: { porcento: number; rotulo: string };
+  rosca?: { fatias: FatiaDaRosca[]; centroValor: string; centroRotulo: string };
+  nota?: string;
+}
+
 /** O que a gestão do Play acrescenta ao painel da pauta. */
 export interface ExtrasDoInicio {
   /** O nome da trilha de um registro; `null` tira o registro do agrupamento. */
@@ -56,6 +106,7 @@ export function PautaInicio({
   aoAdicionar,
   aoAbrir,
   extras,
+  panorama,
 }: {
   pauta: Pauta;
   registros: Registro[];
@@ -64,6 +115,7 @@ export function PautaInicio({
   aoAdicionar: () => void;
   aoAbrir: (id: string) => void;
   extras?: ExtrasDoInicio;
+  panorama?: PanoramaDaPauta;
 }) {
   const d = DESCRICAO_DA_PAUTA[pauta];
   const [movendo, setMovendo] = useState<string | null>(null);
@@ -135,7 +187,8 @@ export function PautaInicio({
           <span className="prod-melhor-texto">
             <span className="prod-melhor-nome">{semTravessao(r.titulo) || d.singular}</span>
             <span className="prod-melhor-sub">
-              {r.situacao === "publicado" ? d.rotulo : "continue de onde parou"}
+              {panorama?.subDe?.(r) ??
+                (r.situacao === "publicado" ? d.rotulo : "continue de onde parou")}
             </span>
           </span>
           {medida ? (
@@ -180,7 +233,7 @@ export function PautaInicio({
             </span>
           </Link>
           <span className="prod-contagem">
-            {publicados.length} no ar
+            {panorama?.contagem ?? `${publicados.length} no ar`}
           </span>
         </div>
         <h1 className="prod-titulo">{d.rotulo}</h1>
@@ -195,19 +248,59 @@ export function PautaInicio({
           <>
             {/* ---- os tres numeros da categoria ---- */}
             <div className="prod-inicio-stats" data-numeros-da-pauta>
-              <span className="prod-inicio-stat">
-                <strong>{publicados.length}</strong>
-                <span>no ar</span>
-              </span>
-              <span className="prod-inicio-stat">
-                <strong>{milhar(total)}</strong>
-                <span>{rotuloDoTotal}</span>
-              </span>
-              <span className="prod-inicio-stat">
-                <strong>{emEdicao.length}</strong>
-                <span>em edição</span>
-              </span>
+              {(panorama?.numeros ?? [
+                { valor: String(publicados.length), rotulo: "no ar" },
+                { valor: milhar(total), rotulo: rotuloDoTotal },
+                { valor: String(emEdicao.length), rotulo: "em edição" },
+              ]).map((num) => (
+                <span className="prod-inicio-stat" key={num.rotulo}>
+                  <strong>{num.valor}</strong>
+                  <span>{num.rotulo}</span>
+                </span>
+              ))}
             </div>
+
+            {panorama?.frase ? (
+              <p className="prod-campo-nota" data-frase-do-panorama>
+                {semTravessao(panorama.frase)}
+              </p>
+            ) : null}
+
+            {/* ---- os graficos que so esta pauta tem ---- */}
+            {panorama?.cartoes && panorama.cartoes.length > 0 ? (
+              <div className="prod-grade-dash" data-panorama-da-pauta>
+                {panorama.cartoes.map((c) => (
+                  <section
+                    className="prod-cartao-dash"
+                    key={c.titulo}
+                    data-largura={String(c.largura)}
+                  >
+                    <div className="prod-cartao-dash-topo">
+                      <h2 className="prod-cartao-dash-titulo">{c.titulo}</h2>
+                    </div>
+                    {c.rosca ? (
+                      <div className="prod-cartao-dash-rosca">
+                        <Rosca
+                          fatias={c.rosca.fatias}
+                          centroValor={c.rosca.centroValor}
+                          centroRotulo={c.rosca.centroRotulo}
+                        />
+                        <LegendaDaRosca fatias={c.rosca.fatias} />
+                      </div>
+                    ) : null}
+                    {c.barras ? <BarrasVerticais barras={c.barras} /> : null}
+                    {c.medidor ? (
+                      <div className="prod-medidores">
+                        <Medidor porcento={c.medidor.porcento} rotulo={c.medidor.rotulo} />
+                      </div>
+                    ) : null}
+                    {c.nota ? (
+                      <p className="prod-cartao-dash-nota">{semTravessao(c.nota)}</p>
+                    ) : null}
+                  </section>
+                ))}
+              </div>
+            ) : null}
 
             {/* ---- os melhores, com as metricas de cada um ---- */}
             {ordenados.length > 0 ? (
@@ -217,6 +310,28 @@ export function PautaInicio({
                 </h2>
                 {ordenados.slice(0, 4).map((m, i) => (
                   <LinhaDeRegistro key={m.r.id} r={m.r} posicao={i + 1} />
+                ))}
+              </section>
+            ) : null}
+
+            {/* ---- os grupos que a pauta sabe formar ---- */}
+            {panorama?.grupos && panorama.grupos.length > 0 ? (
+              <section className="prod-secao" aria-labelledby="prod-grupos-titulo">
+                <h2 className="prod-secao-titulo" id="prod-grupos-titulo">
+                  {panorama.tituloDosGrupos ?? "Em edição"}
+                </h2>
+                {panorama.grupos.map((g) => (
+                  <div className="prod-trilha-grupo" key={g.nome} data-grupo={g.nome}>
+                    <p className="prod-trilha-nome">
+                      {g.nome}
+                      <span className="prod-trilha-conta">
+                        {g.registros.length} {g.registros.length === 1 ? "item" : "itens"}
+                      </span>
+                    </p>
+                    {g.registros.map((r) => (
+                      <LinhaDeRegistro key={r.id} r={r} />
+                    ))}
+                  </div>
                 ))}
               </section>
             ) : null}
@@ -306,7 +421,7 @@ export function PautaInicio({
             ) : null}
 
             {/* ---- o que esta em edicao ---- */}
-            {emEdicao.length > 0 && !trilhas ? (
+            {emEdicao.length > 0 && !trilhas && !panorama?.grupos ? (
               <section className="prod-secao" aria-labelledby="prod-em-edicao-titulo">
                 <h2 className="prod-secao-titulo" id="prod-em-edicao-titulo">
                   Em edição

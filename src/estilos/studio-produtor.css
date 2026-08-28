@@ -3435,19 +3435,6 @@
   color: var(--cor-tinta-3);
 }
 
-/* ---- a heranca da organizacao, so na web ---------------------------------- */
-
-/**
- * As cinco rotas de pauta que herdaram telas da Organizacao (espacos, midia, programa,
- * formacao, editais) mostram no app SO o conteudo novo: a parede herdada foi reprovada
- * a olho. O bloco continua no DOM e visivel na web, porque verificar-organizacao.mjs
- * mede PRESENCA, e mede na visao web; esconder por CSS no app nao tira nada do que a
- * suite afirma. (Ocorrencias fica de fora: a fase 4 exige o imutavel visivel no app.)
- */
-[data-view="mobile"] [data-herdado-da-organizacao] {
-  display: none;
-}
-
 /* ---- a tela do registro publicado ----------------------------------------- */
 
 /**
@@ -4516,6 +4503,9 @@
 
 [data-view="web"] .prod-grade-dash > [data-largura="12"] { grid-column: span 12; }
 [data-view="web"] .prod-grade-dash > [data-largura="8"] { grid-column: span 8; }
+/* A METADE existe desde o panorama das pautas (2026-08-27): sem esta linha os dois
+ * cartoes de edital caiam para UMA coluna das doze, e o titulo quebrava letra a letra. */
+[data-view="web"] .prod-grade-dash > [data-largura="6"] { grid-column: span 6; }
 [data-view="web"] .prod-grade-dash > [data-largura="4"] { grid-column: span 4; }
 [data-view="web"] .prod-grade-dash > [data-largura="2"] { grid-column: span 2; }
 
@@ -4734,6 +4724,33 @@
   gap: 1rem;
   align-items: start;
   padding-block: 0.5rem;
+}
+
+/**
+ * UM MEDIDOR SOZINHO CRESCE. No painel do Inicio eles vem em fila de cinco e 6rem basta;
+ * no panorama de uma pauta cada cartao traz UM, e um desenho de 96px num cartao de 400
+ * deixava 83% da caixa vazia (medido na revisao adversarial, 2026-08-27).
+ */
+.prod-cartao-dash > .prod-medidores:only-of-type > .prod-medidor:only-child {
+  padding-block: 0.5rem;
+}
+
+.prod-cartao-dash > .prod-medidores > .prod-medidor:only-child svg {
+  width: 9rem;
+  height: 9rem;
+}
+
+.prod-cartao-dash > .prod-medidores > .prod-medidor:only-child .prod-medidor-centro {
+  top: 3.5rem;
+  font-size: var(--tipo-titulo-3);
+}
+
+/**
+ * A LEGENDA DA ROSCA NAO SE ESPICHA. Num cartao de oito colunas ela ocupava a largura
+ * inteira e jogava o percentual a 470px do proprio rotulo: os olhos perdiam a linha.
+ */
+.prod-cartao-dash-rosca > .prod-rosca-legenda {
+  max-width: 22rem;
 }
 
 .prod-medidor {

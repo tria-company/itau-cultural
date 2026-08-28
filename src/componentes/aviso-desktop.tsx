@@ -15,6 +15,9 @@ import { useVisao } from "@/contexto/visao";
  * produto faz.
  */
 function superficieDe(caminho: string): string {
+  // A Organização mora sob /studio/ desde 2026-08-27, e vem ANTES da checagem de
+  // /studio: sem esta linha o aviso dizia «Esta superfície» numa rota que tem nome.
+  if (caminho.startsWith("/studio/organizacao")) return "A Organização";
   if (caminho.startsWith("/moderacao")) return "Moderação";
   if (caminho.startsWith("/redacao")) return "Redação";
   if (caminho.startsWith("/observatorio")) return "Observatório";
