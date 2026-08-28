@@ -88,7 +88,7 @@ const TELAS_DE_TOPO: ItemDeTopo[] = [
     icone: ICONE_LOJA,
     filhos: [
       { href: "/studio/pontos", rotulo: "Carteira" },
-      { href: "/studio/pontos/gestao", rotulo: "Gestão da loja" },
+      { href: "/studio/pontos/gestao", rotulo: "Resgates" },
     ],
   },
 ];

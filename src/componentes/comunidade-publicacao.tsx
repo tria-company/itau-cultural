@@ -185,7 +185,8 @@ export function PublicacaoAberta({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    // `comunidade-coluna`: a mesma largura de leitura do feed, na web. Ver studio-produtor.css.
+    <div className="flex flex-col gap-4 comunidade-coluna">
       <div className="aberta-foto">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={publicacao.imagem} alt={publicacao.imagemAlt} />

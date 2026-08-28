@@ -1706,13 +1706,48 @@
 
 /* ④ A folha vira PAINEL LATERAL. Mesma árvore, outra ancoragem: numa janela de 1440px uma
  * folha subindo do pé cobriria a tela inteira para oferecer trinta e três termos. */
+/**
+ * `fixed` NA WEB, e a mesma razao da folha de resgate la embaixo.
+ *
+ * `absolute` com `top: 0; bottom: 0` mede a altura do BLOCO QUE CONTEM, e na web esse
+ * bloco e a moldura alargada, que tem a altura da pagina inteira. O painel entao ficava
+ * com 2.000px de altura e o rodape -- «Criar», «Salvar», «Publicar» -- ia parar em
+ * `top: 1877` numa janela de 960: existia na arvore, respondia a sonda, e ninguem
+ * conseguia alcancar (medido por `elementFromPoint`, 2026-08-28).
+ *
+ * D-03 proibe `fixed` fora do `.canto` PORQUE ELE ESCAPA DA MOLDURA. Na web nao ha
+ * aparelho desenhado do qual escapar: a moldura e a propria largura da pagina, e o painel
+ * lateral quer justamente a janela como ancoradouro. No aparelho a regra nao vale, e ali
+ * a folha continua `absolute` como sempre foi.
+ */
 [data-view="web"] .prod-folha {
+  position: fixed;
   top: 0;
   left: auto;
   width: min(26rem, 40vw);
   max-height: none;
   border-radius: var(--raio-g) 0 0 var(--raio-g);
   animation: prod-painel-entra var(--dur-3) var(--ease-padrao);
+}
+
+/* O veu acompanha: scrim preso a pagina rolava para longe do painel que ele escurece. */
+[data-view="web"] .prod-scrim {
+  position: fixed;
+}
+
+/**
+ * AS DUAS TELAS DE LISTA DA COMUNIDADE E DA LOJA SAO UMA COLUNA SO, cabecalho junto.
+ *
+ * Elas nao tem tabela nem grade: sao linhas de nome com dois botoes na ponta. Esticadas
+ * ate 1.400px, o nome fica na borda esquerda e «remover» na direita, com um metro de
+ * escuro no meio -- e o cabecalho, que ja acompanha a coluna de leitura, ficava com
+ * metade da largura das linhas que ele encima (visto em captura, 2026-08-28).
+ */
+[data-view="web"] .prod-corpo[data-gestao-da-comunidade],
+[data-view="web"] .prod-corpo[data-gestao-da-loja] {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
 }
 
 @keyframes prod-painel-entra {
@@ -1916,6 +1951,44 @@
 .prod-vinculo[data-proposto="sim"] {
   border-style: dashed;
   border-color: var(--cor-acao);
+}
+
+/**
+ * A LINHA COM ACOES, arrumada (reprovado a olho, 2026-08-28).
+ *
+ * `.prod-registro-acoes` nasceu dentro da grade do cartao de registro, e trouxe de la um
+ * `grid-column: 1 / -1` e um `flex-wrap` que aqui nao ajudam: numa linha de 370px o texto
+ * quebrava em duas, os botoes quebravam em duas, e cada linha da lista ficava com uma
+ * altura diferente da vizinha.
+ *
+ * No aparelho a linha vira COLUNA: nome e meta em cima com a largura toda, acoes embaixo
+ * numa fileira so. Na web continua uma linha, e as acoes nao quebram — quem cede espaco
+ * e o texto, que tem para onde ceder.
+ */
+.prod-vinculo > .prod-registro-corpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.prod-vinculo > .prod-registro-acoes {
+  grid-column: auto;
+  padding-top: 0;
+}
+
+[data-view="mobile"] .prod-vinculo:has(> .prod-registro-acoes) {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+[data-view="mobile"] .prod-vinculo > .prod-registro-acoes {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+[data-view="web"] .prod-vinculo > .prod-registro-acoes {
+  flex: none;
+  flex-wrap: nowrap;
 }
 
 /* ===========================================================================
@@ -5151,4 +5224,75 @@
 [data-view="web"] .prod-lateral-abrir[aria-expanded="false"] > span {
   display: block;
   transform: rotate(90deg) scaleX(-1);
+}
+
+/* ---- a coluna do feed na web ------------------------------------------------ */
+
+/**
+ * LARGURA DE LEITURA, e nao a largura da janela.
+ *
+ * O feed ocupava os 1.100px inteiros da area de conteudo, e a foto de um post era esticada
+ * ate encher isso: nao se via mais foto, via-se a mesma foto maior, e a linha de texto
+ * embaixo passava de 180 caracteres, que e o dobro do que o olho acompanha sem perder a
+ * linha (reprovado a olho, 2026-08-28).
+ *
+ * A capa fica de fora de proposito: ela e cartaz, e cartaz quer a largura toda.
+ */
+[data-view="web"] .comunidade-coluna,
+[data-view="web"] .prod-comunidade-capa,
+[data-view="web"] .prod-cabecalho[data-coluna-de-leitura] {
+  /* `width: 100%` PORQUE O PAI E COLUNA FLEX: sem ele, `margin-inline: auto` faz o item
+   * encolher ate o conteudo em vez de parar no teto -- o cabecalho de «Quem esta na
+   * comunidade» mediu 227px numa janela de 1440 (medido por CDP, 2026-08-28). */
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+/* O CABECALHO ACOMPANHA A COLUNA, E SO ELE: titulo colado na borda da janela com o post
+ * no meio da tela sao duas larguras diferentes na mesma pagina (reprovado a olho,
+ * 2026-08-28).
+ *
+ * E POR ATRIBUTO, E NAO EM `.prod-cabecalho` INTEIRO. A regra nasceu global e estreitou
+ * tambem Catalogos, Pautas, Perfil, Sessoes e o inicio de cada pauta -- telas de tabela
+ * larga, que ficariam com um titulo de 44rem sobre um corpo de 1400px. Quem quer a
+ * coluna, pede: hoje sao as duas telas de lista da Comunidade e da Loja. */
+
+/* ---- a gestao dentro da vitrine --------------------------------------------- */
+
+/**
+ * O LAPIS NO CANTO DO CARTAO, e nao uma fileira de pastilhas embaixo dele.
+ *
+ * A primeira versao pendurava «Editar · N em estoque · Tirar» sob cada cartao. Numa grade
+ * de auto-fill isso quebrava tudo: cada item ganhava uma altura diferente conforme as
+ * pastilhas quebravam a linha, as fotos deixavam de alinhar, e a vitrine virou um mural
+ * de botoes (reprovado a olho, 2026-08-28).
+ *
+ * O gesto e o mesmo da capa da comunidade, que ja foi pedido e aprovado: um lapis sobre a
+ * imagem, e tudo -- preco, estoque, familia, foto, e a retirada -- dentro da folha que ele
+ * abre. Um cartao, um gesto.
+ */
+.recompensa-item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.recompensa-item > .recompensa-cartao {
+  flex: 1;
+  min-width: 0;
+}
+
+.recompensa-dono {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Criar e um botao, e nao uma faixa: alinhado a direita, do tamanho do texto. */
+.recompensa-criar {
+  display: flex;
+  justify-content: flex-end;
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Moeda } from "@/componentes/pontos-base";
 import { usePontos } from "@/contexto/pontos";
@@ -199,20 +200,33 @@ function FolhaDoItem({
   );
 }
 
-export function Recompensas({ hoje }: { hoje: string }) {
+export function Recompensas({
+  hoje,
+  /** O que o dono da loja pode fazer com CADA item. `undefined` some da tela. */
+  acoesDoItem,
+  /** O botao de criar item, montado por quem sabe se a loja e sua. */
+  acaoDeCriar,
+}: {
+  hoje: string;
+  acoesDoItem?: (r: RecompensaDefinida) => ReactNode;
+  acaoDeCriar?: ReactNode;
+}) {
   const { motor, hidratado } = usePontos();
   const [aberta, setAberta] = useState<RecompensaDefinida | null>(null);
 
   // A VITRINE OBEDECE A GESTAO do Produtor (2026-08-28). O gancho reconcilia o array
   // `RECOMPENSAS` com o armazem `produtor.loja.v1` e repinta esta tela quando ele muda;
   // a linha que filtra por familia, logo abaixo, continua igual a do ramo de origem.
-  useVitrineGerida(hoje, motor.atual.resgates, motor.lerVersao());
+  useVitrineGerida(hoje, motor.atual.resgates, motor.lerVersao(), hidratado);
 
   const fichas = hidratado ? motor.saldoDe("ficha") : 0;
   const fechar = useCallback(() => setAberta(null), []);
 
   return (
     <div className="flex flex-col gap-5">
+      {/* CRIAR MORA NA VITRINE, que e onde o item vai aparecer. */}
+      {acaoDeCriar ? <div className="recompensa-criar">{acaoDeCriar}</div> : null}
+
       {FAMILIAS.map((familia) => {
         const itens = recompensasDaFamilia(familia.id);
         if (itens.length === 0) return null;
@@ -225,12 +239,14 @@ export function Recompensas({ hoje }: { hoje: string }) {
             </div>
             <div className="recompensa-grade">
               {itens.map((r) => (
-                <Cartao
-                  key={r.id}
-                  recompensa={r}
-                  fichas={fichas}
-                  aoAbrir={() => setAberta(r)}
-                />
+                // O cartao e um <button>, e botao nao aninha botao: o lapis de quem
+                // opera a loja vai por FORA dele, sobreposto no canto da foto.
+                <div className="recompensa-item" key={r.id}>
+                  <Cartao recompensa={r} fichas={fichas} aoAbrir={() => setAberta(r)} />
+                  {acoesDoItem ? (
+                    <div className="recompensa-dono">{acoesDoItem(r)}</div>
+                  ) : null}
+                </div>
               ))}
             </div>
           </section>

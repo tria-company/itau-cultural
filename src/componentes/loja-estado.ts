@@ -261,6 +261,14 @@ export function useVitrineGerida(
    * ainda na carteira (medido, 2026-08-28).
    */
   versaoDoMotor: number,
+  /**
+   * SE O MOTOR JÁ LEU O QUE ESTAVA GRAVADO. Sem esta guarda o efeito rodava no primeiro
+   * quadro, quando `resgates` ainda é a lista vazia do servidor, contava zero, e gravava
+   * `consumo: {}` por cima do que a sessão anterior tinha deixado. O estoque voltava
+   * cheio a cada recarregamento e o resgate continuava na carteira: a loja dava o item
+   * de graça, uma vez por visita (medido, 2026-08-28).
+   */
+  motorHidratado: boolean,
 ): boolean {
   useEffect(() => {
     hidratar(hoje);
@@ -269,7 +277,7 @@ export function useVitrineGerida(
   const atual = useSyncExternalStore(assinar, lerLoja, lerNoServidor);
 
   useEffect(() => {
-    if (estado === null) return;
+    if (estado === null || !motorHidratado) return;
     const conta = contarPorItem(resgates);
     const mesmo =
       Object.keys(conta).length === Object.keys(estado.consumo).length &&
@@ -278,7 +286,7 @@ export function useVitrineGerida(
     gravar({ ...estado, consumo: conta, atualizadoEm: hoje });
     // `resgates` fica fora das dependências de propósito: ver a nota do parâmetro.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [versaoDoMotor, hoje]);
+  }, [versaoDoMotor, hoje, motorHidratado]);
 
   return atual !== null;
 }
@@ -321,20 +329,36 @@ export function useLojaGerida(hoje: string): ArmazemDaLoja {
     return id;
   }, []);
 
+  /**
+   * O ESTOQUE QUE ENTRA É O QUE RESTA; O QUE SE GRAVA É O TOTAL.
+   *
+   * O armazém guarda quantos existiram e desconta o consumo na hora de desenhar. A folha
+   * de edição mostra o que a vitrine mostra, que é o que sobrou -- e é assim que um
+   * lojista conta. Se o número digitado fosse gravado cru, o consumo seria descontado
+   * DUAS vezes: abrir a folha de um item com um resgate e salvar sem mexer em nada
+   * derrubaria o estoque em um, toda vez.
+   *
+   * Somar o consumo de volta antes de gravar torna a operação idempotente: salvar sem
+   * mexer não muda nada, e digitar «12» significa «há doze para vender».
+   */
   const alterar = useCallback((id: string, mudanca: Partial<RecompensaDefinida>) => {
     if (estado === null) return;
+    const efetiva =
+      typeof mudanca.estoque === "number"
+        ? { ...mudanca, estoque: mudanca.estoque + (estado.consumo[id] ?? 0) }
+        : mudanca;
     const criado = estado.criados.find((r) => r.id === id);
     if (criado) {
       gravar({
         ...estado,
-        criados: estado.criados.map((r) => (r.id === id ? { ...r, ...mudanca } : r)),
+        criados: estado.criados.map((r) => (r.id === id ? { ...r, ...efetiva } : r)),
         atualizadoEm: dataDeReferencia,
       });
       return;
     }
     gravar({
       ...estado,
-      ajustes: { ...estado.ajustes, [id]: { ...(estado.ajustes[id] ?? {}), ...mudanca } },
+      ajustes: { ...estado.ajustes, [id]: { ...(estado.ajustes[id] ?? {}), ...efetiva } },
       atualizadoEm: dataDeReferencia,
     });
   }, []);

@@ -1,5 +1,5 @@
 import { Grafismo } from "@/componentes/grafismo";
-import { Recompensas } from "@/componentes/recompensas";
+import { LojaNaVitrine } from "@/componentes/loja-na-vitrine";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor";
@@ -29,7 +29,10 @@ export default function PaginaRecompensas() {
         </div>
       </header>
 
-      <Recompensas hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia} />
+      <LojaNaVitrine
+        hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
+        imagens={catalogoComum().imagens}
+      />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

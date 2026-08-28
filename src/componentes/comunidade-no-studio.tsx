@@ -6,10 +6,8 @@ import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
 import type { ImagemDoAcervo } from "@/componentes/base/campo-de-imagem";
 import { Campo } from "@/componentes/base/ficha-em-atos";
 import { Folha } from "@/componentes/base/folha";
-import { OpcaoDeSegmento, Segmento } from "@/componentes/base/segmento";
 import { Comunidade } from "@/componentes/comunidade";
 import {
-  PREFIXO_DA_PUBLICACAO,
   useComunidadeGerida,
   sementeDoPerfil,
 } from "@/componentes/comunidade-estado";
@@ -31,6 +29,12 @@ import type { PublicacaoDefinida } from "@/lib/pontos/tipos";
  * post. O feed não sabe o que é gestão; ele só desenha o que recebe. Foi assim que a
  * gestão entrou sem reescrever a tela.
  *
+ * NÃO HÁ ESCOLHA DE «TIPO» ANTES DE ESCREVER. Existiu um segmentado Imagem|Vídeo que
+ * decidia qual campo aparecia; ele foi retirado em 28/08/2026 porque pedia uma decisão
+ * antes da matéria e escondia metade do formulário. Toda publicação tem imagem, e o vídeo
+ * é um campo a mais: quem cola um link do YouTube ganha o palco, quem não cola não perde
+ * nada.
+ *
  * SÓ NA COMUNIDADE DA CASA. Nas outras 21 as props não chegam, e o feed volta a ser
  * exatamente o do outro ramo: elas pertencem a instituições e pessoas reais.
  * ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +46,6 @@ interface Composicao {
   titulo: string;
   corpo: string;
   etiqueta: string;
-  midia: "imagem" | "video";
   imagem: ImagemDeclarada | null;
   video: string;
   enquete: string[];
@@ -54,7 +57,6 @@ function vazia(id: string): Composicao {
     titulo: "",
     corpo: "",
     etiqueta: "",
-    midia: "imagem",
     imagem: imagemVazia(),
     video: "",
     enquete: [],
@@ -67,7 +69,6 @@ function daPublicacao(p: PublicacaoDefinida): Composicao {
     titulo: p.titulo,
     corpo: p.corpo,
     etiqueta: p.etiqueta ?? "",
-    midia: p.video ? "video" : "imagem",
     imagem: {
       caminho: p.imagem,
       credito: p.imagemCredito,
@@ -159,7 +160,7 @@ export function ComunidadeNoStudio({
         imagem: capa.caminho,
         imagemAlt: capa.alt,
         imagemCredito: capa.credito,
-        video: compondo.midia === "video" ? idDoVideo(compondo.video) : "",
+        video: idDoVideo(compondo.video),
         enquete: opcoesDaEnquete(compondo.enquete),
       },
     );
@@ -176,8 +177,7 @@ export function ComunidadeNoStudio({
   const podeEnviar =
     compondo !== null &&
     compondo.titulo.trim() !== "" &&
-    imagemCompleta(compondo.imagem) &&
-    (compondo.midia === "imagem" || idDoVideo(compondo.video) !== "");
+    imagemCompleta(compondo.imagem);
 
   return (
     <>
@@ -189,7 +189,7 @@ export function ComunidadeNoStudio({
             desabilitado={!armazem.pronto || restam >= 20}
             porQueDesabilitado={
               armazem.pronto
-                ? "Os endereços reservados para publicação acabaram nesta demonstração."
+                ? "Acabaram os endereços reservados para publicação."
                 : "Lendo o que está gravado neste navegador…"
             }
             data-publicar-aqui
@@ -198,8 +198,11 @@ export function ComunidadeNoStudio({
           </BotaoDoStudio>
         }
         acoesDoPost={(p) => {
-          // Só o que nasceu aqui: as publicações do acervo não são suas para apagar.
-          if (!p.id.startsWith(PREFIXO_DA_PUBLICACAO) || !hidratado) return undefined;
+          // TODA PUBLICAÇÃO DESTA COMUNIDADE, e não só as criadas nesta sessão. A regra
+          // anterior olhava o prefixo do id e escondia o botão nas sete publicações
+          // semeadas, que são justamente as que aparecem primeiro no feed: quem mantém a
+          // comunidade da casa responde por tudo que está nela.
+          if (!hidratado || p.comunidadeId !== comunidadeId) return undefined;
           if (aApagar === p.id) {
             return (
               <>
@@ -247,13 +250,12 @@ export function ComunidadeNoStudio({
       <Folha
         aberta={compondo !== null}
         titulo="Publicar na comunidade"
-        descricao="Entra no topo do feed de quem assina."
         aoFechar={() => setCompondo(null)}
         rodape={
           <BotaoDoStudio
             primaria
             desabilitado={!podeEnviar}
-            porQueDesabilitado="Precisa de título, de uma imagem com crédito e texto alternativo, e do endereço do vídeo quando for vídeo."
+            porQueDesabilitado="Falta o título ou a imagem com crédito e texto alternativo."
             aoClicar={publicar}
             data-enviar-publicacao
           >
@@ -284,49 +286,23 @@ export function ComunidadeNoStudio({
               />
             </Campo>
 
-            <Campo rotulo="O que acompanha">
-              <Segmento rotulo="o que acompanha a publicação">
-                <OpcaoDeSegmento
-                  selecionado={compondo.midia === "imagem"}
-                  onClick={() => setCompondo({ ...compondo, midia: "imagem" })}
-                  data-midia="imagem"
-                >
-                  Imagem
-                </OpcaoDeSegmento>
-                <OpcaoDeSegmento
-                  selecionado={compondo.midia === "video"}
-                  onClick={() => setCompondo({ ...compondo, midia: "video" })}
-                  data-midia="video"
-                >
-                  Vídeo
-                </OpcaoDeSegmento>
-              </Segmento>
-            </Campo>
-
-            {compondo.midia === "video" ? (
-              <Campo
-                rotulo="Endereço do vídeo"
-                obrigatorio
-                nota="Cole a URL do YouTube: o id é extraído sozinho."
-              >
-                <input
-                  type="text"
-                  value={compondo.video}
-                  onChange={(e) => setCompondo({ ...compondo, video: e.target.value })}
-                  className="prod-campo-entrada"
-                  data-video-publicacao
-                  aria-invalid={idDoVideo(compondo.video) === ""}
-                />
-              </Campo>
-            ) : null}
-
             <CampoDeImagem
-              rotulo={compondo.midia === "video" ? "Cartaz do vídeo" : "Imagem"}
+              rotulo="Imagem"
               obrigatoria
               imagem={compondo.imagem ?? imagemVazia()}
               aoMudar={(i) => setCompondo({ ...compondo, imagem: i })}
               acervo={imagens}
             />
+
+            <Campo rotulo="Vídeo" nota="Link do YouTube, se houver.">
+              <input
+                type="text"
+                value={compondo.video}
+                onChange={(e) => setCompondo({ ...compondo, video: e.target.value })}
+                className="prod-campo-entrada"
+                data-video-publicacao
+              />
+            </Campo>
 
             <Campo rotulo="Etiqueta" nota="Uma palavra, no canto do cartão.">
               <input
@@ -340,7 +316,7 @@ export function ComunidadeNoStudio({
 
             <Campo
               rotulo="Enquete"
-              nota="Sem voto neste protótipo: as parciais saem repartidas em partes iguais."
+              nota="Sem voto aqui: as parciais saem em partes iguais."
             >
               <div className="prod-enquete-campos">
                 {compondo.enquete.map((opcao, i) => (

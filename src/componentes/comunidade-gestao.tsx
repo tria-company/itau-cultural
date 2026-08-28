@@ -89,7 +89,7 @@ export function GestaoDaComunidade({
 
   return (
     <>
-      <header className="prod-cabecalho">
+      <header className="prod-cabecalho" data-coluna-de-leitura>
         <div className="prod-cabecalho-linha">
           <Link
             href="/studio/comunidade/"
@@ -104,9 +104,6 @@ export function GestaoDaComunidade({
           <span className="prod-contagem">{dentro.length} pessoas</span>
         </div>
         <h1 className="prod-titulo">Quem está na comunidade</h1>
-        <p className="prod-objetivo">
-          A lista de quem participa, com o que cada pessoa escreveu, e as regras da casa.
-        </p>
       </header>
 
       <div className="prod-corpo" data-gestao-da-comunidade>
@@ -124,10 +121,6 @@ export function GestaoDaComunidade({
             <span>comentários somados</span>
           </span>
         </div>
-        <p className="prod-campo-nota">
-          O número de assinantes é escrito no dado, não medido: não há usuários neste
-          protótipo. As pessoas abaixo são as do cenário da demonstração.
-        </p>
 
         <section className="prod-secao">
           <h2 className="prod-secao-titulo">Na comunidade</h2>
@@ -149,8 +142,9 @@ export function GestaoDaComunidade({
                 >
                   perfil
                 </BotaoDoStudio>
-                {/* «Você» não se remove da própria comunidade. */}
-                {pessoa.id === "eu" ? null : (
+                {/* Nem «Você» nem a casa se removem da própria comunidade: `p-ic` é a
+                    pessoa que assina as publicações desta comunidade. */}
+                {pessoa.id === "eu" || pessoa.id === "p-ic" ? null : (
                   <BotaoDoStudio
                     curto
                     aoClicar={() => setARemover(pessoa.id)}
@@ -167,9 +161,6 @@ export function GestaoDaComunidade({
         {armazem.removidos.length > 0 ? (
           <section className="prod-secao">
             <h2 className="prod-secao-titulo">Fora da comunidade</h2>
-            <p className="prod-campo-nota">
-              O que elas escreveram continua nas publicações.
-            </p>
             {armazem.removidos.map((id) => (
               <div className="prod-vinculo" key={id} data-pessoa-removida={id}>
                 <span className="prod-registro-corpo">
@@ -221,20 +212,12 @@ export function GestaoDaComunidade({
           </label>
         </section>
 
-        <p className="prod-campo-nota">
-          Nome, chamada, descrição e capa se editam no lápis da própria capa, em{" "}
-          <Link href="/studio/comunidade/" className="prod-link">
-            Comunidade
-          </Link>
-          . Publicar e apagar post moram no feed.
-        </p>
       </div>
 
       {/* ---- o perfil, aqui mesmo ---- */}
       <Folha
         aberta={aberta !== null}
         titulo={aberta ? nomeDe(aberta) : ""}
-        descricao="O que existe sobre esta pessoa nesta demonstração."
         aoFechar={() => setAberta(null)}
       >
         {perfilAberto ? (
@@ -265,10 +248,6 @@ export function GestaoDaComunidade({
               </div>
             ))}
 
-            <p className="prod-campo-nota">
-              Não há página de perfil para estas pessoas: elas são do cenário da
-              demonstração, e nenhuma tem verbete no acervo.
-            </p>
           </>
         ) : null}
       </Folha>

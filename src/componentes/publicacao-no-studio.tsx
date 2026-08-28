@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { PublicacaoAberta } from "@/componentes/comunidade-publicacao";
-import { PREFIXO_DA_PUBLICACAO } from "@/dados/comunidade-capas";
+import { COMUNIDADE_OFICIAL } from "@/dados/comunidade";
 import { usePontos } from "@/contexto/pontos";
 
 /**
@@ -20,7 +20,12 @@ export function PublicacaoNoStudio({ id }: { id: string }) {
   const router = useRouter();
   const { motor, hidratado } = usePontos();
 
-  const minha = hidratado && id.startsWith(PREFIXO_DA_PUBLICACAO);
+  // TODA PUBLICAÇÃO DA COMUNIDADE DA CASA, e não só as criadas nesta sessão: ver a nota
+  // gêmea em comunidade-no-studio.tsx.
+  const publicacao = hidratado
+    ? motor.atual.publicacoes.find((p) => p.id === id)
+    : undefined;
+  const minha = publicacao?.comunidadeId === COMUNIDADE_OFICIAL;
 
   return (
     <PublicacaoAberta

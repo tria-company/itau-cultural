@@ -258,7 +258,10 @@ export function Comunidade({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    // A COLUNA TEM LARGURA DE LEITURA NA WEB (2026-08-28): esticar a foto de um post por
+    // 1.100px nao mostra mais foto, mostra a mesma foto maior, e o texto embaixo vira uma
+    // linha de 180 caracteres. O limite mora no CSS, sob `[data-view="web"]`.
+    <div className="flex flex-col gap-4 comunidade-coluna">
       <Seletor atual={atual} aoTrocar={setAtual} />
 
       {/* A ficha e a faixa só aparecem fora da casa: na comunidade do Itaú a
