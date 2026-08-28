@@ -4944,7 +4944,9 @@
   justify-content: flex-end;
   overflow: hidden;
   min-height: 11rem;
-  margin: calc(var(--espaco-pilha) * -1) calc(var(--espaco-tela) * -1) 0;
+  /* SANGRA ATE A BORDA. A pagina que a monta tem margem lateral quase nula (`px-1`), e a
+   * capa cancela o que sobra: foto de abertura com moldura de um lado so parece defeito. */
+  margin: calc(var(--espaco-pilha) * -1) -0.25rem 0;
   padding: var(--espaco-tela);
   border-radius: 0 0 var(--raio-g) var(--raio-g);
   background: var(--ic-preto);
@@ -4953,6 +4955,8 @@
 
 [data-view="web"] .prod-comunidade-capa {
   min-height: 16rem;
+  /* Na web ela NAO sangra: a area de conteudo e larga e presa a esquerda pela coluna, e
+   * puxar so o lado direito deixava 32px de um lado contra 0 do outro (medido). */
   margin: 0 0 0.5rem;
   border-radius: var(--raio-g);
 }
@@ -5016,4 +5020,24 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+/* ---- as telas que vao de borda a borda ------------------------------------- */
+
+/**
+ * A MARGEM LATERAL QUASE NULA, pedida a olho em 2026-08-28.
+ *
+ * `.prod-tela` da 1rem de cada lado a TODA tela do Studio, e para um formulario isso
+ * esta certo: campo colado na borda do aparelho e desconfortavel de ler. Mas a Comunidade
+ * e a Loja sao feed e vitrine, feitos de foto: ali a margem vira moldura, e a foto de
+ * abertura parecia um cartaz pendurado dentro de outro cartaz.
+ *
+ * A regra cancela o que o layout poe e devolve o quase-nada que a propria pagina pede
+ * (`px-1`). E opt-in por atributo, e nao global: quem nao o carrega continua com a margem.
+ *
+ * SO NO APARELHO. Na web a area de conteudo ja e larga e presa a esquerda pela coluna de
+ * navegacao; ali margem nao e moldura, e uma linha de leitura.
+ */
+[data-view="mobile"] [data-margem-quase-nula] {
+  margin-inline: calc(var(--espaco-tela) * -1);
 }

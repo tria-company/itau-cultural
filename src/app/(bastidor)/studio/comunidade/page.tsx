@@ -31,7 +31,10 @@ const PUBLICACOES_DA_CASA = [...PUBLICACOES, ...PUBLICACOES_DO_ACERVO].filter(
 
 export default function PaginaComunidade() {
   return (
-    <div className="flex flex-col gap-5 p-5 desk:p-8">
+    <div
+      className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
+      data-margem-quase-nula
+    >
       {/* A CAPA NO LUGAR DO CABEÇALHO DE TEXTO (2026-08-28): a foto da comunidade com o
           nome dentro, no gesto da abertura de Descobrir. Ela também é a porta da gestão. */}
       <CapaDaComunidade

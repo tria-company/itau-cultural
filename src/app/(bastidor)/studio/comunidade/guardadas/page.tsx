@@ -18,7 +18,10 @@ import { catalogoComum } from "@/dados/mock/seed-produtor";
 
 export default function PaginaGuardadas() {
   return (
-    <div className="flex flex-col gap-5 p-5 desk:p-8">
+    <div
+      className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
+      data-margem-quase-nula
+    >
       <header className="flex flex-col gap-2">
         <div className="flex items-baseline gap-2">
           <Grafismo variacao="barra" className="h-5 w-auto shrink-0 text-acao-tinta" />

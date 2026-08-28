@@ -35,7 +35,10 @@ export default async function PaginaDeComunidade({ params }: { params: Promise<{
   if (!comunidade) notFound();
 
   return (
-    <div className="flex flex-col gap-5 p-5 desk:p-8">
+    <div
+      className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
+      data-margem-quase-nula
+    >
       {/* Sem o botão de gestão: estas 21 comunidades pertencem a instituições, coletivos
           e pessoas reais, amarradas por `entidadeId` à Enciclopédia. Deixá-las renomear
           aqui cruzaria a mesma linha que este produto se recusa a cruzar ao não autorar

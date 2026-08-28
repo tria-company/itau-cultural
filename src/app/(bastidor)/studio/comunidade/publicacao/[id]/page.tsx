@@ -46,7 +46,10 @@ export default async function PaginaPublicacao({ params }: { params: Promise<{ i
   if (!TODAS.some((p) => p.id === id) && !SLUGS_DO_PRODUTOR.includes(id)) notFound();
 
   return (
-    <div className="flex flex-col gap-5 p-5 desk:p-8">
+    <div
+      className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
+      data-margem-quase-nula
+    >
       <PublicacaoAberta id={id} />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
