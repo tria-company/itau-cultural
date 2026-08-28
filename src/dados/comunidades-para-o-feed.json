@@ -1,0 +1,140 @@
+[
+ {
+  "id": "ic",
+  "linguagens": []
+ },
+ {
+  "id": "c-bro-mcs",
+  "linguagens": []
+ },
+ {
+  "id": "c-teatro-amazonas",
+  "linguagens": [
+   "musica"
+  ]
+ },
+ {
+  "id": "c-bordadeiras",
+  "linguagens": [
+   "musica",
+   "teatro"
+  ]
+ },
+ {
+  "id": "c-itamatatiua",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-rendeiras-cariri",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-caixa-belem",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-coletivo-bispo",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-brigada-henfil",
+  "linguagens": [
+   "teatro"
+  ]
+ },
+ {
+  "id": "c-basirah",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-armazem",
+  "linguagens": [
+   "danca"
+  ]
+ },
+ {
+  "id": "c-caixa-do-elefante",
+  "linguagens": [
+   "teatro"
+  ]
+ },
+ {
+  "id": "c-artmosfera",
+  "linguagens": [
+   "teatro"
+  ]
+ },
+ {
+  "id": "c-a-cena",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-atelie-gravura",
+  "linguagens": [
+   "danca"
+  ]
+ },
+ {
+  "id": "c-bonobando",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-cine-falcatrua",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-o-imaginario",
+  "linguagens": [
+   "arte-e-tecnologia",
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-ailton-krenak",
+  "linguagens": [
+   "teatro"
+  ]
+ },
+ {
+  "id": "c-alceu-valenca",
+  "linguagens": [
+   "literatura"
+  ]
+ },
+ {
+  "id": "c-adriana-varejao",
+  "linguagens": [
+   "musica"
+  ]
+ },
+ {
+  "id": "c-abdias-nascimento",
+  "linguagens": [
+   "artes-visuais"
+  ]
+ },
+ {
+  "id": "c-adelia-sampaio",
+  "linguagens": [
+   "teatro",
+   "artes-visuais",
+   "literatura"
+  ]
+ }
+]

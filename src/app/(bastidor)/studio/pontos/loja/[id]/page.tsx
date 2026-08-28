@@ -1,12 +1,13 @@
+import { notFound } from "next/navigation";
 import { Grafismo } from "@/componentes/grafismo";
-import { Comunidade } from "@/componentes/comunidade";
-import { COMUNIDADE_OFICIAL } from "@/dados/comunidade";
+import { RecompensaItem } from "@/componentes/recompensa-item";
+import { RECOMPENSAS, recompensaPorId } from "@/dados/recompensas";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 import { catalogoComum } from "@/dados/mock/seed-produtor";
 
 /**
- * Studio · Comunidade, o feed de quem produz.
+ * Studio · Loja de pontos, um item da vitrine.
  *
  * PORTADA DO OUTRO RAMO em 2026-08-28, do repositorio Apogeunexus/bid-itau, onde estas
  * telas foram construidas. O corpo e o de la, palavra por palavra: o pedido foi que
@@ -17,17 +18,25 @@ import { catalogoComum } from "@/dados/mock/seed-produtor";
  * Studio, e sem ela esta rota seria a unica sem saida na visao app.
  */
 
-export default function PaginaComunidade() {
+export function generateStaticParams() {
+  return RECOMPENSAS.map((r) => ({ id: r.id }));
+}
+
+export default async function PaginaRecompensa({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const recompensa = recompensaPorId(id);
+  if (!recompensa) notFound();
+
   return (
     <div className="flex flex-col gap-5 p-5 desk:p-8">
       <header className="flex flex-col gap-2">
         <div className="flex items-baseline gap-2">
           <Grafismo variacao="barra" className="h-5 w-auto shrink-0 text-acao-tinta" />
-          <h1 className="text-2xl leading-tight font-bold desk:text-3xl">Comunidade</h1>
+          <h1 className="text-2xl leading-tight font-bold desk:text-3xl">{recompensa.titulo}</h1>
         </div>
       </header>
 
-      <Comunidade comunidadeId={COMUNIDADE_OFICIAL} />
+      <RecompensaItem recompensa={recompensa} />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

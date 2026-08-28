@@ -1,0 +1,112 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { Moeda } from "@/componentes/pontos-base";
+import { usePontos } from "@/contexto/pontos";
+import type { RecompensaDefinida } from "@/lib/pontos/tipos";
+
+const ROTULO_DA_ENTREGA: Record<RecompensaDefinida["entrega"], string> = {
+  presencial: "Retirada ou uso presencial, no Itaú Cultural.",
+  digital: "Liberado na hora, dentro do app.",
+  correio: "Enviado pelo correio para o endereço que você informar.",
+  "no-produto": "Vale dentro do próprio app, sem envio.",
+};
+
+export function RecompensaItem({ recompensa }: { recompensa: RecompensaDefinida }) {
+  const { motor, hidratado } = usePontos();
+  const [resgatando, setResgatando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [feito, setFeito] = useState(false);
+
+  const fichas = hidratado ? motor.saldoDe("ficha") : 0;
+  const faltam = recompensa.custo - fichas;
+  const esgotada = recompensa.estoque !== null && recompensa.estoque <= 0;
+  const podeResgatar = hidratado && faltam <= 0 && !esgotada && !feito;
+
+  function resgatar() {
+    if (!podeResgatar || resgatando) return;
+    setResgatando(true);
+    setErro(null);
+
+    const rastro = motor.emitir("recompensa.resgatada", {
+      tipo: "recompensa",
+      id: recompensa.id,
+    });
+
+    const barrado = rastro.efeitos.find((e) => e.tipo === "tetoAtingido");
+    if (barrado) {
+      setErro(barrado.oQue);
+    } else {
+      setFeito(true);
+    }
+    setResgatando(false);
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="folha-foto">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={recompensa.imagem} alt={recompensa.imagemAlt} />
+      </div>
+
+      <div className="cartao">
+        <span className="recompensa-preco text-xl">
+          <Moeda />
+          {recompensa.custo}
+        </span>
+        <p className="tipo-detalhe">{recompensa.descricao}</p>
+        <p className="tipo-legenda text-tinta-2">{ROTULO_DA_ENTREGA[recompensa.entrega]}</p>
+        {recompensa.estoque !== null && (
+          <p className="tipo-legenda text-tinta-2">
+            {recompensa.estoque > 0
+              ? `${recompensa.estoque} ${recompensa.estoque === 1 ? "disponível" : "disponíveis"}`
+              : "Esgotado nesta temporada."}
+          </p>
+        )}
+      </div>
+
+      {feito ? (
+        <>
+          <p className="aviso" data-tom="acao">
+            Resgatado. A entrega já está na sua carteira, com as cinco etapas.
+          </p>
+          <Link href="/studio/pontos/" className="botao-acao no-underline">
+            Acompanhar a entrega
+          </Link>
+        </>
+      ) : (
+        <>
+          {erro && (
+            <p className="aviso" data-tom="acao" role="alert">
+              {erro}
+            </p>
+          )}
+          <button type="button" className="botao-acao" onClick={resgatar} disabled={!podeResgatar || resgatando}>
+            {resgatando
+              ? "Resgatando…"
+              : esgotada
+                ? "Esgotado"
+                : !hidratado
+                  ? "Carregando saldo…"
+                  : faltam > 0
+                    ? `Faltam ${faltam.toLocaleString("pt-BR")} fichas`
+                    : "Resgatar"}
+          </button>
+          {hidratado && faltam > 0 && !esgotada && (
+            <p className="tipo-legenda text-tinta-2">
+              Você tem {fichas.toLocaleString("pt-BR")}. Terminar um curso rende 25; confirmar
+              presença num evento rende 20.
+            </p>
+          )}
+        </>
+      )}
+
+      <p className="credito-foto">Foto: {recompensa.imagemCredito}</p>
+
+      <Link href="/studio/pontos/loja/" className="botao-discreto no-underline self-start">
+        ← Voltar às recompensas
+      </Link>
+    </div>
+  );
+}

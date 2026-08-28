@@ -139,6 +139,7 @@
  * pública `/produtor/[slug]`, com o prefixo `.pr-*`. As duas convivem; o prefixo daqui é
  * `.prod-*`. */
 @import "../estilos/studio-produtor.css";
+@import "../estilos/pontos.css";
 
 /* ---------------------------------------------------------------------------
  * A base visual (camada base tipográfica, moldura D-03, cartão)

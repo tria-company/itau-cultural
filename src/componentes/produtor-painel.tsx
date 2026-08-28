@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
+import { usePontos } from "@/contexto/pontos";
+import { COMUNIDADES } from "@/dados/comunidade";
 import { Folha } from "@/componentes/base/folha";
 import { iniciaisDe, usePerfil } from "@/componentes/perfil-estado";
 import {
@@ -920,6 +922,10 @@ function VisaoGeral({
     [registros, dataDeReferencia],
   );
 
+  // O SALDO DE FICHAS VEM DO MOTOR, a mesma fonte que a Carteira le. Ver a nota no cartao
+  // da Loja de pontos, mais abaixo.
+  const { motor, hidratado } = usePontos();
+
   const medidos = useMemo(
     () =>
       registros
@@ -1160,10 +1166,32 @@ function VisaoGeral({
             nota: "comentários recebidos",
           },
           {
-            href: "/studio/pontos/",
+            // UMA VERDADE SÓ SOBRE O SALDO. Este cartão mostrava `panorama.pontosGanhos`,
+            // recalculado dos registros publicados, enquanto a tela que ele abre passou a
+            // ler o motor de pontos que veio do outro ramo (porte de 2026-08-28). Eram
+            // 1.540 pontos / nível 7 no Início contra 45 fichas / nível 1 na Carteira, a um
+            // clique de distância: dois números para a mesma coisa, na mesma sessão. Agora
+            // os dois leem o motor.
+            href: "/studio/pontos/loja/",
             rotulo: "Loja de pontos",
-            numero: milhar(panorama.pontosGanhos),
-            nota: `pontos ganhos, nível ${panorama.nivel}`,
+            numero: hidratado ? milhar(motor.saldoDe("ficha")) : "—",
+            nota: hidratado
+              ? `fichas para resgatar, nível ${motor.nivel().numero} · ${motor.nivel().nome}`
+              : "somando as suas fichas",
+          },
+          {
+            href: "/studio/comunidade/marketplace/",
+            rotulo: "Comunidades",
+            numero: String(COMUNIDADES.length),
+            nota: "produtores e organizações por território",
+          },
+          {
+            // GUARDADAS SÓ SE ALCANÇA DAQUI NO APARELHO: a barra flutuante tem quatro abas
+            // e nao cabe mais uma. Na web ela tambem esta na coluna, sob Comunidade.
+            href: "/studio/comunidade/guardadas/",
+            rotulo: "Guardadas",
+            numero: hidratado ? String(motor.atual.publicacoesSalvas.length) : "—",
+            nota: "publicações que você marcou",
           },
           {
             href: "/studio/ocorrencias/",

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Casca } from "@/componentes/casca";
 import { PapelProvider } from "@/contexto/papel";
+import { PontosProvider } from "@/contexto/pontos";
 import { SessaoProvider } from "@/contexto/sessao";
 import { ViewProvider } from "@/contexto/visao";
 import { HEROIS } from "@/dados/heroi";
@@ -63,7 +64,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 persona, e a casca já é o primeiro consumidor — o menu lateral que ela
                 monta filtra o grupo de bastidor por papel. */}
             <PapelProvider>
-              <Casca>{children}</Casca>
+              {/* O MOTOR DE PONTOS entra por dentro da sessao, porque le a persona, e por
+                  fora da casca, porque a Comunidade e a Carteira vivem dentro dela. Do
+                  outro ramo ele SUBSTITUIA o papel neste slot; aqui os dois convivem, e
+                  quem filtra o menu de bastidor continua sendo o papel. */}
+              <PontosProvider>
+                <Casca>{children}</Casca>
+              </PontosProvider>
             </PapelProvider>
           </SessaoProvider>
         </ViewProvider>

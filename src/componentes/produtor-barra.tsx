@@ -32,11 +32,17 @@ import type { Pauta } from "@/dados/tipos-produtor";
  * ação primária, que é o que a sonda da dobra confere no app.
  */
 
+/**
+ * A LOJA APONTA PARA A LOJA. Até 2026-08-28 esta aba levava a `/studio/pontos/`, que era
+ * uma tela chamada «Loja de pontos»; com o porte do outro ramo, esse endereço passou a
+ * abrir a CARTEIRA, e a vitrine foi para `/studio/pontos/loja/`. Rótulo e destino voltaram
+ * a dizer a mesma coisa; a carteira fica a um toque, no botão próprio da vitrine.
+ */
 const ABAS = [
   { href: "/studio", rotulo: "Início", icone: ICONE_STUDIO_HOME },
   { href: "/studio/pautas", rotulo: "Studio", icone: ICONE_APPS },
   { href: "/studio/comunidade", rotulo: "Comunidade", icone: ICONE_COMUNIDADE },
-  { href: "/studio/pontos", rotulo: "Loja", icone: ICONE_LOJA },
+  { href: "/studio/pontos/loja", rotulo: "Loja", icone: ICONE_LOJA },
 ] as const;
 
 export type { ImagemDaCriacao as ImagemDaBarra };
@@ -58,7 +64,14 @@ export function BarraDoStudio({
       <nav className="prod-barra-nav" aria-label="Navegação do Studio" data-barra-acao>
         <ul className="prod-abas">
           {ABAS.map((aba) => {
-            const ativa = caminho === aba.href;
+            // A SEÇÃO INTEIRA ACENDE, e não só a rota exata: a Comunidade e a Loja ganharam
+            // sub-telas no porte de 2026-08-28, e com a comparação exata as quatro abas
+            // apagavam juntas em /studio/comunidade/guardadas/ e irmãs. Início fica de fora
+            // porque `/studio` prefixa todas as outras.
+            const secao = aba.href === "/studio/pontos/loja" ? "/studio/pontos" : aba.href;
+            const ativa =
+              caminho === aba.href ||
+              (secao !== "/studio" && caminho.startsWith(`${secao}/`));
             return (
               <li key={aba.href}>
                 <Link

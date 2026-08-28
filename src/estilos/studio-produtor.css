@@ -727,6 +727,26 @@
   list-style: none;
 }
 
+/**
+ * As sub-telas da Comunidade e da Loja, recuadas sob a sua.
+ *
+ * Elas vieram do outro ramo em 2026-08-28 e la quem dava entrada nelas era o menu lateral
+ * do app publico, que aqui nao existe. Recuadas, dizem de quem sao sem inchar o grupo.
+ */
+[data-view="web"] .prod-lateral-filhos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0;
+  padding: 0 0 0 1.75rem;
+  list-style: none;
+}
+
+[data-view="web"] .prod-lateral-filhos .prod-lateral-item {
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
 [data-view="web"] .prod-lateral-item {
   display: flex;
   align-items: center;
@@ -4852,4 +4872,26 @@
  */
 [data-view="web"] .prod-ficha-duas-colunas:has(> .prod-lado-fixo) .prod-lado-do-ato .prod-previa {
   display: none;
+}
+
+/* ---- a folha de resgate, na web deste ramo ---------------------------------- */
+
+/**
+ * A FOLHA PRECISA SER `fixed` NA WEB, e o componente que a abre nao tem como saber disso.
+ *
+ * `recompensas.tsx` veio do outro ramo inteiro, e decide o ancoradouro perguntando se
+ * existe uma `.moldura` na pagina: se nao existe, entende que esta na web e marca
+ * `data-solta="sim"`, que vira `position: fixed` em pontos.css. La a premissa vale.
+ *
+ * AQUI NAO: a nossa casca mantem o elemento `.moldura` nas duas visoes, so alargado na web
+ * (`moldura desk:w-full`). O componente entao le `data-solta="nao"`, a folha fica
+ * `absolute` contra uma moldura que tem a altura da pagina inteira, e abrir um item depois
+ * de rolar punha a folha em `top: -900px`, fora da tela (medido, 2026-08-28).
+ *
+ * A regra mora AQUI e nao em `pontos.css` porque aquela folha e copia literal do outro
+ * ramo, e o pedido foi que as telas ficassem exatamente iguais. O que diverge e a nossa
+ * casca, entao a correcao e nossa.
+ */
+[data-view="web"] .folha-fundo {
+  position: fixed;
 }

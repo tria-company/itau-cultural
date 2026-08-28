@@ -39,13 +39,37 @@ interface ItemDeTopo {
   href: string;
   rotulo: string;
   icone: React.ReactNode;
+  /**
+   * As telas irmãs que moram sob esta, listadas logo abaixo e recuadas.
+   *
+   * A Comunidade e a Carteira vieram do outro ramo em 2026-08-28 com sub-telas, e lá quem
+   * dava entrada nelas era o menu lateral do app público. Aqui esse menu não existe: sem
+   * estas linhas, «Guardadas», «Comunidades» e a própria vitrine ficariam construídas e
+   * inalcançáveis, só por URL digitada.
+   */
+  filhos?: { href: string; rotulo: string }[];
 }
 
 const TELAS_DE_TOPO: ItemDeTopo[] = [
   { href: "/studio", rotulo: "Início", icone: ICONE_STUDIO_HOME },
   { href: "/studio/pautas", rotulo: "Studio", icone: ICONE_APPS },
-  { href: "/studio/comunidade", rotulo: "Comunidade", icone: ICONE_COMUNIDADE },
-  { href: "/studio/pontos", rotulo: "Loja de pontos", icone: ICONE_LOJA },
+  {
+    href: "/studio/comunidade",
+    rotulo: "Comunidade",
+    icone: ICONE_COMUNIDADE,
+    filhos: [
+      { href: "/studio/comunidade/marketplace", rotulo: "Comunidades" },
+      { href: "/studio/comunidade/guardadas", rotulo: "Guardadas" },
+    ],
+  },
+  {
+    // RÓTULO E DESTINO DIZEM A MESMA COISA: «Loja de pontos» abre a vitrine, e a carteira
+    // fica logo abaixo. Ver a nota gêmea em produtor-barra.tsx.
+    href: "/studio/pontos/loja",
+    rotulo: "Loja de pontos",
+    icone: ICONE_LOJA,
+    filhos: [{ href: "/studio/pontos", rotulo: "Carteira" }],
+  },
 ];
 
 const GESTAO = [
@@ -110,7 +134,12 @@ export function ProdutorNavegacao({
       {/* ---- as telas de topo ---- */}
       <ul className="prod-lateral-grupo">
         {TELAS_DE_TOPO.map((t) => {
-          const ativa = caminho === t.href;
+          // O «você está aqui» vale para a seção inteira, e não só para a rota exata: em
+          // /studio/comunidade/guardadas/ a lateral apagava tudo e a pessoa perdia a
+          // referência. Início fica de fora porque `/studio` prefixa todas as outras.
+          const secao = t.href === "/studio/pontos/loja" ? "/studio/pontos" : t.href;
+          const daSecao = secao !== "/studio" && caminho.startsWith(`${secao}/`);
+          const ativa = caminho === t.href || daSecao;
           return (
             <li key={t.href}>
               <Link
@@ -118,11 +147,28 @@ export function ProdutorNavegacao({
                 className="prod-pauta prod-lateral-item"
                 data-lateral={t.rotulo.toLowerCase()}
                 data-ativa={ativa ? "sim" : "nao"}
-                aria-current={ativa ? "page" : undefined}
+                aria-current={caminho === t.href ? "page" : undefined}
               >
                 {t.icone}
                 {t.rotulo}
               </Link>
+              {t.filhos ? (
+                <ul className="prod-lateral-filhos">
+                  {t.filhos.map((f) => (
+                    <li key={f.href}>
+                      <Link
+                        href={`${f.href}/`}
+                        className="prod-pauta prod-lateral-item"
+                        data-lateral={f.rotulo.toLowerCase()}
+                        data-ativa={caminho === f.href ? "sim" : "nao"}
+                        aria-current={caminho === f.href ? "page" : undefined}
+                      >
+                        {f.rotulo}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </li>
           );
         })}

@@ -23,6 +23,7 @@
     "verificar-admin": "node scripts/verificar-admin.mjs",
     "verificar-gestor": "node scripts/verificar-gestor.mjs",
     "verificar-moderacao": "node scripts/verificar-moderacao.mjs",
+    "verificar-pontos": "tsx scripts/verificar-pontos.ts",
     "verificar-produtor": "node scripts/verificar-produtor.mjs"
   },
   "dependencies": {

@@ -1,0 +1,1731 @@
+/* ---------------------------------------------------------------------------
+ * pontos.css — carteira, recompensas e comunidade.
+ *
+ * As três dividem uma folha porque dividem o mesmo vocabulário: o saldo em
+ * ficha, o cartaz de item e o cartão de publicação aparecem nas três.
+ * ------------------------------------------------------------------------- */
+
+/* --- Saldo e moeda ------------------------------------------------------ */
+
+.ficha-moeda {
+  display: inline-block;
+  flex: none;
+  width: 0.875em;
+  height: 0.875em;
+  border-radius: 999px;
+  background: var(--ic-amarelo);
+  box-shadow: inset 0 0 0 0.15em color-mix(in srgb, var(--ic-laranja) 70%, transparent);
+  vertical-align: -0.05em;
+}
+
+.saldo-linha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.saldo-painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-cartao);
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie-2);
+}
+
+.saldo-numero {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--fonte-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.saldo-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-pilha);
+}
+
+.saldo-celula {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.saldo-celula-valor {
+  font-family: var(--fonte-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* --- Nível -------------------------------------------------------------- */
+
+.nivel-barra {
+  position: relative;
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--cor-borda);
+}
+
+.nivel-preenchimento {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--cor-acao);
+  transition: width var(--dur-2, 240ms) ease;
+}
+
+/* --- Sequência ---------------------------------------------------------- */
+
+.sequencia-semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.sequencia-dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.sequencia-marca {
+  width: 100%;
+  height: 2rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+}
+
+.sequencia-marca[data-marcada="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao);
+}
+
+.sequencia-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+.sequencia-estado[data-fase="segura"] {
+  background: color-mix(in srgb, var(--ic-verde) 22%, transparent);
+  color: var(--cor-tinta);
+}
+
+.sequencia-estado[data-fase="em-risco"],
+.sequencia-estado[data-fase="carencia"] {
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+.sequencia-estado[data-fase="congelada"] {
+  background: color-mix(in srgb, var(--ic-azul) 25%, transparent);
+  color: var(--cor-tinta);
+}
+
+.sequencia-estado[data-fase="quebrada"] {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+}
+
+/* --- Extrato ------------------------------------------------------------ */
+
+.extrato-lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.extrato-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.extrato-linha:last-child {
+  border-bottom: 0;
+}
+
+.extrato-valor {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.extrato-valor[data-sentido="credito"] {
+  color: var(--cor-acao-tinta);
+}
+
+.extrato-valor[data-sentido="debito"] {
+  color: var(--cor-tinta-2);
+}
+
+/* --- Esteira de entrega ------------------------------------------------- */
+
+.esteira {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.esteira-etapa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  text-align: center;
+}
+
+.esteira-trilho {
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--cor-borda);
+}
+
+.esteira-etapa[data-alcancada="sim"] .esteira-trilho {
+  background: var(--cor-acao);
+}
+
+.esteira-etapa[data-alcancada="sim"] {
+  color: var(--cor-tinta);
+  font-weight: 700;
+}
+
+/* --- Recompensas ------------------------------------------------------------ */
+
+.recompensa-trilho {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 10.5rem;
+  gap: var(--espaco-pilha);
+  overflow-x: auto;
+  margin-inline: calc(var(--espaco-tela) * -1);
+  padding-inline: var(--espaco-tela);
+  padding-bottom: 0.25rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.recompensa-trilho::-webkit-scrollbar {
+  display: none;
+}
+
+.recompensa-cartaz {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  scroll-snap-align: start;
+  color: inherit;
+  text-decoration: none;
+}
+
+.recompensa-cartaz[data-alcancavel="nao"] {
+  opacity: 0.72;
+}
+
+.recompensa-preco {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.recompensa-falta {
+  color: var(--cor-tinta-2);
+  font-size: var(--tipo-legenda);
+}
+
+.recompensa-grade {
+  display: grid;
+  gap: var(--espaco-pilha);
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+}
+
+/* --- Botões ------------------------------------------------------------- */
+
+.botao-acao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--cor-acao);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-weight: 700;
+  font-size: var(--tipo-detalhe);
+  cursor: pointer;
+}
+
+.botao-acao:disabled {
+  border-color: var(--cor-borda);
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-3);
+  cursor: not-allowed;
+}
+
+.botao-discreto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  font-size: var(--tipo-detalhe);
+  cursor: pointer;
+}
+
+.botao-discreto[data-ativo="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+/* --- Comunidade ---------------------------------------------------------- */
+
+.publicacao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+
+.publicacao-topo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.monograma {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 999px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie-2);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.monograma[data-porte="pequeno"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.5625rem;
+}
+
+/* O corpo do cartão inteiro é o alvo do toque que abre a publicação. Botão e
+ * não link porque ele embrulha imagem e título; um <a> em volta de bloco vira
+ * uma área de arraste enorme e atrapalha o gesto de rolar. */
+.publicacao-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.publicacao-imagem {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.publicacao-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O trecho corta em duas linhas e o «ler mais» fica logo abaixo, na cor de
+ * ação: é ele que diz que existe mais texto do outro lado do toque. Sem o
+ * rótulo, o corte parece só uma frase que terminou mal. */
+.publicacao-chamada {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.publicacao-trecho {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.4;
+  color: var(--cor-tinta-2);
+}
+
+.publicacao-ler-mais {
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  color: var(--cor-acao-tinta);
+}
+
+.publicacao-rodape {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pastilha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pastilha svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.pastilha[data-ativa="sim"] {
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+/* --- Publicação aberta --------------------------------------------------- */
+
+/* A foto sangra até a borda da moldura: as margens da tela são desfeitas com
+ * margem negativa em vez de o contêiner mudar de padding, para o resto da
+ * página continuar alinhado com as outras telas. */
+.aberta-foto {
+  position: relative;
+  margin: calc(var(--espaco-tela) * -1) calc(var(--espaco-tela) * -1) 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--cor-superficie-2);
+}
+
+.aberta-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aberta-veu {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8rem;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.55), transparent);
+}
+
+.aberta-autor {
+  position: absolute;
+  top: 0.65rem;
+  right: var(--espaco-tela);
+  left: var(--espaco-tela);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ic-branco);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.5);
+}
+
+.aberta-voltar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(0.6rem);
+  color: var(--ic-branco);
+  cursor: pointer;
+}
+
+.aberta-voltar svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.aberta-autor .monograma {
+  border-color: rgb(255 255 255 / 0.5);
+  background: rgb(0 0 0 / 0.35);
+  color: var(--ic-branco);
+  backdrop-filter: blur(0.6rem);
+}
+
+/* --- Thread -------------------------------------------------------------- */
+
+.thread {
+  display: flex;
+  gap: 0.6rem;
+  padding-bottom: 0.65rem;
+}
+
+/* A coluna do avatar carrega o trilho vertical que liga a resposta ao seu pai —
+ * é ele que faz a conversa se ler como conversa em vez de lista plana. */
+.thread-coluna {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.thread-trilho {
+  width: 1.5px;
+  flex: 1;
+  margin-top: 0.3rem;
+  border-radius: 1px;
+  background: var(--cor-borda-forte);
+}
+
+.thread-corpo {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.thread-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.1rem;
+}
+
+.thread-acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-tinta-3);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thread-acao svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.thread-acao[data-ativa="sim"] {
+  color: var(--cor-acao-tinta);
+}
+
+.thread-respostas {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Compositor de resposta ---------------------------------------------- */
+
+.responder {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.responder input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: 999px;
+  background: var(--cor-superficie);
+  color: inherit;
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+}
+
+.responder input:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 1px;
+}
+
+.responder button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  cursor: pointer;
+}
+
+.responder button:disabled {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-3);
+  cursor: not-allowed;
+}
+
+.responder button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* --- Marketplace -------------------------------------------------------- */
+
+.comunidade-cartao {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: inherit;
+  text-decoration: none;
+}
+
+.uf-selo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--raio-p);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+/* --- Emblemas ----------------------------------------------------------- */
+
+.emblema {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.emblema[data-ganho="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+}
+
+/* --- Aviso -------------------------------------------------------------- */
+
+.aviso {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+.aviso[data-tom="acao"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+/* --- Cartaz com foto e a folha do item ---------------------------------- */
+
+.recompensa-foto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie-2);
+}
+
+.recompensa-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recompensa-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.recompensa-cartao > .recompensa-corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.7rem;
+}
+
+.recompensa-cartao[data-alcancavel="nao"] .recompensa-foto img {
+  filter: grayscale(0.55);
+}
+
+/* A folha do item posiciona ABSOLUTE CONTRA A MOLDURA, nunca `fixed` e nunca
+ * `<dialog>` com `showModal()`: os dois sobem para a camada de topo do
+ * navegador e se ancoram na JANELA, o que joga a folha para fora do telefone
+ * desenhado na tela. É a mesma regra que a barra de abas e a gaveta do menu já
+ * seguem (D-03/D-04). Quem entrega a folha dentro da moldura é um portal. */
+.folha-fundo {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  backdrop-filter: blur(0.2rem);
+}
+
+/* Sem moldura (visão web ou janela estreita) o ancoradouro é a janela mesmo. */
+.folha-fundo[data-solta="sim"] {
+  position: fixed;
+}
+
+.folha-item {
+  display: flex;
+  width: 100%;
+  max-width: 26rem;
+  max-height: 100%;
+  flex-direction: column;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+  box-shadow: var(--sombra-3);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+.folha-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: var(--espaco-cartao);
+}
+
+.folha-foto {
+  position: relative;
+  flex: none;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--cor-superficie-2);
+}
+
+.folha-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.folha-fechar {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  color: var(--ic-branco);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.credito-foto {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.recompensa-resumo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-legenda);
+  line-height: 1.35;
+  color: var(--cor-tinta-2);
+}
+
+.guardada-capa {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 4.5rem;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie-2);
+}
+
+.guardada-capa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Desafios ------------------------------------------------------------ */
+
+.desafios-topo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* O selo do nível usa o amarelo e o laranja da ficha, não a cor de ação: ele é
+ * um objeto que a pessoa ganhou, não um botão. O laranja aqui é o mesmo do
+ * miolo da moeda, o que amarra nível e economia visualmente. */
+.selo-nivel {
+  width: 7.5rem;
+  height: 7.5rem;
+  /* As artes são quadradas com respiro próprio; `contain` garante que nenhuma
+     seja esticada se um dos arquivos vier fora de proporção. */
+  object-fit: contain;
+}
+
+.desafios-barra {
+  width: min(12rem, 100%);
+}
+
+.missao-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+/* --- Seletor de comunidade ----------------------------------------------- */
+
+/* O menu é DESENHADO, não é `<select>`. O nativo é pintado pelo sistema
+ * operacional: fundo, tipografia, marca de seleção e cantos vêm do macOS ou do
+ * Android, e nenhum deles conhece a paleta do Itaú Cultural. Numa tela em que
+ * cada cartão foi desenhado, ele aparece como corpo estranho. */
+
+.seletor-comunidade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-pilha);
+}
+
+.seletor-campo {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 9rem;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.seletor-rotulo {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.seletor-gatilho {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: inherit;
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.seletor-gatilho[aria-expanded="true"] {
+  border-color: var(--cor-acao);
+}
+
+.seletor-gatilho:disabled {
+  border-color: var(--cor-borda);
+  color: var(--cor-tinta-3);
+  cursor: not-allowed;
+}
+
+.seletor-gatilho > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seletor-seta {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  transform: rotate(45deg) translate(-0.12rem, -0.12rem);
+  opacity: 0.65;
+}
+
+/* O painel posiciona contra o campo, e o campo é `relative` — a mesma regra da
+ * gaveta do menu: nada de `fixed`, que se ancoraria na janela e escaparia da
+ * moldura do telefone. */
+.seletor-painel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  left: 0;
+  z-index: 40;
+  max-height: 16rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-3);
+}
+
+.seletor-opcao {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: var(--raio-p);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  text-align: left;
+  cursor: pointer;
+}
+
+.seletor-opcao:hover,
+.seletor-opcao:focus-visible {
+  background: var(--cor-superficie-2);
+}
+
+.seletor-opcao[aria-selected="true"] {
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+  font-weight: 700;
+}
+
+.seletor-opcao-uf {
+  flex: none;
+  margin-left: auto;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.seletor-opcao[aria-selected="true"] .seletor-opcao-uf {
+  color: inherit;
+}
+
+.seletor-vazio {
+  padding: 0.5rem 0.6rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+/* Assinatura da curadoria — a comunidade leva o nome de alguém, mas quem escreve
+ * é o Itaú Cultural, e a tela precisa dizer isso sem rodeio. */
+.selo-curadoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+/* A faixa de visita: a pessoa entrou numa comunidade que ainda não segue, e a
+ * tela diz isso em vez de deixá-la descobrir ao voltar e não achar. */
+.faixa-visita {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cor-acao);
+  border-radius: var(--raio-m);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+  font-size: var(--tipo-detalhe);
+}
+
+/* --- Módulo de desafios: detalhe, prova e placar (onda 2026-08) ---------- */
+
+.missao-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-pilha);
+}
+
+.missao-etiqueta[data-cor="modelo"] {
+  background: color-mix(in srgb, var(--cor-acao) 16%, transparent);
+  color: var(--cor-acao-tinta);
+}
+
+.missao-etiqueta[data-cor="prova"] {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+}
+
+.missao-etiqueta[data-cor="vagas"],
+.missao-etiqueta[data-cor="revisao"] {
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+.missao-quadros {
+  display: grid;
+  gap: var(--espaco-pilha);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.missao-quadro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.missao-quadro[data-tom="premio"],
+.cartao[data-tom="premio"] {
+  border-color: color-mix(in srgb, var(--cor-acao) 40%, var(--cor-borda));
+  background: var(--cor-acao-lavada);
+}
+
+/* --- As duas listas de regra ---------------------------------------------- */
+
+.regras-duas {
+  display: grid;
+  gap: var(--espaco-cartao);
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.regras-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.regras-lista li:not(:first-child) {
+  padding-left: 1.25rem;
+  position: relative;
+  color: var(--cor-tinta-2);
+}
+
+.regras-lista li:not(:first-child)::before {
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+.regras-lista[data-lado="vale"] li:not(:first-child)::before {
+  content: "✓";
+  color: var(--cor-acao-tinta);
+}
+
+.regras-lista[data-lado="nao-vale"] li:not(:first-child)::before {
+  content: "✕";
+  color: var(--cor-tinta-3);
+}
+
+/* --- A esteira de análise ------------------------------------------------- */
+
+.esteira-analise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie-2);
+}
+
+.esteira-etapas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.esteira-passo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.esteira-passo::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-borda);
+  transition: background var(--dur-1) ease;
+}
+
+.esteira-passo[data-estado="feita"] {
+  color: var(--cor-tinta-2);
+}
+
+.esteira-passo[data-estado="feita"]::before {
+  background: var(--cor-acao);
+}
+
+.esteira-passo[data-estado="agora"] {
+  color: var(--cor-tinta);
+  font-weight: 700;
+}
+
+.esteira-passo[data-estado="agora"]::before {
+  background: var(--cor-acao);
+  box-shadow: 0 0 0 0.25rem var(--cor-acao-lavada);
+}
+
+/* --- O desfecho do envio -------------------------------------------------- */
+
+.desfecho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+
+.desfecho[data-fase="aprovada"] {
+  border-color: color-mix(in srgb, var(--ic-verde) 50%, var(--cor-borda));
+  background: color-mix(in srgb, var(--ic-verde) 14%, transparent);
+}
+
+.desfecho[data-fase="em-moderacao"] {
+  border-color: color-mix(in srgb, var(--cor-acao) 40%, var(--cor-borda));
+  background: var(--cor-acao-lavada);
+}
+
+.desfecho[data-fase="recusada"] {
+  background: var(--cor-superficie-2);
+}
+
+/* --- Minhas comprovações -------------------------------------------------- */
+
+.comprovacoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comprovacao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-pilha);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.comprovacao-mini {
+  width: 3rem;
+  height: 3rem;
+  flex: none;
+  object-fit: cover;
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie-2);
+}
+
+.comprovacao > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.comprovacao-selo {
+  flex: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  font-size: var(--tipo-micro);
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+}
+
+.comprovacao-selo[data-fase="aprovada"] {
+  background: color-mix(in srgb, var(--ic-verde) 22%, transparent);
+  color: var(--cor-tinta);
+}
+
+.comprovacao-selo[data-fase="em-moderacao"],
+.comprovacao-selo[data-fase="analisando"] {
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+/* --- Placar --------------------------------------------------------------- */
+
+.ranking-atalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao);
+  border-radius: var(--raio-g);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+}
+
+.placar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.placar-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-pilha);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.placar-linha[data-eu="sim"] {
+  border-color: var(--cor-acao);
+  border-width: 2px;
+}
+
+.placar-linha > span:nth-child(3) {
+  flex: 1;
+  min-width: 0;
+}
+
+.placar-posicao {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+.placar-linha[data-podio="sim"] .placar-posicao {
+  background: var(--ic-amarelo);
+  color: var(--cor-tinta-crua);
+}
+
+.placar-monograma {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+.placar-bonus {
+  flex: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--ic-amarelo);
+  color: var(--cor-tinta-crua);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+}
+
+.placar-valor {
+  flex: none;
+  font-weight: 700;
+}
+
+/* --- Filtros e primeiros passos ------------------------------------------- */
+
+.filtros-missao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-pilha);
+}
+
+.filtro-missao {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta-2);
+  font-size: var(--tipo-legenda);
+  cursor: pointer;
+}
+
+.filtro-missao[data-ativo="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-weight: 700;
+}
+
+.campo-selecao {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+  font-size: var(--tipo-detalhe);
+}
+
+/* --- O card de missão em quatro colunas (espelho da lista de conquistas) --- */
+
+.missao-linha {
+  display: grid;
+  align-items: center;
+  gap: var(--espaco-pilha);
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "estrelas recompensa"
+    "corpo    corpo"
+    "estado   estado";
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+
+/* Na VISÃO WEB as quatro leituras cabem lado a lado, que é onde o espelho da
+   referência funciona de verdade: o olho varre estrelas → nome → prêmio → falta.
+
+   PRESO A `[data-view]`, E NÃO A MEDIA QUERY, e a diferença é o defeito que estava aqui.
+   Media query mede a JANELA; na visão App o cartão vive dentro da moldura de celular —
+   370px dentro de uma janela de 1440px. A janela larga disparava as quatro colunas dentro
+   dos 370px, a coluna de texto colapsava e cada palavra quebrava numa linha. É a regra
+   que `base.css` já registra: divergência por visão se faz pelo atributo, nunca por
+   largura de janela. */
+[data-view="web"] {
+  .missao-linha {
+    grid-template-columns: auto 1fr auto minmax(9rem, 12rem);
+    grid-template-areas: "estrelas corpo recompensa estado";
+    gap: var(--espaco-cartao);
+  }
+}
+
+.missao-linha[data-concluida="sim"] {
+  border-color: color-mix(in srgb, var(--ic-verde) 45%, var(--cor-borda));
+  background: color-mix(in srgb, var(--ic-verde) 8%, transparent);
+}
+
+.estrelas-missao {
+  grid-area: estrelas;
+  display: flex;
+  /* Alinhadas pelo PÉ, não pelo centro: é o que permite a do meio subir sem empurrar as
+     outras nem crescer a altura do grupo. */
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+/* A DO MEIO SOBE. É o desenho clássico de classificação por estrelas — o arco põe a
+   central em destaque e diz, sem texto, que a terceira é a que fecha. Selecionada pela
+   posição e não por classe: quem desenha o cartão não deveria ter de saber que a segunda
+   é especial. */
+.estrelas-missao > .estrela:nth-child(2) {
+  transform: translateY(-0.1875rem);
+}
+
+.estrela {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+.missao-corpo {
+  grid-area: corpo;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.missao-recompensa {
+  grid-area: recompensa;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.premio-fichas {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.premio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.premio-chip[data-ativo="percurso"] {
+  background: color-mix(in srgb, var(--ic-azul) 20%, transparent);
+  color: var(--cor-tinta);
+}
+
+.premio-chip[data-ativo="ficha"] {
+  background: color-mix(in srgb, var(--ic-amarelo) 45%, transparent);
+  color: var(--cor-tinta-crua);
+}
+
+.missao-estado {
+  grid-area: estado;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.missao-trilho-barra {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.missao-trilho-preenchimento {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--cor-acao);
+  transition: width var(--dur-2) ease;
+}
+
+.missao-trilho-numero {
+  position: relative;
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  /* Sobre a barra cheia OU vazia o número precisa continuar legível; o contorno
+     resolve os dois casos sem trocar de cor no meio do preenchimento. */
+  color: var(--cor-tinta);
+  text-shadow:
+    0 0 0.25rem var(--cor-superficie),
+    0 0 0.25rem var(--cor-superficie);
+}
+
+.missao-selo-feita {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-verde) 25%, transparent);
+  color: var(--cor-tinta);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+/* O botão de abrir a missão. LARANJA, que é a cor de AÇÃO do Itaú Cultural —
+   as estrelas e os chips são objetos ganhos, este é o único elemento do card
+   que se aperta, e a cor precisa dizer isso sozinha. */
+.missao-ver {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+.missao-ver:hover,
+.missao-ver:focus-visible {
+  background: var(--cor-acao-tinta);
+}
+
+/* --- A estrela azul do percurso, e o par de saldos do cabeçalho ----------- */
+
+.estrela-xp {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.barra-saldos {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.saldo-pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+}
+
+.saldo-pilula:hover,
+.saldo-pilula:focus-visible {
+  border-color: var(--cor-borda-forte);
+}
+
+.barra-marca {
+  display: inline-flex;
+  align-items: center;
+  color: var(--cor-acao);
+}
+
+/* --- O selo do nível grudado no ícone de perfil --------------------------- */
+
+.barra-conta-botao {
+  /* A ÂNCORA DO SELO. Sem isto o selo absoluto sobe até o primeiro ancestral
+     posicionado — que é o cabeçalho `sticky` — e vai parar no canto da barra
+     inteira em vez do canto do ícone. */
+  position: relative;
+}
+
+.selo-no-perfil {
+  position: absolute;
+  right: -0.125rem;
+  bottom: -0.125rem;
+  display: inline-flex;
+  /* O anel na cor da superfície separa o selo do ícone por baixo. Sem ele, um
+     selo azul sobre o traço azul do ícone vira uma mancha só. */
+  border-radius: var(--raio-pilula);
+  box-shadow: 0 0 0 0.125rem var(--cor-superficie);
+  pointer-events: none;
+}
+
+.selo-nivel[data-porte="pequeno"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* --- O painel do nível e a escada de 18 degraus --------------------------- */
+
+.saldo-xp {
+  position: relative;
+  display: inline-flex;
+}
+
+button.saldo-pilula {
+  cursor: pointer;
+  font: inherit;
+}
+
+.painel-nivel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  width: 16rem;
+  max-width: calc(100vw - 2rem);
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-2);
+}
+
+.escada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.escada-faixa {
+  display: block;
+  padding: var(--espaco-pilha) 0 0.25rem;
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.escada-degrau {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-cartao);
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+/* O DEGRAU NÃO ALCANÇADO MOSTRA A ARTE INTEIRA, em cor cheia.
+ *
+ * A primeira versão desta regra baixava a opacidade para 0,55 — e o resultado
+ * sobre o tema escuro foi um conjunto de selos lavados, indistinguíveis entre si.
+ * A meta é o que a pessoa vem ver: apagá-la é apagar o motivo de a tela existir.
+ * Quem diz o que já foi alcançado é o texto de cada linha e a moldura do degrau
+ * atual, que não custam contraste nenhum à arte. */
+.escada-degrau[data-alcancado="nao"] .selo-nivel {
+  opacity: 1;
+}
+
+.escada-degrau[data-atual="sim"] {
+  border-color: var(--cor-acao);
+  border-width: 2px;
+  background: var(--cor-acao-lavada);
+}
+
+.escada-voce {
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-size: var(--tipo-micro);
+  font-weight: 700;
+}
+
+.escada-degrau .selo-nivel {
+  width: 3rem;
+  height: 3rem;
+  flex: none;
+}
+
+/* ===========================================================================
+ * O cabeçalho de Desafios — título e filtro na mesma linha.
+ *
+ * O trilho de cinco pílulas ocupava uma faixa inteira para uma escolha única. `<select>`
+ * é o controle certo para escolha única em lista: o sistema operacional já sabe
+ * apresentá-lo, e no telefone traz busca por digitação de graça.
+ *
+ * A APARÊNCIA VEM DE `.filtros-select`, em `filtros.css` — o mesmo controle nas duas
+ * telas tem a mesma cara, e uma segunda definição aqui divergiria na primeira mudança.
+ * ======================================================================== */
+
+.desafios-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-cartao);
+  flex-wrap: wrap;
+}
+
+.desafios-cabecalho-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaco-pilha);
+}
+
+.desafios-filtro {
+  flex: none;
+  min-width: 0;
+}

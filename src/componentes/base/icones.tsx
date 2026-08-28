@@ -364,6 +364,34 @@ export const ICONE_CASA = (
 );
 
 /**
+ * Coração — reagir. `data-cheio` no <svg> pinta o miolo.
+ *
+ * Vieram do outro ramo em 2026-08-28, com as telas de Comunidade e Loja: são os dois
+ * únicos ícones do porte que faltavam aqui. O resto (`ICONE_FALA`, `ICONE_SALVOS`,
+ * `ICONE_ENVIAR`, `ICONE_CHEVRON_ESQUERDA`) já existia com o mesmo nome.
+ */
+export const ICONE_CORACAO = (
+  <Icone>
+    <path
+      d="M12 20.2s-7.5-4.6-7.5-9.5a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 4.9-7.5 9.5-7.5 9.5Z"
+      {...traco}
+    />
+  </Icone>
+);
+
+export const ICONE_CORACAO_CHEIO = (
+  <Icone>
+    <path
+      d="M12 20.2s-7.5-4.6-7.5-9.5a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 4.9-7.5 9.5-7.5 9.5Z"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinejoin="round"
+    />
+  </Icone>
+);
+
+/**
  * Ícone da CLASSE da ontologia, o mesmo traço em todo filtrador de seção.
  * A chave é o valor cru (`conteudo`, `termo`), nunca o rótulo em português.
  */
