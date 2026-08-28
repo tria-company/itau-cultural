@@ -5,7 +5,7 @@ import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor"
 import { COMUNIDADE_OFICIAL, COMUNIDADES, comunidadePorId } from "@/dados/comunidade";
 
 /**
- * Studio · Gerenciar a comunidade.
+ * Studio · Quem está na comunidade.
  *
  * A COMUNIDADE PELO LADO DE QUEM A MANTÉM, aberta em 2026-08-28: nome, chamada, capa,
  * regras, e o que se publica nela. O feed em `/studio/comunidade/` continua sendo a tela
@@ -28,7 +28,6 @@ export default function Pagina() {
         descricao={DA_CASA.descricao}
         assinantes={DA_CASA.assinantes}
         hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
-        imagens={catalogoComum().imagens}
       />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />

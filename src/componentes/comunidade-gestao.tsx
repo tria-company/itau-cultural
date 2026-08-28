@@ -3,57 +3,44 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
-import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
-import type { ImagemDoAcervo } from "@/componentes/base/campo-de-imagem";
 import { Campo } from "@/componentes/base/ficha-em-atos";
-import {
-  PREFIXO_DA_PUBLICACAO,
-  sementeDoPerfil,
-  useComunidadeGerida,
-} from "@/componentes/comunidade-estado";
+import { Folha } from "@/componentes/base/folha";
+import { Monograma, nomeDe } from "@/componentes/comunidade";
+import { sementeDoPerfil, useComunidadeGerida } from "@/componentes/comunidade-estado";
 import { usePontos } from "@/contexto/pontos";
-import type { PublicacaoDefinida } from "@/lib/pontos/tipos";
+import { PESSOAS } from "@/dados/comunidade";
+import type { ComentarioDefinido, PublicacaoDefinida } from "@/lib/pontos/tipos";
 
 /**
- * comunidade-gestao.tsx — a identidade da comunidade.
+ * comunidade-gestao.tsx — quem está na comunidade, e as regras dela.
  *
- * ────────────────────────────────────────────────────────────────────────────
- * ELA TINHA DUAS ABAS E PERDEU UMA (2026-08-28). «As publicações» mostrava a lista do que
- * se tinha postado, com editar e apagar; agora esses gestos moram no PRÓPRIO post, no
- * feed, que é onde a coisa está. Publicar também: é um botão em cima do feed.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ELA JÁ FOI OUTRA COISA DUAS VEZES, e o que sobrou aqui é o que não cabe em outro lugar.
+ * Publicar, editar e apagar post mudaram para o próprio feed; nome, chamada, descrição e
+ * capa mudaram para o lápis da capa. Sobrou o que é lista: as pessoas.
  *
- * O QUE SOBRA AQUI É O QUE NÃO CABE NUM POST: o nome que assina todos eles, a capa que
- * abre a tela, a descrição, as regras e o alcance. Identidade é de tela; operação é de
- * gesto.
+ * REMOVER TIRA DA LISTA, E NÃO APAGA O QUE A PESSOA ESCREVEU. Histórico de conversa não
+ * se reescreve porque quem falou saiu, e apagar comentário existe, no próprio comentário.
+ * A tela diz isso onde a decisão é tomada, com o número do que fica.
  *
- * NÃO HÁ BOTÃO DE SALVAR: cada tecla escreve no armazém, a mesma disciplina da ficha em
- * atos. Formulário que só grava no fim é formulário que perde trabalho.
- *
- * ESCOPADA NA COMUNIDADE DA CASA. As outras 21 pertencem a instituições, coletivos e
- * pessoas reais amarradas à Enciclopédia; renomeá-las daqui seria pôr palavra na boca de
- * quem não escreveu.
- * ────────────────────────────────────────────────────────────────────────────
+ * O PERFIL DA PESSOA ABRE AQUI, e não numa rota: estas sete são do cenário da
+ * demonstração, não têm página no acervo, e inventar uma daria a elas uma existência que
+ * o dado não sustenta. A folha mostra o que existe: nome, cidade, e o que a pessoa
+ * escreveu nesta comunidade.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
-
-/** Comentários mais respostas, o mesmo cálculo que o cartão do feed faz. */
-function totalDeComentarios(p: PublicacaoDefinida): number {
-  return p.comentarios.reduce((n, c) => n + 1 + (c.respostas?.length ?? 0), 0);
-}
-
 export function GestaoDaComunidade({
   comunidadeId,
   nome,
   descricao,
   assinantes,
   hoje,
-  imagens,
 }: {
   comunidadeId: string;
   nome: string;
   descricao: string;
   assinantes: number;
   hoje: string;
-  imagens: ImagemDoAcervo[];
 }) {
   const semente = useMemo(
     () => sementeDoPerfil(comunidadeId, nome, descricao),
@@ -62,17 +49,10 @@ export function GestaoDaComunidade({
   const armazem = useComunidadeGerida(comunidadeId, semente, hoje);
   const { motor, hidratado } = usePontos();
 
-  const [aLimpar, setALimpar] = useState(false);
+  const [aberta, setAberta] = useState<string | null>(null);
+  const [aRemover, setARemover] = useState<string | null>(null);
 
-  const minhas = useMemo(
-    () =>
-      hidratado
-        ? motor.atual.publicacoes.filter((p) => p.id.startsWith(PREFIXO_DA_PUBLICACAO))
-        : [],
-    [motor, hidratado],
-  );
-
-  const daComunidade = useMemo(
+  const daComunidade = useMemo<PublicacaoDefinida[]>(
     () =>
       hidratado
         ? motor.atual.publicacoes.filter((p) => p.comunidadeId === comunidadeId)
@@ -80,8 +60,21 @@ export function GestaoDaComunidade({
     [motor, hidratado, comunidadeId],
   );
 
-  const reacoes = daComunidade.reduce((n, p) => n + p.reacoes, 0);
-  const comentarios = daComunidade.reduce((n, p) => n + totalDeComentarios(p), 0);
+  /** Todo comentário da comunidade, achatado com a publicação de onde veio. */
+  const conversas = useMemo(() => {
+    const linhas: { autorId: string; corpo: string; onde: string }[] = [];
+    const descer = (c: ComentarioDefinido, onde: string) => {
+      linhas.push({ autorId: c.autorId, corpo: c.corpo, onde });
+      for (const r of c.respostas ?? []) descer(r, onde);
+    };
+    for (const p of daComunidade) for (const c of p.comentarios) descer(c, p.titulo);
+    return linhas;
+  }, [daComunidade]);
+
+  const quantosDe = (autorId: string) =>
+    conversas.filter((c) => c.autorId === autorId).length;
+  const comentariosDe = (autorId: string) =>
+    conversas.filter((c) => c.autorId === autorId);
 
   if (!armazem.pronto) {
     return (
@@ -91,182 +84,226 @@ export function GestaoDaComunidade({
     );
   }
 
+  const dentro = PESSOAS.filter((p) => !armazem.removidos.includes(p.id));
+  const perfilAberto = PESSOAS.find((p) => p.id === aberta) ?? null;
 
   return (
     <>
       <header className="prod-cabecalho">
         <div className="prod-cabecalho-linha">
-          <Link href="/studio/" className="prod-superficie prod-voltar" data-voltar-studio>
-            <span className="prod-voltar-texto">‹ Studio</span>
+          <Link
+            href="/studio/comunidade/"
+            className="prod-superficie prod-voltar"
+            data-voltar-studio
+          >
+            <span className="prod-voltar-texto">‹ Comunidade</span>
             <span className="prod-voltar-x" aria-hidden>
               ✕
             </span>
           </Link>
-          <span className="prod-contagem">{minhas.length} publicações suas</span>
+          <span className="prod-contagem">{dentro.length} pessoas</span>
         </div>
-        <h1 className="prod-titulo">Gerenciar a comunidade</h1>
+        <h1 className="prod-titulo">Quem está na comunidade</h1>
         <p className="prod-objetivo">
-          Nome, capa, regras, e o que você publica na comunidade da casa.
+          A lista de quem participa, com o que cada pessoa escreveu, e as regras da casa.
         </p>
       </header>
 
       <div className="prod-corpo" data-gestao-da-comunidade>
-        <section className="prod-secao">
-              <h2 className="prod-secao-titulo">Identidade</h2>
-
-              <Campo
-                rotulo="Nome da comunidade"
-                obrigatorio
-                nota="Aparece grande na capa e assina cada publicação."
-              >
-                <input
-                  type="text"
-                  value={armazem.perfil.nome}
-                  placeholder={semente.nome}
-                  onChange={(e) => armazem.alterarPerfil({ nome: e.target.value })}
-                  className="prod-campo-entrada"
-                  data-nome-comunidade
-                />
-              </Campo>
-
-              <Campo rotulo="Chamada da capa" nota="Uma linha, sob o nome.">
-                <input
-                  type="text"
-                  value={armazem.perfil.chamada}
-                  placeholder={semente.chamada}
-                  onChange={(e) => armazem.alterarPerfil({ chamada: e.target.value })}
-                  className="prod-campo-entrada"
-                  data-chamada-comunidade
-                />
-              </Campo>
-
-              <Campo rotulo="Descrição">
-                <textarea
-                  value={armazem.perfil.descricao}
-                  placeholder={semente.descricao}
-                  onChange={(e) => armazem.alterarPerfil({ descricao: e.target.value })}
-                  rows={3}
-                  className="prod-campo-entrada"
-                  data-descricao-comunidade
-                />
-              </Campo>
-
-              <CampoDeImagem
-                rotulo="Capa da comunidade"
-                imagem={armazem.perfil.capa}
-                aoMudar={(i) => armazem.alterarPerfil({ capa: i })}
-                acervo={imagens}
-              />
-              <p className="prod-campo-nota">
-                Sem capa própria, vale a foto semeada. Campo em branco sempre volta para o
-                que a semente diz.
-              </p>
-        </section>
+        <div className="prod-inicio-stats" data-numeros-da-comunidade>
+          <span className="prod-inicio-stat">
+            <strong>{dentro.length}</strong>
+            <span>na comunidade</span>
+          </span>
+          <span className="prod-inicio-stat">
+            <strong>{assinantes.toLocaleString("pt-BR")}</strong>
+            <span>assinantes, de cenário</span>
+          </span>
+          <span className="prod-inicio-stat">
+            <strong>{conversas.length}</strong>
+            <span>comentários somados</span>
+          </span>
+        </div>
+        <p className="prod-campo-nota">
+          O número de assinantes é escrito no dado, não medido: não há usuários neste
+          protótipo. As pessoas abaixo são as do cenário da demonstração.
+        </p>
 
         <section className="prod-secao">
-              <h2 className="prod-secao-titulo">Regras</h2>
-
-              <Campo rotulo="Quem publica">
-                <select
-                  value={armazem.perfil.quemPublica}
-                  onChange={(e) =>
-                    armazem.alterarPerfil({
-                      quemPublica: e.target.value as "so-a-casa" | "quem-segue",
-                    })
-                  }
-                  className="prod-campo-entrada"
-                  data-quem-publica
-                >
-                  <option value="so-a-casa">Só a casa</option>
-                  <option value="quem-segue">Quem segue a comunidade</option>
-                </select>
-              </Campo>
-
-              <label className="prod-dimensao">
-                <input
-                  type="checkbox"
-                  checked={armazem.perfil.comentariosAbertos}
-                  onChange={(e) =>
-                    armazem.alterarPerfil({ comentariosAbertos: e.target.checked })
-                  }
-                  data-comentarios-abertos
-                />
-                <span className="prod-dimensao-rotulo">Comentários abertos</span>
-              </label>
-              <p className="prod-campo-nota">
-                As duas regras ficam gravadas e valem para esta gestão. A tela pública da
-                publicação ainda não as lê: é código do outro ramo, e mexer nele custaria
-                a fidelidade que o porte comprou.
-              </p>
-        </section>
-
-        <section className="prod-secao">
-              <h2 className="prod-secao-titulo">Alcance</h2>
-              <div className="prod-inicio-stats" data-alcance-da-comunidade>
-                <span className="prod-inicio-stat">
-                  <strong>{assinantes.toLocaleString("pt-BR")}</strong>
-                  <span>assinantes, de cenário</span>
+          <h2 className="prod-secao-titulo">Na comunidade</h2>
+          {dentro.map((pessoa) => (
+            <div className="prod-vinculo" key={pessoa.id} data-pessoa={pessoa.id}>
+              <span className="prod-registro-corpo">
+                <strong className="prod-registro-titulo">{nomeDe(pessoa.id)}</strong>
+                <span className="prod-registro-meta">
+                  {pessoa.cidade}
+                  {pessoa.uf ? `, ${pessoa.uf}` : ""} · {quantosDe(pessoa.id)}{" "}
+                  {quantosDe(pessoa.id) === 1 ? "comentário" : "comentários"}
                 </span>
-                <span className="prod-inicio-stat">
-                  <strong>{daComunidade.length}</strong>
-                  <span>publicações no ar</span>
-                </span>
-                <span className="prod-inicio-stat">
-                  <strong>{reacoes}</strong>
-                  <span>reações somadas</span>
-                </span>
-              </div>
-              <p className="prod-campo-nota">
-                O número de assinantes é escrito no dado, não medido: não há usuários neste
-                protótipo. Reações e {comentarios} comentários são os do acervo mais o que
-                aconteceu neste navegador.
-              </p>
-        </section>
-
-        <section className="prod-secao">
-              <h2 className="prod-secao-titulo">Recomeçar</h2>
-              {aLimpar ? (
-                <>
-                  <p className="prod-campo-nota">
-                    Apaga o nome, a chamada, a descrição e a capa que você escreveu. As
-                    publicações que já foram ao ar continuam no ar, e a comunidade volta a
-                    se chamar {semente.nome}.
-                  </p>
-                  <div className="prod-registro-acoes">
-                    <BotaoDoStudio
-                      curto
-                      aoClicar={() => {
-                        armazem.limpar();
-                        setALimpar(false);
-                      }}
-                      data-confirmar-limpar-comunidade
-                    >
-                      Apagar a gestão
-                    </BotaoDoStudio>
-                    <BotaoDoStudio curto aoClicar={() => setALimpar(false)}>
-                      Cancelar
-                    </BotaoDoStudio>
-                  </div>
-                </>
-              ) : (
+              </span>
+              <span className="prod-registro-acoes">
                 <BotaoDoStudio
                   curto
-                  aoClicar={() => setALimpar(true)}
-                  data-limpar-comunidade
+                  aoClicar={() => setAberta(pessoa.id)}
+                  data-acao="ver-perfil"
                 >
-                  Voltar ao que a semente diz
+                  perfil
                 </BotaoDoStudio>
-              )}
+                {/* «Você» não se remove da própria comunidade. */}
+                {pessoa.id === "eu" ? null : (
+                  <BotaoDoStudio
+                    curto
+                    aoClicar={() => setARemover(pessoa.id)}
+                    data-acao="remover-pessoa"
+                  >
+                    remover
+                  </BotaoDoStudio>
+                )}
+              </span>
+            </div>
+          ))}
+        </section>
+
+        {armazem.removidos.length > 0 ? (
+          <section className="prod-secao">
+            <h2 className="prod-secao-titulo">Fora da comunidade</h2>
+            <p className="prod-campo-nota">
+              O que elas escreveram continua nas publicações.
+            </p>
+            {armazem.removidos.map((id) => (
+              <div className="prod-vinculo" key={id} data-pessoa-removida={id}>
+                <span className="prod-registro-corpo">
+                  <strong className="prod-registro-titulo">{nomeDe(id)}</strong>
+                </span>
+                <span className="prod-registro-acoes">
+                  <BotaoDoStudio
+                    curto
+                    aoClicar={() => armazem.readmitir(id)}
+                    data-acao="readmitir-pessoa"
+                  >
+                    trazer de volta
+                  </BotaoDoStudio>
+                </span>
+              </div>
+            ))}
+          </section>
+        ) : null}
+
+        <section className="prod-secao">
+          <h2 className="prod-secao-titulo">Regras</h2>
+
+          <Campo rotulo="Quem publica">
+            <select
+              value={armazem.perfil.quemPublica}
+              onChange={(e) =>
+                armazem.alterarPerfil({
+                  quemPublica: e.target.value as "so-a-casa" | "quem-segue",
+                })
+              }
+              className="prod-campo-entrada"
+              data-quem-publica
+            >
+              <option value="so-a-casa">Só a casa</option>
+              <option value="quem-segue">Quem segue a comunidade</option>
+            </select>
+          </Campo>
+
+          <label className="prod-dimensao">
+            <input
+              type="checkbox"
+              checked={armazem.perfil.comentariosAbertos}
+              onChange={(e) =>
+                armazem.alterarPerfil({ comentariosAbertos: e.target.checked })
+              }
+              data-comentarios-abertos
+            />
+            <span className="prod-dimensao-rotulo">Comentários abertos</span>
+          </label>
         </section>
 
         <p className="prod-campo-nota">
-          Publicar, editar e apagar moram no próprio feed, em{" "}
+          Nome, chamada, descrição e capa se editam no lápis da própria capa, em{" "}
           <Link href="/studio/comunidade/" className="prod-link">
             Comunidade
           </Link>
-          .
+          . Publicar e apagar post moram no feed.
         </p>
       </div>
+
+      {/* ---- o perfil, aqui mesmo ---- */}
+      <Folha
+        aberta={aberta !== null}
+        titulo={aberta ? nomeDe(aberta) : ""}
+        descricao="O que existe sobre esta pessoa nesta demonstração."
+        aoFechar={() => setAberta(null)}
+      >
+        {perfilAberto ? (
+          <>
+            <div className="prod-registro-acoes">
+              <Monograma autorId={perfilAberto.id} />
+              <span className="prod-registro-corpo">
+                <strong className="prod-registro-titulo">{nomeDe(perfilAberto.id)}</strong>
+                <span className="prod-registro-meta">
+                  {perfilAberto.cidade}
+                  {perfilAberto.uf ? `, ${perfilAberto.uf}` : ""}
+                </span>
+              </span>
+            </div>
+
+            <p className="prod-campo-nota">
+              {quantosDe(perfilAberto.id) === 0
+                ? "Ainda não escreveu nada nesta comunidade."
+                : `${quantosDe(perfilAberto.id)} comentário(s) nesta comunidade.`}
+            </p>
+
+            {comentariosDe(perfilAberto.id).map((c, i) => (
+              <div className="prod-vinculo" key={i}>
+                <span className="prod-registro-corpo">
+                  <strong className="prod-registro-titulo">{c.onde}</strong>
+                  <span className="prod-registro-meta">{c.corpo}</span>
+                </span>
+              </div>
+            ))}
+
+            <p className="prod-campo-nota">
+              Não há página de perfil para estas pessoas: elas são do cenário da
+              demonstração, e nenhuma tem verbete no acervo.
+            </p>
+          </>
+        ) : null}
+      </Folha>
+
+      {/* ---- remover, com o que fica dito antes ---- */}
+      <Folha
+        aberta={aRemover !== null}
+        titulo="Remover da comunidade"
+        aoFechar={() => setARemover(null)}
+        rodape={
+          <BotaoDoStudio
+            primaria
+            aoClicar={() => {
+              if (aRemover) armazem.remover(aRemover);
+              setARemover(null);
+            }}
+            data-confirmar-remover-pessoa
+          >
+            Remover
+          </BotaoDoStudio>
+        }
+      >
+        {aRemover !== null ? (
+          <div className="prod-impedimentos" data-alcance-de-remover>
+            <p className="prod-impedimentos-frase">
+              {nomeDe(aRemover)} sai da lista da comunidade.
+            </p>
+            <p className="prod-impedimento-texto">
+              {quantosDe(aRemover) === 0
+                ? "Ela não escreveu nada aqui."
+                : `Os ${quantosDe(aRemover)} comentário(s) dela continuam nas publicações: histórico de conversa não se reescreve porque quem falou saiu. Apagar comentário é gesto do próprio comentário.`}
+            </p>
+          </div>
+        ) : null}
+      </Folha>
     </>
   );
 }

@@ -5015,11 +5015,42 @@
   color: color-mix(in srgb, var(--ic-branco) 70%, transparent);
 }
 
-.prod-comunidade-capa-acoes {
-  position: relative;
+/**
+ * O CANTO DA CAPA: o lapis e a porta das pessoas, longe do texto.
+ *
+ * Ficam em cima e a direita porque o texto cresce do pe para cima, e um botao no meio do
+ * caminho do titulo obrigaria o titulo a desviar dele.
+ */
+.prod-comunidade-capa-canto {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
   display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.prod-comunidade-capa-lapis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 30%, transparent);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  color: var(--ic-branco);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.prod-comunidade-capa-lapis:hover {
+  background: color-mix(in srgb, var(--ic-preto) 75%, transparent);
+  border-color: color-mix(in srgb, var(--ic-branco) 55%, transparent);
+}
+
+.prod-comunidade-capa-lapis > svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 /* ---- as telas que vao de borda a borda ------------------------------------- */

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { PublicacaoAberta } from "@/componentes/comunidade-publicacao";
+import { PublicacaoNoStudio } from "@/componentes/publicacao-no-studio";
 import { PUBLICACOES } from "@/dados/comunidade";
 import { PUBLICACOES_DO_ACERVO } from "@/dados/comunidade-feed";
 import {
@@ -50,9 +50,9 @@ export default async function PaginaPublicacao({ params }: { params: Promise<{ i
       className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
       data-margem-quase-nula
     >
-      {/* QUEM MANTÉM A COMUNIDADE APAGA COMENTÁRIO no próprio comentário (2026-08-28).
-          Vale nas publicações da casa: as do acervo também são dela. */}
-      <PublicacaoAberta id={id} podeModerar />
+      {/* MODERAR COMENTÁRIO E APAGAR O POST, os dois no próprio lugar (2026-08-28).
+          Ver o cabeçalho de publicacao-no-studio.tsx. */}
+      <PublicacaoNoStudio id={id} />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

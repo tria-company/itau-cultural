@@ -67,6 +67,14 @@ export interface EstadoDaComunidade {
   versao: number;
   perfis: Record<string, PerfilDaComunidade>;
   rascunhos: RascunhoDePublicacao[];
+  /**
+   * Quem foi removido da comunidade, por id de pessoa.
+   *
+   * Remover tira da LISTA, e não apaga o que a pessoa escreveu: histórico de conversa
+   * não se reescreve por saída de quem falou. Apagar comentário é gesto do próprio
+   * comentário, e existe.
+   */
+  removidos: string[];
   atualizadoEm: string;
 }
 
@@ -108,7 +116,13 @@ function lerNoServidor(): EstadoDaComunidade | null {
 }
 
 function doZero(): EstadoDaComunidade {
-  return { versao: VERSAO, perfis: {}, rascunhos: [], atualizadoEm: dataDeReferencia };
+  return {
+    versao: VERSAO,
+    perfis: {},
+    rascunhos: [],
+    removidos: [],
+    atualizadoEm: dataDeReferencia,
+  };
 }
 
 function pareceEstado(v: unknown): v is EstadoDaComunidade {
@@ -215,6 +229,10 @@ function hidratar(hoje: string) {
     rascunhos: bruto.rascunhos
       .map(normalizarRascunho)
       .filter((x): x is RascunhoDePublicacao => x !== null),
+    // Campo novo em armazem antigo: entra com o default, e o que ja estava fica.
+    removidos: Array.isArray(bruto.removidos)
+      ? bruto.removidos.filter((x): x is string => typeof x === "string")
+      : [],
     atualizadoEm: typeof bruto.atualizadoEm === "string" ? bruto.atualizadoEm : hoje,
   };
   avisar();
@@ -291,6 +309,9 @@ export interface ArmazemDaComunidade {
   alterarRascunho: (id: string, mudanca: Partial<RascunhoDePublicacao>) => void;
   marcarPublicada: (id: string) => void;
   esquecerRascunho: (id: string) => void;
+  removidos: string[];
+  remover: (pessoaId: string) => void;
+  readmitir: (pessoaId: string) => void;
   limpar: () => void;
 }
 
@@ -380,6 +401,24 @@ export function useComunidadeGerida(
     });
   }, []);
 
+  const remover = useCallback((pessoaId: string) => {
+    if (estado === null || estado.removidos.includes(pessoaId)) return;
+    gravar({
+      ...estado,
+      removidos: [...estado.removidos, pessoaId],
+      atualizadoEm: dataDeReferencia,
+    });
+  }, []);
+
+  const readmitir = useCallback((pessoaId: string) => {
+    if (estado === null) return;
+    gravar({
+      ...estado,
+      removidos: estado.removidos.filter((x) => x !== pessoaId),
+      atualizadoEm: dataDeReferencia,
+    });
+  }, []);
+
   const limpar = useCallback(() => {
     gravar(doZero());
   }, []);
@@ -397,6 +436,9 @@ export function useComunidadeGerida(
     alterarRascunho,
     marcarPublicada,
     esquecerRascunho,
+    removidos: atual?.removidos ?? [],
+    remover,
+    readmitir,
     limpar,
   };
 }

@@ -391,6 +391,14 @@ export const ICONE_CORACAO_CHEIO = (
   </Icone>
 );
 
+/** Lápis — editar aqui mesmo, sem sair da tela. */
+export const ICONE_LAPIS = (
+  <Icone>
+    <path d="M4.5 19.5h3.2l9.1-9.1-3.2-3.2-9.1 9.1v3.2Z" {...traco} />
+    <path d="M14.9 5.4l1.5-1.5a1.4 1.4 0 0 1 2 0l1.2 1.2a1.4 1.4 0 0 1 0 2l-1.5 1.5" {...traco} />
+  </Icone>
+);
+
 /**
  * Ícone da CLASSE da ontologia, o mesmo traço em todo filtrador de seção.
  * A chave é o valor cru (`conteudo`, `termo`), nunca o rótulo em português.

@@ -135,10 +135,14 @@ export function PublicacaoAberta({
   id,
   /** Quem mantém a comunidade pode apagar comentário. Padrão: não pode. */
   podeModerar = false,
+  /** Chega só quando a publicação é de quem está lendo. `undefined` some da tela. */
+  aoApagarPost,
 }: {
   id: string;
   podeModerar?: boolean;
+  aoApagarPost?: () => void;
 }) {
+  const [apagando, setApagando] = useState(false);
   const router = useRouter();
   const { motor, hidratado } = usePontos();
   const [texto, setTexto] = useState("");
@@ -265,6 +269,42 @@ export function PublicacaoAberta({
             <span className="inline-flex size-3.5">{ICONE_FALA}</span>
             {total} {total === 1 ? "comentário" : "comentários"}
           </span>
+
+          {/* APAGAR O POST TAMBÉM AQUI (pedido de 2026-08-28): quem abriu a publicação
+              para ler os comentários e decidiu tirá-la não deveria ter de voltar ao feed
+              para achar o botão. Dois tempos, no lugar, como no cartão. */}
+          {aoApagarPost ? (
+            <span className="publicacao-dono">
+              {apagando ? (
+                <>
+                  <button
+                    type="button"
+                    className="pastilha"
+                    onClick={aoApagarPost}
+                    data-apagar-post
+                  >
+                    Apagar mesmo
+                  </button>
+                  <button
+                    type="button"
+                    className="pastilha"
+                    onClick={() => setApagando(false)}
+                  >
+                    Cancelar
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="pastilha"
+                  onClick={() => setApagando(true)}
+                  data-pedir-apagar-post
+                >
+                  Apagar
+                </button>
+              )}
+            </span>
+          ) : null}
         </div>
       </div>
 

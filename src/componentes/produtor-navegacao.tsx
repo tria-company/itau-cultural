@@ -75,7 +75,7 @@ const TELAS_DE_TOPO: ItemDeTopo[] = [
     rotulo: "Comunidade",
     icone: ICONE_COMUNIDADE,
     filhos: [
-      { href: "/studio/comunidade/gerenciar", rotulo: "Gerenciar" },
+      { href: "/studio/comunidade/gerenciar", rotulo: "Quem está na comunidade" },
       { href: "/studio/comunidade/marketplace", rotulo: "Comunidades" },
       { href: "/studio/comunidade/guardadas", rotulo: "Guardadas" },
     ],

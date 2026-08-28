@@ -44,6 +44,7 @@ export default function PaginaComunidade() {
         hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
         publicacoes={PUBLICACOES_DA_CASA}
         assinantes={DA_CASA.assinantes}
+        imagens={catalogoComum().imagens}
         gerenciavel
       />
 
