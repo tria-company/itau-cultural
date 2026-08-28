@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Moeda } from "@/componentes/pontos-base";
 import { usePontos } from "@/contexto/pontos";
+import { useVitrineGerida } from "@/componentes/loja-estado";
 import { FAMILIAS, recompensasDaFamilia } from "@/dados/recompensas";
 import type { RecompensaDefinida } from "@/lib/pontos/tipos";
 
@@ -198,9 +199,14 @@ function FolhaDoItem({
   );
 }
 
-export function Recompensas() {
+export function Recompensas({ hoje }: { hoje: string }) {
   const { motor, hidratado } = usePontos();
   const [aberta, setAberta] = useState<RecompensaDefinida | null>(null);
+
+  // A VITRINE OBEDECE A GESTAO do Produtor (2026-08-28). O gancho reconcilia o array
+  // `RECOMPENSAS` com o armazem `produtor.loja.v1` e repinta esta tela quando ele muda;
+  // a linha que filtra por familia, logo abaixo, continua igual a do ramo de origem.
+  useVitrineGerida(hoje, motor.atual.resgates, motor.lerVersao());
 
   const fichas = hidratado ? motor.saldoDe("ficha") : 0;
   const fechar = useCallback(() => setAberta(null), []);

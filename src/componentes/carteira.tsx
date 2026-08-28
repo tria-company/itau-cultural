@@ -30,15 +30,19 @@ function Esteira({ fase }: { fase: FaseDoResgate }) {
 }
 
 function CartaoDeResgate({ resgate }: { resgate: Resgate }) {
+  // O RECIBO E DO RESGATE, nao do catalogo. Ele lia o catalogo vigente e sumia com
+  // `return null` quando o item saia da loja; desde que o produtor pode tirar item e
+  // mudar preco (2026-08-28), isso apagaria da carteira uma compra que aconteceu.
   const recompensa = recompensaPorId(resgate.recompensaId);
-  if (!recompensa) return null;
+  const titulo = resgate.titulo ?? recompensa?.titulo ?? "Item fora da loja";
+  const custo = resgate.custoPago ?? recompensa?.custo ?? 0;
 
   return (
     <li className="cartao">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="tipo-detalhe font-bold">{recompensa.titulo}</span>
+        <span className="tipo-detalhe font-bold">{titulo}</span>
         <span className="tipo-legenda text-tinta-2 saldo-linha">
-          <Moeda /> {recompensa.custo}
+          <Moeda /> {custo}
         </span>
       </div>
       <Esteira fase={resgate.fase} />

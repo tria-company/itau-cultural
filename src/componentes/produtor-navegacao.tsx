@@ -58,6 +58,7 @@ const TELAS_DE_TOPO: ItemDeTopo[] = [
     rotulo: "Comunidade",
     icone: ICONE_COMUNIDADE,
     filhos: [
+      { href: "/studio/comunidade/gerenciar", rotulo: "Gerenciar" },
       { href: "/studio/comunidade/marketplace", rotulo: "Comunidades" },
       { href: "/studio/comunidade/guardadas", rotulo: "Guardadas" },
     ],
@@ -68,7 +69,10 @@ const TELAS_DE_TOPO: ItemDeTopo[] = [
     href: "/studio/pontos/loja",
     rotulo: "Loja de pontos",
     icone: ICONE_LOJA,
-    filhos: [{ href: "/studio/pontos", rotulo: "Carteira" }],
+    filhos: [
+      { href: "/studio/pontos", rotulo: "Carteira" },
+      { href: "/studio/pontos/gestao", rotulo: "Gestão da loja" },
+    ],
   },
 ];
 

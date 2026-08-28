@@ -42,6 +42,7 @@ import type {
   EfeitoDoMotor,
   EstadoDoMotor,
   EventoDeAtividade,
+  FaseDoResgate,
   LinhaDoLivro,
   NomeDeEvento,
   Rastro,
@@ -482,6 +483,55 @@ export class Motor {
         break;
       }
 
+      case "comunidade.publicacao.criada": {
+        const id = evento.alvo?.id;
+        const comunidadeId = String(evento.contexto?.comunidadeId ?? "");
+        if (!id || !comunidadeId || s.publicacoes.some((p) => p.id === id)) break;
+        // `unshift` poe a nova em primeiro, e o feed preserva a ordem do array: a
+        // publicacao do produtor aparece no topo sem nenhuma linha de ordenacao nova.
+        s.publicacoes.unshift({
+          id,
+          comunidadeId,
+          // A comunidade assina as proprias publicacoes, como as sete semeadas.
+          autorId: comunidadeId,
+          titulo: String(evento.contexto?.titulo ?? ""),
+          corpo: String(evento.contexto?.corpo ?? ""),
+          etiqueta: String(evento.contexto?.etiqueta ?? "") || undefined,
+          imagem: String(evento.contexto?.imagem ?? ""),
+          imagemAlt: String(evento.contexto?.imagemAlt ?? ""),
+          imagemCredito: String(evento.contexto?.imagemCredito ?? ""),
+          reacoes: 0,
+          comentarios: [],
+          diasAtras: 0,
+          oficial: comunidadeId === "ic",
+        });
+        break;
+      }
+
+      case "comunidade.publicacao.editada": {
+        const id = evento.alvo?.id;
+        const alvo = s.publicacoes.find((p) => p.id === id);
+        if (!alvo) break;
+        const c = evento.contexto ?? {};
+        if (typeof c.titulo === "string") alvo.titulo = c.titulo;
+        if (typeof c.corpo === "string") alvo.corpo = c.corpo;
+        if (typeof c.etiqueta === "string") alvo.etiqueta = c.etiqueta || undefined;
+        if (typeof c.imagem === "string") alvo.imagem = c.imagem;
+        if (typeof c.imagemAlt === "string") alvo.imagemAlt = c.imagemAlt;
+        if (typeof c.imagemCredito === "string") alvo.imagemCredito = c.imagemCredito;
+        break;
+      }
+
+      case "comunidade.publicacao.retirada": {
+        const id = evento.alvo?.id;
+        if (!id) break;
+        s.publicacoes = s.publicacoes.filter((p) => p.id !== id);
+        // Sai tambem de quem a tinha guardado: guardada que aponta para publicacao
+        // inexistente e uma linha vazia na tela de Guardadas.
+        s.publicacoesSalvas = s.publicacoesSalvas.filter((x) => x !== id);
+        break;
+      }
+
       case "recompensa.resgatada": {
         const recompensa = this.dados.recompensas.find((r) => r.id === evento.alvo?.id);
         if (!recompensa) return false;
@@ -519,6 +569,9 @@ export class Motor {
           recompensaId: recompensa.id,
           fase: "resgatado",
           em: s.agora,
+          // Congelados: ver a nota em `Resgate`, tipos.ts.
+          titulo: recompensa.titulo,
+          custoPago: recompensa.custo,
         });
         rastro.efeitos.push({ tipo: "resgateFeito", recompensa });
         break;
@@ -692,6 +745,22 @@ export class Motor {
    * intermediárias e a escada de proteção nunca desceria um degrau — que é
    * justamente o que a demonstração precisa mostrar.
    */
+  /**
+   * MOVE UMA ENTREGA, sem mexer no relógio.
+   *
+   * `avancarDias` faz a esteira inteira andar porque o tempo passou; isto é o gesto do
+   * operador sobre UM pedido, no painel de resgates da gestão da loja (2026-08-28).
+   * Chama `confirmar` porque nenhuma tela acorda sem o commit: quem assina o motor
+   * observa o contador de versão, e mudar o campo em silêncio deixaria a carteira
+   * mostrando a fase velha até o próximo evento qualquer.
+   */
+  moverResgate(id: string, fase: FaseDoResgate): void {
+    const resgate = this.estado.resgates.find((r) => r.id === id);
+    if (!resgate || resgate.fase === fase) return;
+    resgate.fase = fase;
+    this.confirmar([]);
+  }
+
   avancarDias(dias: number): EfeitoDoMotor[] {
     const s = this.estado;
     const efeitos: EfeitoDoMotor[] = [];

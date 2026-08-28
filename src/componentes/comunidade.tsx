@@ -10,6 +10,7 @@ import {
 } from "@/componentes/base/icones";
 import { MenuDeEscolha } from "@/componentes/menu-escolha";
 import { Painel, Vazio } from "@/componentes/pontos-base";
+import { nomeGerido } from "@/componentes/comunidade-estado";
 import { usePontos } from "@/contexto/pontos";
 import {
   COMUNIDADE_OFICIAL,
@@ -29,7 +30,11 @@ export function Monograma({ autorId, pequeno }: { autorId: string; pequeno?: boo
 }
 
 export function nomeDe(autorId: string): string {
-  return pessoaPorId(autorId)?.nome ?? "Alguém";
+  // O NOME QUE O PRODUTOR DEU vence o semeado, e vale nos tres lugares que chamam esta
+  // funcao: o cartao do feed, a linha das guardadas e a publicacao aberta. Antes de o
+  // armazem hidratar ela devolve `null`, e cai no semeado — que e o que o HTML do build
+  // traz, entao a hidratacao nao diverge.
+  return nomeGerido(autorId) ?? pessoaPorId(autorId)?.nome ?? "Alguém";
 }
 
 export function assinaturaDe(autorId: string, diasAtras: number): string {

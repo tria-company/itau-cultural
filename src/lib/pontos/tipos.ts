@@ -56,6 +56,14 @@ export type NomeDeEvento =
   | "comunidade.comentario.criado"
   | "comunidade.reacao.dada"
   | "comunidade.assinada"
+  /**
+   * O PRODUTOR PUBLICA NA COMUNIDADE (2026-08-28). Os tres estao de fora de
+   * `UMA_VEZ_POR_ITEM` e de `VALE_SEQUENCIA`, e nenhuma regra os cita: publicar nao paga
+   * ponto, e e isso que impede quem opera a comunidade de somar percurso postando.
+   */
+  | "comunidade.publicacao.criada"
+  | "comunidade.publicacao.editada"
+  | "comunidade.publicacao.retirada"
   | "recompensa.resgatada"
   | "perfil.disposicoes.escolhidas"
   | "perfil.completo"
@@ -459,6 +467,14 @@ export interface Resgate {
   recompensaId: string;
   fase: FaseDoResgate;
   em: number;
+  /**
+   * O QUE FOI COMPRADO, CONGELADO NA HORA. O produtor passou a poder mudar preco e
+   * tirar item da loja (2026-08-28), e um resgate que le o catalogo vigente
+   * reescreveria o passado: o recibo diria o preco de hoje, ou sumiria com o item.
+   * Opcionais porque resgate gravado antes disto nao os tem, e a tela cai no catalogo.
+   */
+  titulo?: string;
+  custoPago?: number;
 }
 
 /* ── Efeitos ─────────────────────────────────────────────────────────────── */

@@ -4895,3 +4895,125 @@
 [data-view="web"] .folha-fundo {
   position: fixed;
 }
+
+/* ---- as abas de uma tela de gestao ----------------------------------------- */
+
+/**
+ * Duas perguntas na mesma tela pedem duas abas, e nao duas rotas: catalogo e resgates da
+ * loja sao o mesmo assunto visto por lados diferentes, e trocar de aba nao muda onde a
+ * pessoa esta. Reusa `.prod-pauta`, que ja sabe desenhar item de trilho ativo e inativo.
+ */
+.prod-trilho-abas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/**
+ * A linha onde moram as acoes de uma secao. Nao e barra de acao: a barra e do pe e tem
+ * uma primaria; esta e uma fileira de botoes curtos no fluxo.
+ */
+.prod-linha-de-acao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---- a capa da comunidade -------------------------------------------------- */
+
+/**
+ * A FOTO GRANDE COM O NOME DENTRO, como a abertura de Descobrir.
+ *
+ * Nao reusa `.heroi`: aquele bloco e um trilho de oito slides, dos quais o CSS esconde
+ * sete, e quem escolhe qual aparece e um atributo que `antes-da-pintura.js` escreve no
+ * `<html>` antes da primeira pintura. Uma capa de um slide so funcionaria por acidente.
+ *
+ * O prefixo e `prod-comunidade-capa` e nao `prod-capa` porque `.prod-capa` ja e a capa
+ * de um CARTAO de registro, la em cima nesta mesma folha (:351).
+ *
+ * Espelha `.prod-hero`, o analogo interno do Studio, com duas diferencas: a altura e
+ * maior porque aqui a foto E o assunto, e nao ha o par perfil/voltar daquele bloco. O
+ * preto e fixo nos dois temas, porque a foto ja e o fundo.
+ */
+.prod-comunidade-capa {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  min-height: 11rem;
+  margin: calc(var(--espaco-pilha) * -1) calc(var(--espaco-tela) * -1) 0;
+  padding: var(--espaco-tela);
+  border-radius: 0 0 var(--raio-g) var(--raio-g);
+  background: var(--ic-preto);
+  color: var(--ic-branco);
+}
+
+[data-view="web"] .prod-comunidade-capa {
+  min-height: 16rem;
+  margin: 0 0 0.5rem;
+  border-radius: var(--raio-g);
+}
+
+.prod-comunidade-capa-foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prod-comunidade-capa-veu {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ic-preto) 20%, transparent),
+    color-mix(in srgb, var(--ic-preto) 85%, transparent)
+  );
+}
+
+.prod-comunidade-capa-texto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 34rem;
+}
+
+.prod-comunidade-capa-titulo {
+  margin: 0;
+  color: var(--ic-branco);
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-cartaz);
+  font-weight: 700;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.prod-comunidade-capa-linha {
+  margin: 0;
+  max-width: 40ch;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--ic-branco) 85%, transparent);
+}
+
+/* O credito da foto, no canto, como em toda imagem que este produto mostra. */
+.prod-comunidade-capa-credito {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.25rem;
+  font-size: var(--tipo-micro);
+  color: color-mix(in srgb, var(--ic-branco) 70%, transparent);
+}
+
+.prod-comunidade-capa-acoes {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

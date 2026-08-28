@@ -2,7 +2,7 @@ import { Grafismo } from "@/componentes/grafismo";
 import { Recompensas } from "@/componentes/recompensas";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
-import { catalogoComum } from "@/dados/mock/seed-produtor";
+import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor";
 
 /**
  * Studio · Loja de pontos, a vitrine.
@@ -26,7 +26,7 @@ export default function PaginaRecompensas() {
         </div>
       </header>
 
-      <Recompensas />
+      <Recompensas hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia} />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

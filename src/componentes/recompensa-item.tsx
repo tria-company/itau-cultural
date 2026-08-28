@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Moeda } from "@/componentes/pontos-base";
 import { usePontos } from "@/contexto/pontos";
+import { useItemGerido } from "@/componentes/loja-estado";
 import type { RecompensaDefinida } from "@/lib/pontos/tipos";
 
 const ROTULO_DA_ENTREGA: Record<RecompensaDefinida["entrega"], string> = {
@@ -13,12 +14,24 @@ const ROTULO_DA_ENTREGA: Record<RecompensaDefinida["entrega"], string> = {
   "no-produto": "Vale dentro do próprio app, sem envio.",
 };
 
-export function RecompensaItem({ recompensa }: { recompensa: RecompensaDefinida }) {
+export function RecompensaItem({ recompensa: semente }: { recompensa: RecompensaDefinida }) {
   const { motor, hidratado } = usePontos();
+  // O ITEM VIGENTE, e nao o do build: o Produtor pode ter mudado o preco ou tirado este
+  // item de cartaz (2026-08-28). `null` significa retirado.
+  const recompensa = useItemGerido(semente);
   const [resgatando, setResgatando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [feito, setFeito] = useState(false);
 
+  if (!recompensa) {
+    return (
+      <p className="aviso">
+        Este item saiu da loja. Quem já resgatou continua com ele na carteira.
+      </p>
+    );
+  }
+
+  const idDoItem = recompensa.id;
   const fichas = hidratado ? motor.saldoDe("ficha") : 0;
   const faltam = recompensa.custo - fichas;
   const esgotada = recompensa.estoque !== null && recompensa.estoque <= 0;
@@ -31,7 +44,9 @@ export function RecompensaItem({ recompensa }: { recompensa: RecompensaDefinida 
 
     const rastro = motor.emitir("recompensa.resgatada", {
       tipo: "recompensa",
-      id: recompensa.id,
+      // `id` fora do fecho: a funcao e hasteada e o estreitamento da guarda acima
+      // nao alcanca o corpo dela.
+      id: idDoItem,
     });
 
     const barrado = rastro.efeitos.find((e) => e.tipo === "tetoAtingido");

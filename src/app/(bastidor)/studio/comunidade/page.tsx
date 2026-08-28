@@ -1,9 +1,15 @@
-import { Grafismo } from "@/componentes/grafismo";
 import { Comunidade } from "@/componentes/comunidade";
-import { COMUNIDADE_OFICIAL } from "@/dados/comunidade";
+import { CapaDaComunidade } from "@/componentes/comunidade-capa";
+import {
+  COMUNIDADE_OFICIAL,
+  COMUNIDADES,
+  PUBLICACOES,
+  comunidadePorId,
+} from "@/dados/comunidade";
+import { PUBLICACOES_DO_ACERVO } from "@/dados/comunidade-feed";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
-import { catalogoComum } from "@/dados/mock/seed-produtor";
+import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor";
 
 /**
  * Studio · Comunidade, o feed de quem produz.
@@ -17,15 +23,26 @@ import { catalogoComum } from "@/dados/mock/seed-produtor";
  * Studio, e sem ela esta rota seria a unica sem saida na visao app.
  */
 
+/** Medidos no build: a comunidade da casa e quantas publicações ela abre. */
+const DA_CASA = comunidadePorId(COMUNIDADE_OFICIAL) ?? COMUNIDADES[0];
+const PUBLICACOES_DA_CASA = [...PUBLICACOES, ...PUBLICACOES_DO_ACERVO].filter(
+  (p) => p.comunidadeId === COMUNIDADE_OFICIAL,
+).length;
+
 export default function PaginaComunidade() {
   return (
     <div className="flex flex-col gap-5 p-5 desk:p-8">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-baseline gap-2">
-          <Grafismo variacao="barra" className="h-5 w-auto shrink-0 text-acao-tinta" />
-          <h1 className="text-2xl leading-tight font-bold desk:text-3xl">Comunidade</h1>
-        </div>
-      </header>
+      {/* A CAPA NO LUGAR DO CABEÇALHO DE TEXTO (2026-08-28): a foto da comunidade com o
+          nome dentro, no gesto da abertura de Descobrir. Ela também é a porta da gestão. */}
+      <CapaDaComunidade
+        comunidadeId={COMUNIDADE_OFICIAL}
+        nome={DA_CASA.nome}
+        descricao={DA_CASA.descricao}
+        hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
+        publicacoes={PUBLICACOES_DA_CASA}
+        assinantes={DA_CASA.assinantes}
+        gerenciavel
+      />
 
       <Comunidade comunidadeId={COMUNIDADE_OFICIAL} />
 
