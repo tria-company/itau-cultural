@@ -5215,15 +5215,22 @@
   color: var(--cor-tinta);
 }
 
-/* A seta aponta para baixo quando aberta: e o gesto que a lista fez. */
-[data-view="web"] .prod-lateral-abrir[aria-expanded="true"] > span {
+/**
+ * A SETA APONTA PARA A DIREITA FECHADA E PARA BAIXO ABERTA, que e o gesto que a lista fez.
+ *
+ * Uma regra so, e um glifo so no JSX. Antes eram dois mecanismos brigando: o JSX trocava o
+ * caractere e o CSS trocava a transformada (rotate(90deg) contra rotate(90deg) scaleX(-1)).
+ * Como as funcoes de transform se aplicam da direita para a esquerda, a fechada espelhava a
+ * seta ANTES de girar, e caia exatamente onde a outra cai: as duas saiam identicas, o mesmo
+ * bitmap, e o controle nao dizia o que ia fazer (medido pixel a pixel, 2026-08-28).
+ */
+[data-view="web"] .prod-lateral-abrir > span {
   display: block;
-  transform: rotate(90deg);
+  transition: transform var(--dur-1) var(--ease-padrao);
 }
 
-[data-view="web"] .prod-lateral-abrir[aria-expanded="false"] > span {
-  display: block;
-  transform: rotate(90deg) scaleX(-1);
+[data-view="web"] .prod-lateral-abrir[aria-expanded="true"] > span {
+  transform: rotate(90deg);
 }
 
 /* ---- a coluna do feed na web ------------------------------------------------ */

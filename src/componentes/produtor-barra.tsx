@@ -68,10 +68,14 @@ export function BarraDoStudio({
             // sub-telas no porte de 2026-08-28, e com a comparação exata as quatro abas
             // apagavam juntas em /studio/comunidade/guardadas/ e irmãs. Início fica de fora
             // porque `/studio` prefixa todas as outras.
+            // `caminho === secao` conta também: em `/studio/pontos/` (a Carteira) o
+            // prefixo com barra não casa, e as quatro abas apagavam juntas, sem nenhum
+            // `aria-current` na tela (medido no HTML exportado, 2026-08-28).
             const secao = aba.href === "/studio/pontos/loja" ? "/studio/pontos" : aba.href;
             const ativa =
               caminho === aba.href ||
-              (secao !== "/studio" && caminho.startsWith(`${secao}/`));
+              (secao !== "/studio" &&
+                (caminho === secao || caminho.startsWith(`${secao}/`)));
             return (
               <li key={aba.href}>
                 <Link

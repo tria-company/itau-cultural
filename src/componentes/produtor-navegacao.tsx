@@ -216,6 +216,31 @@ export function ProdutorNavegacao({
           const temFilhos = filhos.length > 0;
           const aberto = temFilhos && abertaAgora === t.href;
 
+          /**
+           * ACENDE UMA LINHA SÓ POR SEÇÃO, e é a do caminho mais longo que casa.
+           *
+           * «Carteira» mora em `/studio/pontos`, que prefixa TODA a seção: a vitrine em
+           * `/studio/pontos/loja`, os itens dela e os Resgates. Com `dentroDe` solto ela
+           * acendia nas quatro telas. Em Resgates duas pastilhas acendiam juntas, e na
+           * vitrine a acesa apontava uma tela em que a pessoa não estava, enquanto o
+           * `aria-current` ao lado, que compara exato, acertava sozinho: o pintado e o
+           * anunciado diziam coisas diferentes (medido no HTML exportado, 2026-08-28).
+           *
+           * O PAI ENTRA NA DISPUTA. Sem ele, `/studio/pontos/loja` ainda deixaria a
+           * Carteira acesa, porque nenhum filho casa ali e a Carteira casa por prefixo.
+           * Quem responde por aquela tela é o próprio item de topo, e quando ele vence a
+           * disputa nenhum filho acende.
+           *
+           * Comparar exato resolveria a Carteira e quebraria qualquer filho que venha a
+           * ter tela abaixo dele. O mais longo resolve os dois casos.
+           */
+          const filhoAceso = [t.href, ...filhos.map((f) => f.href)]
+            .filter((h) => dentroDe(h))
+            .reduce<string | null>(
+              (maior, h) => (maior === null || h.length > maior.length ? h : maior),
+              null,
+            );
+
           return (
             <li key={t.href}>
               <div className="prod-lateral-linha">
@@ -238,7 +263,12 @@ export function ProdutorNavegacao({
                     aria-label={`${aberto ? "Fechar" : "Abrir"} as telas de ${t.rotulo}`}
                     data-abrir-secao={t.rotulo.toLowerCase()}
                   >
-                    <span aria-hidden>{aberto ? "\u2039" : "\u203a"}</span>
+                    {/* UM GLIFO SÓ, e quem o vira é o CSS. Havia dois mecanismos: o
+                        JSX trocava a seta da esquerda pela da direita, e o CSS trocava
+                        `rotate(90deg)` por `rotate(90deg) scaleX(-1)`. Os dois se
+                        cancelavam, e a seta saía idêntica aberta e fechada, pixel a
+                        pixel (medido, 2026-08-28). */}
+                    <span aria-hidden>{"\u203a"}</span>
                   </button>
                 ) : null}
               </div>
@@ -260,7 +290,7 @@ export function ProdutorNavegacao({
                           href={`${f.href}/`}
                           className="prod-pauta prod-lateral-item"
                           data-lateral={f.rotulo.toLowerCase()}
-                          data-ativa={dentroDe(f.href) ? "sim" : "nao"}
+                          data-ativa={f.href === filhoAceso ? "sim" : "nao"}
                           aria-current={caminho === f.href ? "page" : undefined}
                           title={f.objetivo}
                         >
