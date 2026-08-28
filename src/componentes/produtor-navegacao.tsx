@@ -141,20 +141,6 @@ export function ProdutorNavegacao({
     return caminho === semBarra || caminho.startsWith(`${semBarra}/`);
   };
 
-  /**
-   * O DROPDOWN NASCE ABERTO NA SEÇÃO EM QUE SE ESTÁ, e fechado na raiz.
-   *
-   * Só as seções que a pessoa abriu ou fechou à mão entram neste mapa; o resto segue a
-   * regra. Guardar o estado inteiro faria a coluna abrir do jeito que ficou na última
-   * visita, e ninguém lembra da última visita.
-   */
-  const [alternados, setAlternados] = useState<Record<string, boolean>>({});
-  const naRaiz = caminho === "/studio";
-  const estaAberto = (href: string, daSecao: boolean) =>
-    alternados[href] ?? (daSecao || !naRaiz);
-  const alternar = (href: string, daSecao: boolean) =>
-    setAlternados((antes) => ({ ...antes, [href]: !(antes[href] ?? (daSecao || !naRaiz)) }));
-
   /** As onze pautas, na forma de filho: as sem ficha entram desabilitadas, e dizem por quê. */
   const filhosDasPautas = PAUTAS.map((p) => {
     const d = DESCRICAO_DA_PAUTA[p];
@@ -165,6 +151,46 @@ export function ProdutorNavegacao({
       pronta: conjunto.has(p),
     };
   });
+
+  /** Os filhos de uma tela de topo: as pautas são montadas, o resto vem da constante. */
+  const filhosDe = (t: ItemDeTopo): FilhoDaLateral[] =>
+    t.pautas ? filhosDasPautas : (t.filhos ?? []);
+
+  /**
+   * A seção onde a pessoa está, pelo endereço.
+   *
+   * Não basta o prefixo do item: «Studio» mora em `/studio/pautas`, e as onze pautas moram
+   * em `/studio/eventos`, `/studio/play` e assim por diante. Quem responde por uma seção é
+   * ela mais os filhos dela.
+   */
+  const ehDaSecao = (t: ItemDeTopo) => {
+    const secao = t.href === "/studio/pontos/loja" ? "/studio/pontos" : t.href;
+    // `caminho === secao` conta: em `/studio/comunidade/` a comparação só por prefixo com
+    // barra falhava, e a seção em que a pessoa acabara de entrar nascia fechada.
+    if (secao !== "/studio" && (caminho === secao || caminho.startsWith(`${secao}/`))) {
+      return true;
+    }
+    return filhosDe(t).some((f) => dentroDe(f.href));
+  };
+
+  /**
+   * UMA SEÇÃO ABERTA POR VEZ, e é a da tela em que se está (pedido de 2026-08-28).
+   *
+   * A regra anterior abria TODAS as seções fora da raiz: onze pautas mais três telas de
+   * comunidade mais duas de loja, dezesseis linhas empilhadas numa coluna de 240px, com a
+   * que interessa perdida no meio. Sanfona: abrir uma fecha a outra.
+   *
+   * A ESCOLHA À MÃO VALE ENQUANTO A PESSOA NÃO SAI DA TELA. `em` guarda o endereço em que
+   * ela clicou na setinha; assim que ele muda, a escolha caduca e volta a mandar a rota.
+   * Sem isso, abrir «Loja de pontos» de dentro da Comunidade e depois navegar deixaria a
+   * coluna mostrando a seção errada, e reabrir a certa daria trabalho a cada clique.
+   */
+  const [escolha, setEscolha] = useState<{ em: string; href: string | null } | null>(null);
+  const secaoDaRota =
+    TELAS_DE_TOPO.find((t) => filhosDe(t).length > 0 && ehDaSecao(t))?.href ?? null;
+  const abertaAgora = escolha !== null && escolha.em === caminho ? escolha.href : secaoDaRota;
+  const alternar = (href: string) =>
+    setEscolha({ em: caminho, href: abertaAgora === href ? null : href });
 
   return (
     <nav className="prod-trilho prod-trilho-pautas" aria-label="a navegação do Studio">
@@ -186,9 +212,9 @@ export function ProdutorNavegacao({
           const secao = t.href === "/studio/pontos/loja" ? "/studio/pontos" : t.href;
           const daSecao = secao !== "/studio" && caminho.startsWith(`${secao}/`);
           const ativa = caminho === t.href || daSecao;
-          const filhos: FilhoDaLateral[] = t.pautas ? filhosDasPautas : (t.filhos ?? []);
+          const filhos = filhosDe(t);
           const temFilhos = filhos.length > 0;
-          const aberto = temFilhos && estaAberto(t.href, daSecao);
+          const aberto = temFilhos && abertaAgora === t.href;
 
           return (
             <li key={t.href}>
@@ -207,7 +233,7 @@ export function ProdutorNavegacao({
                   <button
                     type="button"
                     className="prod-lateral-abrir"
-                    onClick={() => alternar(t.href, daSecao)}
+                    onClick={() => alternar(t.href)}
                     aria-expanded={aberto}
                     aria-label={`${aberto ? "Fechar" : "Abrir"} as telas de ${t.rotulo}`}
                     data-abrir-secao={t.rotulo.toLowerCase()}
