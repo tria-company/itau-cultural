@@ -11,6 +11,7 @@ import {
   ICONE_SALVOS,
 } from "@/componentes/base/icones";
 import { Monograma, assinaturaDe, nomeDe } from "@/componentes/comunidade";
+import { PalcoYoutube } from "@/componentes/palco";
 import { Vazio } from "@/componentes/pontos-base";
 import { usePontos } from "@/contexto/pontos";
 import type { ComentarioDefinido } from "@/lib/pontos/tipos";
@@ -18,14 +19,21 @@ import type { ComentarioDefinido } from "@/lib/pontos/tipos";
 function Thread({
   comentario,
   indiceRaiz,
+  indiceResposta,
   aoResponder,
+  aoApagar,
   profundidade = 0,
 }: {
   comentario: ComentarioDefinido;
   indiceRaiz: number;
+  /** `null` no comentário raiz; o índice quando é resposta. */
+  indiceResposta?: number | null;
   aoResponder: (nome: string, indiceRaiz: number) => void;
+  /** Só chega quando quem lê mantém a comunidade. `undefined` some da tela. */
+  aoApagar?: (raiz: number, resposta: number | null) => void;
   profundidade?: number;
 }) {
+  const [confirmando, setConfirmando] = useState(false);
   const [curtiu, setCurtiu] = useState(false);
   const reacoes = (comentario.reacoes ?? 0) + (curtiu ? 1 : 0);
   const temRespostas = Boolean(comentario.respostas?.length);
@@ -68,6 +76,39 @@ function Thread({
               Responder
             </button>
           )}
+
+          {/* APAGAR NO PRÓPRIO COMENTÁRIO (2026-08-28), em dois tempos e sem folha: é
+              destrutivo e não desfaz, então a confirmação mora onde o gesto mora. */}
+          {aoApagar ? (
+            confirmando ? (
+              <>
+                <button
+                  type="button"
+                  className="thread-acao"
+                  onClick={() => aoApagar(indiceRaiz, indiceResposta ?? null)}
+                  data-apagar-comentario
+                >
+                  Apagar mesmo
+                </button>
+                <button
+                  type="button"
+                  className="thread-acao"
+                  onClick={() => setConfirmando(false)}
+                >
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="thread-acao"
+                onClick={() => setConfirmando(true)}
+                data-pedir-apagar-comentario
+              >
+                Apagar
+              </button>
+            )
+          ) : null}
         </div>
 
         {temRespostas && (
@@ -77,7 +118,9 @@ function Thread({
                 key={i}
                 comentario={resposta}
                 indiceRaiz={indiceRaiz}
+                indiceResposta={i}
                 aoResponder={aoResponder}
+                aoApagar={aoApagar}
                 profundidade={profundidade + 1}
               />
             ))}
@@ -88,7 +131,14 @@ function Thread({
   );
 }
 
-export function PublicacaoAberta({ id }: { id: string }) {
+export function PublicacaoAberta({
+  id,
+  /** Quem mantém a comunidade pode apagar comentário. Padrão: não pode. */
+  podeModerar = false,
+}: {
+  id: string;
+  podeModerar?: boolean;
+}) {
   const router = useRouter();
   const { motor, hidratado } = usePontos();
   const [texto, setTexto] = useState("");
@@ -108,6 +158,14 @@ export function PublicacaoAberta({ id }: { id: string }) {
   function responder(nome: string, indice: number) {
     setRespondendo({ indice, nome: nome.split(" ")[0] });
     campo.current?.focus();
+  }
+
+  function apagarComentario(raiz: number, resposta: number | null) {
+    motor.emitir(
+      "comunidade.comentario.removido",
+      { tipo: "publicacao", id: publicacao!.id },
+      resposta === null ? { raiz } : { raiz, resposta },
+    );
   }
 
   function enviar() {
@@ -146,6 +204,16 @@ export function PublicacaoAberta({ id }: { id: string }) {
           </div>
         </div>
       </div>
+
+      {/* O VÍDEO VEM DEPOIS DO CABEÇALHO: a foto de cima é a capa, com o voltar e o autor;
+          o vídeo é o conteúdo. O iframe só nasce depois do clique. */}
+      {publicacao.video ? (
+        <PalcoYoutube
+          id={publicacao.video}
+          titulo={publicacao.titulo}
+          poster={publicacao.imagem}
+        />
+      ) : null}
 
       <div className="flex flex-col gap-2">
         <h2 className="tipo-destaque font-bold">{publicacao.titulo}</h2>
@@ -205,7 +273,14 @@ export function PublicacaoAberta({ id }: { id: string }) {
           <p className="tipo-legenda text-tinta-3">Seja a primeira pessoa a comentar.</p>
         ) : (
           publicacao.comentarios.map((c, i) => (
-            <Thread key={i} comentario={c} indiceRaiz={i} aoResponder={responder} />
+            <Thread
+              key={i}
+              comentario={c}
+              indiceRaiz={i}
+              indiceResposta={null}
+              aoResponder={responder}
+              aoApagar={podeModerar ? apagarComentario : undefined}
+            />
           ))
         )}
       </section>

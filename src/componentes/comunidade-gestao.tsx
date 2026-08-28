@@ -6,40 +6,33 @@ import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
 import type { ImagemDoAcervo } from "@/componentes/base/campo-de-imagem";
 import { Campo } from "@/componentes/base/ficha-em-atos";
-import { Folha } from "@/componentes/base/folha";
 import {
   PREFIXO_DA_PUBLICACAO,
-  SLUGS_RESERVADOS,
   sementeDoPerfil,
   useComunidadeGerida,
 } from "@/componentes/comunidade-estado";
 import { usePontos } from "@/contexto/pontos";
-import { imagemVazia, imagemCompleta } from "@/dados/tipos-produtor";
 import type { PublicacaoDefinida } from "@/lib/pontos/tipos";
 
 /**
- * comunidade-gestao.tsx — a comunidade pelo lado de quem a mantém.
+ * comunidade-gestao.tsx — a identidade da comunidade.
  *
- * ─────────────────────────────────────────────────────────────────────────────
- * DUAS ABAS, DUAS PERGUNTAS. «A comunidade» é a identidade: nome, chamada, capa, regras.
- * «As publicações» é o trabalho do dia: postar, editar, apagar, e ver o que voltou.
+ * ────────────────────────────────────────────────────────────────────────────
+ * ELA TINHA DUAS ABAS E PERDEU UMA (2026-08-28). «As publicações» mostrava a lista do que
+ * se tinha postado, com editar e apagar; agora esses gestos moram no PRÓPRIO post, no
+ * feed, que é onde a coisa está. Publicar também: é um botão em cima do feed.
  *
- * NÃO HÁ BOTÃO DE SALVAR NA IDENTIDADE. Cada tecla escreve no armazém, a mesma disciplina
- * da ficha em atos: um formulário que só grava no fim é um formulário que perde trabalho
- * quando alguém troca de aba.
+ * O QUE SOBRA AQUI É O QUE NÃO CABE NUM POST: o nome que assina todos eles, a capa que
+ * abre a tela, a descrição, as regras e o alcance. Identidade é de tela; operação é de
+ * gesto.
  *
- * A PUBLICAÇÃO VIVE NO MOTOR, não aqui. Este armazém guarda o rascunho — o texto que se
- * está escrevendo — e o motor guarda o que está no ar, no mesmo array que o feed, o
- * detalhe e as guardadas leem. Sem isso, reagir a uma publicação nova acenderia o coração
- * e não subiria o contador, e guardar a faria sumir da tela de Guardadas.
+ * NÃO HÁ BOTÃO DE SALVAR: cada tecla escreve no armazém, a mesma disciplina da ficha em
+ * atos. Formulário que só grava no fim é formulário que perde trabalho.
  *
  * ESCOPADA NA COMUNIDADE DA CASA. As outras 21 pertencem a instituições, coletivos e
  * pessoas reais amarradas à Enciclopédia; renomeá-las daqui seria pôr palavra na boca de
  * quem não escreveu.
- *
- * NENHUMA AÇÃO PRIMÁRIA EM REPOUSO: a rota monta a barra do Studio, cujo «Criar» já é a
- * primária da tela. Todo confirmar mora dentro de uma folha, que só existe aberta.
- * ─────────────────────────────────────────────────────────────────────────────
+ * ────────────────────────────────────────────────────────────────────────────
  */
 
 /** Comentários mais respostas, o mesmo cálculo que o cartão do feed faz. */
@@ -69,9 +62,6 @@ export function GestaoDaComunidade({
   const armazem = useComunidadeGerida(comunidadeId, semente, hoje);
   const { motor, hidratado } = usePontos();
 
-  const [aba, setAba] = useState<"identidade" | "publicacoes">("identidade");
-  const [emEdicao, setEmEdicao] = useState<string | null>(null);
-  const [aApagar, setAApagar] = useState<string | null>(null);
   const [aLimpar, setALimpar] = useState(false);
 
   const minhas = useMemo(
@@ -101,55 +91,6 @@ export function GestaoDaComunidade({
     );
   }
 
-  const rascunho = armazem.rascunhos.find((r) => r.id === emEdicao) ?? null;
-  const podePublicar =
-    rascunho !== null &&
-    rascunho.titulo.trim() !== "" &&
-    imagemCompleta(rascunho.imagem);
-  const jaNoAr = rascunho !== null && minhas.some((p) => p.id === rascunho.id);
-
-  function abrirNova() {
-    const id = armazem.criarRascunho();
-    if (id === null) return;
-    setEmEdicao(id);
-  }
-
-  function abrirEdicao(p: PublicacaoDefinida) {
-    const existente = armazem.rascunhos.find((r) => r.id === p.id);
-    if (!existente) {
-      armazem.alterarRascunho(p.id, {});
-    }
-    setEmEdicao(p.id);
-  }
-
-  function publicar() {
-    if (rascunho === null || !podePublicar || rascunho.imagem === null) return;
-    const contexto = {
-      comunidadeId,
-      titulo: rascunho.titulo.trim(),
-      corpo: rascunho.corpo.trim(),
-      etiqueta: rascunho.etiqueta.trim(),
-      imagem: rascunho.imagem.caminho,
-      imagemAlt: rascunho.imagem.alt,
-      imagemCredito: rascunho.imagem.credito,
-    };
-    motor.emitir(
-      jaNoAr ? "comunidade.publicacao.editada" : "comunidade.publicacao.criada",
-      { tipo: "publicacao", id: rascunho.id },
-      contexto,
-    );
-    armazem.marcarPublicada(rascunho.id);
-    setEmEdicao(null);
-  }
-
-  function apagar(id: string) {
-    motor.emitir("comunidade.publicacao.retirada", { tipo: "publicacao", id });
-    armazem.esquecerRascunho(id);
-    setAApagar(null);
-  }
-
-  const publicacaoAApagar = minhas.find((p) => p.id === aApagar) ?? null;
-  const restam = SLUGS_RESERVADOS - armazem.rascunhos.length;
 
   return (
     <>
@@ -170,34 +111,7 @@ export function GestaoDaComunidade({
       </header>
 
       <div className="prod-corpo" data-gestao-da-comunidade>
-        <div className="prod-trilho-abas" role="tablist" aria-label="as duas gestões">
-          <button
-            type="button"
-            role="tab"
-            className="prod-pauta"
-            data-ativa={aba === "identidade" ? "sim" : "nao"}
-            aria-selected={aba === "identidade"}
-            onClick={() => setAba("identidade")}
-            data-aba="identidade"
-          >
-            A comunidade
-          </button>
-          <button
-            type="button"
-            role="tab"
-            className="prod-pauta"
-            data-ativa={aba === "publicacoes" ? "sim" : "nao"}
-            aria-selected={aba === "publicacoes"}
-            onClick={() => setAba("publicacoes")}
-            data-aba="publicacoes"
-          >
-            As publicações
-          </button>
-        </div>
-
-        {aba === "identidade" ? (
-          <>
-            <section className="prod-secao">
+        <section className="prod-secao">
               <h2 className="prod-secao-titulo">Identidade</h2>
 
               <Campo
@@ -247,9 +161,9 @@ export function GestaoDaComunidade({
                 Sem capa própria, vale a foto semeada. Campo em branco sempre volta para o
                 que a semente diz.
               </p>
-            </section>
+        </section>
 
-            <section className="prod-secao">
+        <section className="prod-secao">
               <h2 className="prod-secao-titulo">Regras</h2>
 
               <Campo rotulo="Quem publica">
@@ -284,9 +198,9 @@ export function GestaoDaComunidade({
                 publicação ainda não as lê: é código do outro ramo, e mexer nele custaria
                 a fidelidade que o porte comprou.
               </p>
-            </section>
+        </section>
 
-            <section className="prod-secao">
+        <section className="prod-secao">
               <h2 className="prod-secao-titulo">Alcance</h2>
               <div className="prod-inicio-stats" data-alcance-da-comunidade>
                 <span className="prod-inicio-stat">
@@ -307,9 +221,9 @@ export function GestaoDaComunidade({
                 protótipo. Reações e {comentarios} comentários são os do acervo mais o que
                 aconteceu neste navegador.
               </p>
-            </section>
+        </section>
 
-            <section className="prod-secao">
+        <section className="prod-secao">
               <h2 className="prod-secao-titulo">Recomeçar</h2>
               {aLimpar ? (
                 <>
@@ -343,183 +257,16 @@ export function GestaoDaComunidade({
                   Voltar ao que a semente diz
                 </BotaoDoStudio>
               )}
-            </section>
-          </>
-        ) : (
-          <>
-            <div className="prod-linha-de-acao">
-              <BotaoDoStudio
-                aoClicar={abrirNova}
-                desabilitado={restam <= 0}
-                porQueDesabilitado="Os endereços reservados para publicação acabaram nesta demonstração."
-                data-nova-publicacao
-              >
-                + Publicar na comunidade
-              </BotaoDoStudio>
-            </div>
+        </section>
 
-            {minhas.length === 0 ? (
-              <div className="prod-vazio">
-                <p className="prod-vazio-frase">
-                  Você ainda não publicou nada aqui. O que você postar entra no topo do
-                  feed, junto do que já existe.
-                </p>
-              </div>
-            ) : (
-              <section className="prod-secao">
-                <h2 className="prod-secao-titulo">Suas publicações</h2>
-                {minhas.map((p) => (
-                  <div
-                    className="prod-vinculo"
-                    key={p.id}
-                    data-publicacao-do-produtor={p.id}
-                  >
-                    <span className="prod-registro-corpo">
-                      <strong className="prod-registro-titulo">
-                        {p.titulo || "(sem título)"}
-                      </strong>
-                      <span className="prod-registro-meta">
-                        {p.reacoes} reações · {totalDeComentarios(p)} comentários · hoje
-                      </span>
-                    </span>
-                    <span className="prod-registro-acoes">
-                      <Link
-                        href={`/studio/comunidade/publicacao/${p.id}/`}
-                        className="prod-botao"
-                        data-porte="curto"
-                        data-acao="ver-publicacao"
-                      >
-                        ver
-                      </Link>
-                      <BotaoDoStudio
-                        curto
-                        aoClicar={() => abrirEdicao(p)}
-                        data-acao="editar-publicacao"
-                      >
-                        editar
-                      </BotaoDoStudio>
-                      <BotaoDoStudio
-                        curto
-                        aoClicar={() => setAApagar(p.id)}
-                        data-acao="apagar-publicacao"
-                      >
-                        apagar
-                      </BotaoDoStudio>
-                    </span>
-                  </div>
-                ))}
-              </section>
-            )}
-
-            {aApagar !== null ? (
-              <section className="prod-secao">
-                <div className="prod-impedimentos" data-alcance-de-apagar>
-                  <p className="prod-impedimentos-frase">
-                    Apagar «{publicacaoAApagar?.titulo || aApagar}» tira a publicação do
-                    feed e de quem a guardou.
-                  </p>
-                  <p className="prod-impedimento-texto">
-                    Não há como desfazer: as reações e os {" "}
-                    {publicacaoAApagar ? totalDeComentarios(publicacaoAApagar) : 0}{" "}
-                    comentários somem com ela.
-                  </p>
-                </div>
-                <div className="prod-registro-acoes">
-                  <BotaoDoStudio
-                    curto
-                    aoClicar={() => apagar(aApagar)}
-                    data-confirmar-apagar-publicacao
-                  >
-                    Apagar mesmo assim
-                  </BotaoDoStudio>
-                  <BotaoDoStudio curto aoClicar={() => setAApagar(null)}>
-                    Cancelar
-                  </BotaoDoStudio>
-                </div>
-              </section>
-            ) : null}
-          </>
-        )}
+        <p className="prod-campo-nota">
+          Publicar, editar e apagar moram no próprio feed, em{" "}
+          <Link href="/studio/comunidade/" className="prod-link">
+            Comunidade
+          </Link>
+          .
+        </p>
       </div>
-
-      {/* ---- a folha da publicação ---- */}
-      <Folha
-        aberta={rascunho !== null}
-        titulo={jaNoAr ? "Editar publicação" : "Publicar na comunidade"}
-        descricao="É o que aparece no feed de quem assina a comunidade."
-        aoFechar={() => setEmEdicao(null)}
-        rodape={
-          <BotaoDoStudio
-            primaria
-            desabilitado={!podePublicar}
-            porQueDesabilitado="Precisa de título e de uma imagem com crédito e texto alternativo."
-            aoClicar={publicar}
-            data-publicar-na-comunidade
-          >
-            {jaNoAr ? "Salvar" : "Publicar"}
-          </BotaoDoStudio>
-        }
-      >
-        {rascunho !== null ? (
-          <>
-            <div className="prod-impedimentos" data-alcance-da-publicacao>
-              <p className="prod-impedimentos-frase">
-                {assinantes.toLocaleString("pt-BR")} pessoas assinam esta comunidade. A
-                publicação entra no topo do feed.
-              </p>
-              <p className="prod-impedimento-texto">
-                O número de assinantes é de cenário, escrito no dado: não há usuários neste
-                protótipo, e o que a tela prova é o mecanismo.
-              </p>
-            </div>
-
-            <Campo rotulo="Título" obrigatorio>
-              <input
-                type="text"
-                value={rascunho.titulo}
-                onChange={(e) =>
-                  armazem.alterarRascunho(rascunho.id, { titulo: e.target.value })
-                }
-                className="prod-campo-entrada"
-                data-titulo-publicacao
-                aria-invalid={rascunho.titulo.trim() === ""}
-              />
-            </Campo>
-
-            <Campo rotulo="Texto">
-              <textarea
-                value={rascunho.corpo}
-                onChange={(e) =>
-                  armazem.alterarRascunho(rascunho.id, { corpo: e.target.value })
-                }
-                rows={5}
-                className="prod-campo-entrada"
-                data-corpo-publicacao
-              />
-            </Campo>
-
-            <Campo rotulo="Etiqueta" nota="Uma palavra, no canto do cartão.">
-              <input
-                type="text"
-                value={rascunho.etiqueta}
-                onChange={(e) =>
-                  armazem.alterarRascunho(rascunho.id, { etiqueta: e.target.value })
-                }
-                className="prod-campo-entrada"
-                data-etiqueta-publicacao
-              />
-            </Campo>
-
-            <CampoDeImagem
-              rotulo="Imagem"
-              obrigatoria
-              imagem={rascunho.imagem ?? imagemVazia()}
-              aoMudar={(i) => armazem.alterarRascunho(rascunho.id, { imagem: i })}
-              acervo={imagens}
-            />
-          </>
-        ) : null}
-      </Folha>
     </>
   );
 }

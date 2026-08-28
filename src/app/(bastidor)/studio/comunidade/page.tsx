@@ -1,4 +1,4 @@
-import { Comunidade } from "@/componentes/comunidade";
+import { ComunidadeNoStudio } from "@/componentes/comunidade-no-studio";
 import { CapaDaComunidade } from "@/componentes/comunidade-capa";
 import {
   COMUNIDADE_OFICIAL,
@@ -47,7 +47,15 @@ export default function PaginaComunidade() {
         gerenciavel
       />
 
-      <Comunidade comunidadeId={COMUNIDADE_OFICIAL} />
+      {/* O FEED COM A GESTÃO DENTRO: publicar é um botão em cima dele, e apagar mora no
+          próprio post. Ver o cabeçalho de comunidade-no-studio.tsx. */}
+      <ComunidadeNoStudio
+        comunidadeId={COMUNIDADE_OFICIAL}
+        nome={DA_CASA.nome}
+        descricao={DA_CASA.descricao}
+        hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
+        imagens={catalogoComum().imagens}
+      />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

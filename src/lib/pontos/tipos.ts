@@ -64,6 +64,7 @@ export type NomeDeEvento =
   | "comunidade.publicacao.criada"
   | "comunidade.publicacao.editada"
   | "comunidade.publicacao.retirada"
+  | "comunidade.comentario.removido"
   | "recompensa.resgatada"
   | "perfil.disposicoes.escolhidas"
   | "perfil.completo"
@@ -410,6 +411,14 @@ export interface PublicacaoDefinida {
   etiqueta?: string;
   /** Capa do acervo. Toda publicação tem uma — nenhuma cena inventada. */
   imagem: string;
+  /**
+   * O id de um vídeo do YouTube, quando a publicação é vídeo (2026-08-28).
+   *
+   * SÓ O ID, nunca a URL inteira, e o iframe só nasce depois do clique: é a mesma
+   * disciplina do resto do produto, que promete zero requisição externa em runtime.
+   * A `imagem` continua obrigatória e serve de cartaz.
+   */
+  video?: string;
   imagemAlt: string;
   imagemCredito: string;
   /** URL da matéria no site do Itaú Cultural, quando a publicação vem do acervo. */

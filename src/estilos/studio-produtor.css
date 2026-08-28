@@ -5041,3 +5041,32 @@
 [data-view="mobile"] [data-margem-quase-nula] {
   margin-inline: calc(var(--espaco-tela) * -1);
 }
+
+/* ---- a gestao dentro do proprio feed --------------------------------------- */
+
+/**
+ * As acoes de quem mantem a comunidade vivem no rodape do cartao, empurradas para a
+ * direita: as pastilhas da esquerda sao de quem LE (reagir, comentar, guardar), e estas
+ * sao de quem ESCREVE. Mesma linha, lados opostos, sem inventar barra nova.
+ */
+.publicacao-dono {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* Publicar fica em cima do feed, que e onde a publicacao vai aparecer. */
+.publicacao-acao-de-publicar {
+  display: flex;
+}
+
+.publicacao-acao-de-publicar > * {
+  width: 100%;
+}
+
+.prod-enquete-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

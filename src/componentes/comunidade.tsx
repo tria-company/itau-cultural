@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   ICONE_CORACAO,
   ICONE_CORACAO_CHEIO,
@@ -9,6 +10,7 @@ import {
   ICONE_SALVOS,
 } from "@/componentes/base/icones";
 import { MenuDeEscolha } from "@/componentes/menu-escolha";
+import { PalcoYoutube } from "@/componentes/palco";
 import { Painel, Vazio } from "@/componentes/pontos-base";
 import { nomeGerido } from "@/componentes/comunidade-estado";
 import { usePontos } from "@/contexto/pontos";
@@ -70,7 +72,13 @@ function Enquete({ opcoes }: { opcoes: { rotulo: string; pct: number }[] }) {
   );
 }
 
-function Cartao({ publicacao }: { publicacao: PublicacaoDefinida }) {
+function Cartao({
+  publicacao,
+  acoesDoDono,
+}: {
+  publicacao: PublicacaoDefinida;
+  acoesDoDono?: ReactNode;
+}) {
   const router = useRouter();
   const { motor, hidratado } = usePontos();
 
@@ -106,11 +114,25 @@ function Cartao({ publicacao }: { publicacao: PublicacaoDefinida }) {
         </div>
       </div>
 
+      {/* VÍDEO QUANDO HÁ VÍDEO (2026-08-28). O palco carrega o iframe só depois do
+          clique, então o feed continua sem requisição externa até alguém querer ver. Fica
+          FORA do botão que abre a publicação: um play dentro de um botão de navegar
+          disputaria o mesmo clique. */}
+      {publicacao.video ? (
+        <PalcoYoutube
+          id={publicacao.video}
+          titulo={publicacao.titulo}
+          poster={publicacao.imagem}
+        />
+      ) : null}
+
       <button type="button" className="publicacao-corpo" onClick={abrir}>
-        <span className="publicacao-imagem">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={publicacao.imagem} alt={publicacao.imagemAlt} loading="lazy" />
-        </span>
+        {publicacao.video ? null : (
+          <span className="publicacao-imagem">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={publicacao.imagem} alt={publicacao.imagemAlt} loading="lazy" />
+          </span>
+        )}
         <span className="tipo-destaque font-bold">{publicacao.titulo}</span>
         {publicacao.corpo && (
           <span className="publicacao-chamada">
@@ -149,6 +171,11 @@ function Cartao({ publicacao }: { publicacao: PublicacaoDefinida }) {
         >
           {ICONE_SALVOS}
         </button>
+
+        {/* AS AÇÕES DE QUEM MANTÉM A COMUNIDADE, no próprio post (pedido de 2026-08-28).
+            Ficam à direita, discretas, e só aparecem para quem pode: apagar o que se
+            publicou não é uma viagem a outra tela, é um gesto sobre a coisa. */}
+        {acoesDoDono ? <span className="publicacao-dono">{acoesDoDono}</span> : null}
       </div>
     </article>
   );
@@ -205,7 +232,17 @@ function Seletor({ atual, aoTrocar }: { atual: string; aoTrocar: (id: string) =>
   );
 }
 
-export function Comunidade({ comunidadeId }: { comunidadeId: string }) {
+export function Comunidade({
+  comunidadeId,
+  /** O que o dono pode fazer com CADA post. `undefined` some da tela. */
+  acoesDoPost,
+  /** O botão de publicar, montado por quem sabe se esta comunidade é sua. */
+  acaoDePublicar,
+}: {
+  comunidadeId: string;
+  acoesDoPost?: (p: PublicacaoDefinida) => ReactNode;
+  acaoDePublicar?: ReactNode;
+}) {
   const { motor, hidratado } = usePontos();
   const [atual, setAtual] = useState(comunidadeId);
 
@@ -262,12 +299,19 @@ export function Comunidade({ comunidadeId }: { comunidadeId: string }) {
         </>
       )}
 
+      {/* PUBLICAR MORA AQUI, em cima do feed: é onde a publicação vai aparecer. */}
+      {acaoDePublicar ? (
+        <div className="publicacao-acao-de-publicar">{acaoDePublicar}</div>
+      ) : null}
+
       {publicacoes.length === 0 ? (
         <Painel titulo="Ainda sem publicações">
           <Vazio>Esta comunidade ainda não publicou nada.</Vazio>
         </Painel>
       ) : (
-        publicacoes.map((p) => <Cartao key={p.id} publicacao={p} />)
+        publicacoes.map((p) => (
+          <Cartao key={p.id} publicacao={p} acoesDoDono={acoesDoPost?.(p)} />
+        ))
       )}
     </div>
   );

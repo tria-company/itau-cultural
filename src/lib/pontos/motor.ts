@@ -500,6 +500,10 @@ export class Motor {
           imagem: String(evento.contexto?.imagem ?? ""),
           imagemAlt: String(evento.contexto?.imagemAlt ?? ""),
           imagemCredito: String(evento.contexto?.imagemCredito ?? ""),
+          video: String(evento.contexto?.video ?? "") || undefined,
+          enquete: Array.isArray(evento.contexto?.enquete)
+            ? { opcoes: evento.contexto.enquete as { rotulo: string; pct: number }[] }
+            : undefined,
           reacoes: 0,
           comentarios: [],
           diasAtras: 0,
@@ -519,6 +523,30 @@ export class Motor {
         if (typeof c.imagem === "string") alvo.imagem = c.imagem;
         if (typeof c.imagemAlt === "string") alvo.imagemAlt = c.imagemAlt;
         if (typeof c.imagemCredito === "string") alvo.imagemCredito = c.imagemCredito;
+        if (typeof c.video === "string") alvo.video = c.video || undefined;
+        if (Array.isArray(c.enquete)) {
+          alvo.enquete =
+            c.enquete.length > 0
+              ? { opcoes: c.enquete as { rotulo: string; pct: number }[] }
+              : undefined;
+        }
+        break;
+      }
+
+      case "comunidade.comentario.removido": {
+        const publicacao = s.publicacoes.find((p) => p.id === evento.alvo?.id);
+        if (!publicacao) break;
+        const raiz = Number(evento.contexto?.raiz ?? -1);
+        const resposta = evento.contexto?.resposta;
+        const alvo = publicacao.comentarios[raiz];
+        if (!alvo) break;
+        // Resposta some sozinha; comentario raiz leva as respostas dele junto, que e o
+        // que a pessoa espera de apagar um comentario com thread embaixo.
+        if (typeof resposta === "number" && alvo.respostas) {
+          alvo.respostas = alvo.respostas.filter((_, i) => i !== resposta);
+        } else {
+          publicacao.comentarios = publicacao.comentarios.filter((_, i) => i !== raiz);
+        }
         break;
       }
 

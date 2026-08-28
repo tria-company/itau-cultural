@@ -50,7 +50,9 @@ export default async function PaginaPublicacao({ params }: { params: Promise<{ i
       className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
       data-margem-quase-nula
     >
-      <PublicacaoAberta id={id} />
+      {/* QUEM MANTÉM A COMUNIDADE APAGA COMENTÁRIO no próprio comentário (2026-08-28).
+          Vale nas publicações da casa: as do acervo também são dela. */}
+      <PublicacaoAberta id={id} podeModerar />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>
