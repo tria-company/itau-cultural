@@ -254,6 +254,25 @@ titulo("8. Resgate nas recompensas");
 
   m.avancarDias(2);
   conferir("e a esteira anda com o tempo", m.atual.resgates[0]?.fase === "separado", m.atual.resgates[0]?.fase);
+
+  // ITEM DE LINK (29/08/2026): a retirada acontece numa loja de fora, entao nao ha esteira
+  // a andar. Ele debita como qualquer outro, nasce ENTREGUE, e congela cupom e endereco.
+  const porLink = PROGRAMA.recompensas.find((r) => r.entrega === "link");
+  if (!porLink) throw new Error("esperava um item de entrega por link na semente");
+  for (let i = 0; i < 8; i += 1) m.emitir("curso.concluido", { tipo: "curso", id: `c-link-${i}` });
+  const antesDoLink = m.saldoDe("ficha");
+  m.emitir("recompensa.resgatada", { tipo: "recompensa", id: porLink.id });
+  const doLink = m.atual.resgates.find((r) => r.recompensaId === porLink.id);
+  conferir("o resgate por link entrou", doLink !== undefined);
+  conferir("e nasce entregue, sem esteira a andar", doLink?.fase === "entregue", doLink?.fase);
+  conferir("com o endereco congelado", doLink?.link === porLink.link);
+  conferir("e o cupom congelado", doLink?.cupom === porLink.cupom);
+  conferir("e debitou como qualquer outro", m.saldoDe("ficha") === antesDoLink - porLink.custo);
+  m.avancarDias(3);
+  conferir(
+    "e avancar o tempo nao o move: ele ja chegou",
+    m.atual.resgates.find((r) => r.recompensaId === porLink.id)?.fase === "entregue",
+  );
 }
 
 /* ── 9. Comunidade ───────────────────────────────────────────────────────── */
@@ -271,10 +290,16 @@ titulo("9. Comunidade");
   conferir("o comentário entrou na publicação certa", alvo.comentarios.some((c) => c.corpo === "Boa!"));
   conferir("e rende reputação", m.saldoDe("reputacao") > 12);
 
-  m.emitir("comunidade.publicacao.salva", { tipo: "publicacao", id: alvo.id });
-  conferir("guardou a publicação", m.atual.publicacoesSalvas.includes(alvo.id));
-  m.emitir("comunidade.publicacao.salva", { tipo: "publicacao", id: alvo.id });
-  conferir("o mesmo gesto devolve — guardar alterna", !m.atual.publicacoesSalvas.includes(alvo.id));
+  // GUARDAR SAIU DO PRODUTO (29/08/2026). Este portão media o alternar do guardar; ele
+  // não some junto com a coisa que media, porque portão que some deixa de avisar no dia em
+  // que alguém traz o campo de volta sem pensar. Agora ele mede a AUSÊNCIA, dos dois lados:
+  // o campo não existe no estado, e a regra não existe no catálogo.
+  const cru = m.atual as unknown as Record<string, unknown>;
+  conferir("«publicacoesSalvas» não existe mais no estado", !("publicacoesSalvas" in cru));
+  conferir(
+    "e a regra que pagava por guardar saiu do catálogo",
+    !PROGRAMA.regras.some((r) => r.id === "r-guardar-publicacao"),
+  );
 
   m.emitir("comunidade.assinada", { tipo: "comunidade", id: "c-bro-mcs" });
   conferir("assinou a comunidade", m.atual.assinadas.includes("c-bro-mcs"));
@@ -329,7 +354,6 @@ titulo("11. O estado nasce inteiro");
     "resgates",
     "publicacoes",
     "assinadas",
-    "publicacoesSalvas",
     "presencas",
     "linguagensAlcancadas",
     "ufsAlcancadas",

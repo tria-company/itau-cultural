@@ -7,6 +7,7 @@ import type { ImagemDoAcervo } from "@/componentes/base/campo-de-imagem";
 import { Campo } from "@/componentes/base/ficha-em-atos";
 import { Folha } from "@/componentes/base/folha";
 import { Comunidade } from "@/componentes/comunidade";
+import { CapaDaComunidade } from "@/componentes/comunidade-capa";
 import {
   useComunidadeGerida,
   sementeDoPerfil,
@@ -17,12 +18,16 @@ import type { ImagemDeclarada } from "@/dados/tipos-produtor";
 import type { PublicacaoDefinida } from "@/lib/pontos/tipos";
 
 /**
- * comunidade-no-studio.tsx — o feed com o que o dono da comunidade pode fazer nele.
+ * comunidade-em-gestao.tsx — uma comunidade pelo lado de quem a mantém.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * A GESTÃO MORA ONDE A COISA MORA (pedido de 2026-08-28). Antes, apagar um post era uma
- * viagem a uma tela de gestão com abas; agora o gesto está no próprio post, e publicar é
- * um botão em cima do feed, que é onde a publicação vai aparecer.
+ * ELA MUDOU DE ENDEREÇO EM 29/08/2026, e o nome mudou junto. Era `comunidade-no-studio`,
+ * montada em `/studio/comunidade/`, a mesma tela que quem só quer ler abria. O corte pedido
+ * foi de uma linha: dentro do Studio fica tudo que ele mexe, e a aba Comunidade é leitura.
+ * Agora ela mora em `/studio/minhas-comunidades/[id]/`, e a aba de leitura monta o feed cru.
+ *
+ * A GESTÃO MORA ONDE A COISA MORA (pedido de 2026-08-28). Apagar um post é um gesto no
+ * próprio post, e publicar é um botão em cima do feed, que é onde a publicação vai aparecer.
  *
  * ESTE COMPONENTE É NOSSO, E O FEED É PORTADO. Ele monta `<Comunidade>` — cópia literal do
  * outro ramo — e lhe entrega duas coisas por prop: o botão de publicar e as ações de cada
@@ -35,8 +40,10 @@ import type { PublicacaoDefinida } from "@/lib/pontos/tipos";
  * é um campo a mais: quem cola um link do YouTube ganha o palco, quem não cola não perde
  * nada.
  *
- * SÓ NA COMUNIDADE DA CASA. Nas outras 21 as props não chegam, e o feed volta a ser
- * exatamente o do outro ramo: elas pertencem a instituições e pessoas reais.
+ * SÓ NAS QUE SÃO DELE, e a pergunta agora é ao dado: `ehMinha` lê `donoId`, em vez de
+ * comparar contra a constante `COMUNIDADE_OFICIAL` como se houvesse uma comunidade só.
+ * Nas de fora as props não chegam, e o feed volta a ser exatamente o do outro ramo: elas
+ * pertencem a instituições, coletivos e pessoas reais.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -116,16 +123,18 @@ function opcoesDaEnquete(rotulos: string[]): { rotulo: string; pct: number }[] {
   }));
 }
 
-export function ComunidadeNoStudio({
+export function ComunidadeEmGestao({
   comunidadeId,
   nome,
   descricao,
+  assinantes,
   hoje,
   imagens,
 }: {
   comunidadeId: string;
   nome: string;
   descricao: string;
+  assinantes: number;
   hoje: string;
   imagens: ImagemDoAcervo[];
 }) {
@@ -179,8 +188,25 @@ export function ComunidadeNoStudio({
     compondo.titulo.trim() !== "" &&
     imagemCompleta(compondo.imagem);
 
+  const publicadas = hidratado
+    ? motor.atual.publicacoes.filter((p) => p.comunidadeId === comunidadeId).length
+    : 0;
+
   return (
-    <>
+    <div className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6" data-margem-quase-nula>
+      {/* A CAPA COM O LÁPIS, que é onde nome, chamada, descrição e foto se editam. Ela só
+          é gerenciável aqui: na aba de leitura a mesma capa entra sem o lápis. */}
+      <CapaDaComunidade
+        comunidadeId={comunidadeId}
+        nome={nome}
+        descricao={descricao}
+        hoje={hoje}
+        publicacoes={publicadas}
+        assinantes={assinantes}
+        imagens={imagens}
+        gerenciavel
+      />
+
       <Comunidade
         comunidadeId={comunidadeId}
         acaoDePublicar={
@@ -365,6 +391,6 @@ export function ComunidadeNoStudio({
           </>
         ) : null}
       </Folha>
-    </>
+    </div>
   );
 }

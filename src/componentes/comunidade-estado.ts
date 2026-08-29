@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
+  COMUNIDADES_RESERVADAS,
+  PREFIXO_DA_COMUNIDADE,
   PREFIXO_DA_PUBLICACAO,
   SLUGS_RESERVADOS,
   capaSemeada,
 } from "@/dados/comunidade-capas";
+import { COMUNIDADES, PRODUTOR_DA_CASA, minhasComunidades } from "@/dados/comunidade";
 import { imagemVazia } from "@/dados/tipos-produtor";
 import type { ImagemDeclarada } from "@/dados/tipos-produtor";
+import type { ComunidadeDefinida } from "@/lib/pontos/tipos";
 
 /**
  * comunidade-estado.ts — o que o Produtor mudou na comunidade da casa.
@@ -36,7 +40,7 @@ const VERSAO = 1;
 
 // O prefixo e o teto vivem em `@/dados/comunidade-capas`, que não é módulo de cliente:
 // o `generateStaticParams` da rota precisa deles no servidor. Ver a nota de lá.
-export { PREFIXO_DA_PUBLICACAO, SLUGS_RESERVADOS };
+export { PREFIXO_DA_PUBLICACAO, SLUGS_RESERVADOS, PREFIXO_DA_COMUNIDADE, COMUNIDADES_RESERVADAS };
 
 export interface PerfilDaComunidade {
   /** Vazio: vale o nome semeado. */
@@ -46,7 +50,6 @@ export interface PerfilDaComunidade {
   chamada: string;
   capa: ImagemDeclarada | null;
   uf: string;
-  quemPublica: "so-a-casa" | "quem-segue";
   comentariosAbertos: boolean;
   atualizadoEm: string;
 }
@@ -68,13 +71,16 @@ export interface EstadoDaComunidade {
   perfis: Record<string, PerfilDaComunidade>;
   rascunhos: RascunhoDePublicacao[];
   /**
-   * Quem foi removido da comunidade, por id de pessoa.
+   * AS COMUNIDADES QUE ELE CRIOU, em forma completa.
    *
-   * Remover tira da LISTA, e não apaga o que a pessoa escreveu: histórico de conversa
-   * não se reescreve por saída de quem falou. Apagar comentário é gesto do próprio
-   * comentário, e existe.
+   * Mesma forma dos `criados` de `loja-estado.ts`, e pela mesma razão: item nascido aqui
+   * não tem semente com que se sobrepor, então guarda-se ele inteiro. `aplicar` empurra
+   * cada uma para dentro do array vivo `COMUNIDADES`, e a partir daí o resto do produto
+   * não sabe que elas nasceram no navegador.
+   *
+   * `removidos` saiu em 29/08/2026 com a tela de membros, que era a única a escrevê-lo.
    */
-  removidos: string[];
+  criadas: ComunidadeDefinida[];
   atualizadoEm: string;
 }
 
@@ -85,7 +91,6 @@ function perfilVazio(): PerfilDaComunidade {
     chamada: "",
     capa: null,
     uf: "",
-    quemPublica: "so-a-casa",
     comentariosAbertos: true,
     atualizadoEm: "",
   };
@@ -120,8 +125,62 @@ function doZero(): EstadoDaComunidade {
     versao: VERSAO,
     perfis: {},
     rascunhos: [],
-    removidos: [],
+    criadas: [],
     atualizadoEm: dataDeReferencia,
+  };
+}
+
+/**
+ * RECONCILIA O ARRAY VIVO `COMUNIDADES`, no lugar.
+ *
+ * Mesma tese de `loja-estado.ts:107`: o seletor, as rotas e `comunidadePorId` continuam
+ * lendo o array exportado por `@/dados/comunidade`, e é este arquivo que o mantém em dia.
+ * Sem isto, comunidade criada aqui existiria só dentro deste módulo, e a página de leitura
+ * daria 404 num id que a lista de gestão mostra.
+ *
+ * Chamada dentro de `hidratar` e de `gravar`, SEMPRE antes de `avisar()`: quem assina
+ * re-renderiza com o array já certo.
+ */
+function aplicar(e: EstadoDaComunidade) {
+  for (const criada of e.criadas) {
+    const viva = COMUNIDADES.find((c) => c.id === criada.id);
+    if (viva) Object.assign(viva, criada);
+    else COMUNIDADES.push({ ...criada });
+  }
+}
+
+/** Uma comunidade nascida aqui, com os campos que o produto exige preenchidos. */
+function comunidadeVazia(id: string): ComunidadeDefinida {
+  return {
+    id,
+    // Ela não é entidade do grafo, e dizer que é seria inventar procedência.
+    entidadeId: null,
+    nome: "",
+    descricao: "",
+    // O único uso de `"produtor"`, que estava declarado no tipo e não era de ninguém.
+    natureza: "produtor",
+    linguagens: [],
+    // Zero, e não um número de cenário: comunidade recém-criada não tem quem a assine.
+    assinantes: 0,
+    donoId: PRODUTOR_DA_CASA,
+  };
+}
+
+/** Normaliza comunidade gravada por versão antiga: campo torto cai no vazio. */
+function normalizarComunidade(bruto: unknown): ComunidadeDefinida | null {
+  if (typeof bruto !== "object" || bruto === null) return null;
+  const b = bruto as Record<string, unknown>;
+  if (typeof b.id !== "string" || b.id === "") return null;
+  const vazia = comunidadeVazia(b.id);
+  return {
+    ...vazia,
+    nome: typeof b.nome === "string" ? b.nome : vazia.nome,
+    descricao: typeof b.descricao === "string" ? b.descricao : vazia.descricao,
+    uf: typeof b.uf === "string" ? b.uf : undefined,
+    linguagens: Array.isArray(b.linguagens)
+      ? b.linguagens.filter((x): x is string => typeof x === "string")
+      : [],
+    assinantes: typeof b.assinantes === "number" ? b.assinantes : 0,
   };
 }
 
@@ -199,6 +258,7 @@ function lerChave(): unknown {
 
 function gravar(proximo: EstadoDaComunidade) {
   estado = proximo;
+  aplicar(proximo);
   try {
     window.localStorage.setItem(CHAVE_DA_COMUNIDADE, JSON.stringify(proximo));
   } catch (erro) {
@@ -218,6 +278,7 @@ function hidratar(hoje: string) {
       console.warn("comunidade-estado: forma inesperada no armazém, recomeçando do zero");
     }
     estado = doZero();
+    aplicar(estado);
     avisar();
     return;
   }
@@ -230,12 +291,30 @@ function hidratar(hoje: string) {
       .map(normalizarRascunho)
       .filter((x): x is RascunhoDePublicacao => x !== null),
     // Campo novo em armazem antigo: entra com o default, e o que ja estava fica.
-    removidos: Array.isArray(bruto.removidos)
-      ? bruto.removidos.filter((x): x is string => typeof x === "string")
+    criadas: Array.isArray((bruto as { criadas?: unknown }).criadas)
+      ? ((bruto as { criadas: unknown[] }).criadas
+          .map(normalizarComunidade)
+          .filter((x): x is ComunidadeDefinida => x !== null))
       : [],
     atualizadoEm: typeof bruto.atualizadoEm === "string" ? bruto.atualizadoEm : hoje,
   };
+  aplicar(estado);
   avisar();
+}
+
+/**
+ * O PRÓXIMO ENDEREÇO RESERVADO, ou `null` quando os oito acabaram.
+ *
+ * Maior sufixo mais um, determinístico: duas sessões chegam ao mesmo id no mesmo passo, e
+ * a captura de ontem bate com a de hoje.
+ */
+function proximaComunidade(): string | null {
+  const usados = (estado?.criadas ?? [])
+    .map((c) => Number(c.id.replace(PREFIXO_DA_COMUNIDADE, "")))
+    .filter((n) => Number.isFinite(n));
+  const proximo = (usados.length > 0 ? Math.max(...usados) : 0) + 1;
+  if (proximo > COMUNIDADES_RESERVADAS) return null;
+  return PREFIXO_DA_COMUNIDADE + String(proximo).padStart(3, "0");
 }
 
 // ---------------------------------------------------------------------------
@@ -254,6 +333,20 @@ export function nomeGerido(comunidadeId: string): string | null {
   return nome ? nome : null;
 }
 
+/**
+ * A COMUNIDADE ACEITA COMENTÁRIO?
+ *
+ * A chave existia desde 28/08 e era gravada por uma tela que ninguém mais tem — e NUNCA
+ * lida por lugar nenhum. Um controle que grava e não faz nada é a tela mentindo, então ou
+ * ele valia ou saía; `quemPublica`, que não tem como valer numa demonstração de persona
+ * única, saiu. Este vale a partir de 29/08/2026: desligado, o campo de resposta some.
+ *
+ * Aberta por padrão, inclusive antes de hidratar, que é o que o HTML do build traz.
+ */
+export function comentariosAbertosDe(comunidadeId: string): boolean {
+  return estado?.perfis[comunidadeId]?.comentariosAbertos ?? true;
+}
+
 // ---------------------------------------------------------------------------
 // O gancho
 // ---------------------------------------------------------------------------
@@ -267,7 +360,6 @@ export interface PerfilVigente {
   imagemAlt: string;
   imagemCredito: string;
   uf: string;
-  quemPublica: PerfilDaComunidade["quemPublica"];
   comentariosAbertos: boolean;
 }
 
@@ -294,7 +386,6 @@ export function vigenteDe(
     imagemAlt: capaPropria ? capaPropria.alt : semente.imagemAlt,
     imagemCredito: capaPropria ? capaPropria.credito : semente.imagemCredito,
     uf: perfil?.uf ?? "",
-    quemPublica: perfil?.quemPublica ?? "so-a-casa",
     comentariosAbertos: perfil?.comentariosAbertos ?? true,
   };
 }
@@ -309,9 +400,11 @@ export interface ArmazemDaComunidade {
   alterarRascunho: (id: string, mudanca: Partial<RascunhoDePublicacao>) => void;
   marcarPublicada: (id: string) => void;
   esquecerRascunho: (id: string) => void;
-  removidos: string[];
-  remover: (pessoaId: string) => void;
-  readmitir: (pessoaId: string) => void;
+  /** As comunidades que ele mantém, já reconciliadas no array vivo. */
+  minhas: ComunidadeDefinida[];
+  /** Cria uma, ou devolve `null` quando os oito endereços reservados acabaram. */
+  criarComunidade: (campos: { nome: string; descricao: string; uf?: string }) => string | null;
+  alterarComunidade: (id: string, mudanca: Partial<ComunidadeDefinida>) => void;
   limpar: () => void;
 }
 
@@ -401,20 +494,34 @@ export function useComunidadeGerida(
     });
   }, []);
 
-  const remover = useCallback((pessoaId: string) => {
-    if (estado === null || estado.removidos.includes(pessoaId)) return;
-    gravar({
-      ...estado,
-      removidos: [...estado.removidos, pessoaId],
-      atualizadoEm: dataDeReferencia,
-    });
-  }, []);
+  const criarComunidade = useCallback(
+    (campos: { nome: string; descricao: string; uf?: string }): string | null => {
+      if (estado === null) return null;
+      const id = proximaComunidade();
+      if (id === null) return null;
+      const nova: ComunidadeDefinida = {
+        ...comunidadeVazia(id),
+        nome: campos.nome.trim(),
+        descricao: campos.descricao.trim(),
+        ...(campos.uf ? { uf: campos.uf } : {}),
+      };
+      gravar({
+        ...estado,
+        criadas: [...estado.criadas, nova],
+        atualizadoEm: dataDeReferencia,
+      });
+      return id;
+    },
+    [],
+  );
 
-  const readmitir = useCallback((pessoaId: string) => {
+  const alterarComunidade = useCallback((id: string, mudanca: Partial<ComunidadeDefinida>) => {
     if (estado === null) return;
+    // Só as criadas se alteram: as 22 do acervo são de gente real e não têm dono editável.
+    if (!estado.criadas.some((c) => c.id === id)) return;
     gravar({
       ...estado,
-      removidos: estado.removidos.filter((x) => x !== pessoaId),
+      criadas: estado.criadas.map((c) => (c.id === id ? { ...c, ...mudanca } : c)),
       atualizadoEm: dataDeReferencia,
     });
   }, []);
@@ -422,6 +529,10 @@ export function useComunidadeGerida(
   const limpar = useCallback(() => {
     gravar(doZero());
   }, []);
+
+  // Depende de `atual` para recalcular quando o armazém muda: `aplicar` muta `COMUNIDADES`
+  // no lugar, e a referência do array não muda nunca.
+  const minhas = useMemo(() => (atual === null ? [] : minhasComunidades()), [atual]);
 
   const perfil = atual?.perfis[comunidadeId] ?? perfilVazio();
   const vigente = useMemo(() => vigenteDe(semente, atual?.perfis[comunidadeId]), [semente, atual, comunidadeId]);
@@ -436,10 +547,64 @@ export function useComunidadeGerida(
     alterarRascunho,
     marcarPublicada,
     esquecerRascunho,
-    removidos: atual?.removidos ?? [],
-    remover,
-    readmitir,
+    minhas,
+    criarComunidade,
+    alterarComunidade,
     limpar,
+  };
+}
+
+/**
+ * A LISTA DE «AS MINHAS», para a tela que não fala de uma comunidade só.
+ *
+ * `useComunidadeGerida` exige um `comunidadeId` e uma semente, porque ela é o armazém de UMA
+ * comunidade. A lista não tem uma: ela é sobre todas. Gancho próprio, com a mesma hidratação
+ * e a mesma assinatura do store externo.
+ */
+export function useMinhasComunidades(hoje: string): {
+  pronto: boolean;
+  minhas: ComunidadeDefinida[];
+  /** `null` quando os oito endereços reservados acabaram. */
+  criar: (campos: { nome: string; descricao: string; uf?: string }) => string | null;
+  restam: number;
+} {
+  useEffect(() => {
+    hidratar(hoje);
+  }, [hoje]);
+
+  const atual = useSyncExternalStore(assinar, lerLoja, lerNoServidor);
+
+  const criar = useCallback(
+    (campos: { nome: string; descricao: string; uf?: string }): string | null => {
+      if (estado === null) return null;
+      const id = proximaComunidade();
+      if (id === null) return null;
+      gravar({
+        ...estado,
+        criadas: [
+          ...estado.criadas,
+          {
+            ...comunidadeVazia(id),
+            nome: campos.nome.trim(),
+            descricao: campos.descricao.trim(),
+            ...(campos.uf ? { uf: campos.uf } : {}),
+          },
+        ],
+        atualizadoEm: dataDeReferencia,
+      });
+      return id;
+    },
+    [],
+  );
+
+  // Depende de `atual`: `aplicar` muta `COMUNIDADES` no lugar, e a referência nunca muda.
+  const minhas = useMemo(() => (atual === null ? [] : minhasComunidades()), [atual]);
+
+  return {
+    pronto: atual !== null,
+    minhas,
+    criar,
+    restam: COMUNIDADES_RESERVADAS - (atual?.criadas.length ?? 0),
   };
 }
 
@@ -450,9 +615,20 @@ export function sementeDoPerfil(
   descricao: string,
 ): SementeDoPerfil {
   const capa = capaSemeada(comunidadeId);
+  /**
+   * COMUNIDADE CRIADA AQUI NÃO TEM SEMENTE NO SERVIDOR, e a página que chama esta função é
+   * de servidor: em `/studio/minhas-comunidades/com-produtor-001/` ela passa `nome: ""`,
+   * porque no build aquele endereço era um slug reservado e vazio. A capa abria sem nome
+   * (medido por CDP, 29/08/2026).
+   *
+   * `aplicar` já pôs a comunidade dentro do array vivo `COMUNIDADES` na hidratação, então a
+   * resposta está aqui, do lado do cliente. O que o servidor manda continua vencendo quando
+   * existe: para as 23 do build nada muda.
+   */
+  const viva = nome.trim() === "" ? COMUNIDADES.find((c) => c.id === comunidadeId) : undefined;
   return {
-    nome,
-    descricao,
+    nome: nome.trim() || (viva?.nome ?? ""),
+    descricao: descricao.trim() || (viva?.descricao ?? ""),
     chamada: capa?.chamada ?? "",
     imagem: capa?.imagem ?? "",
     imagemAlt: capa?.imagemAlt ?? "",

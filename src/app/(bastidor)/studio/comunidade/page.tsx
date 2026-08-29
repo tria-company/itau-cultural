@@ -1,4 +1,4 @@
-import { ComunidadeNoStudio } from "@/componentes/comunidade-no-studio";
+import { Comunidade } from "@/componentes/comunidade";
 import { CapaDaComunidade } from "@/componentes/comunidade-capa";
 import {
   COMUNIDADE_OFICIAL,
@@ -12,15 +12,22 @@ import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor";
 
 /**
- * Studio · Comunidade, o feed de quem produz.
+ * Studio · Comunidade, o feed de quem lê.
  *
- * PORTADA DO OUTRO RAMO em 2026-08-28, do repositorio Apogeunexus/bid-itau, onde estas
- * telas foram construidas. O corpo e o de la, palavra por palavra: o pedido foi que
- * ficassem EXATAMENTE iguais. O que muda e o endereco, porque aqui elas vivem na visao do
- * Produtor, sob /studio/, e nao no app publico.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ELA VOLTOU A SER LEITURA EM 29/08/2026. Até aqui esta rota atendia duas pessoas ao mesmo
+ * tempo: montava `ComunidadeNoStudio`, com publicar, editar e apagar, e uma capa com lápis.
+ * O pedido foi de uma linha: dentro do Studio fica tudo que ele mexe, e a aba Comunidade é
+ * o que ele consome. A gestão mudou para `/studio/minhas-comunidades/[id]/`.
  *
- * Por isso a BarraDoStudio no fim: e ela que da as abas do aparelho a qualquer tela do
- * Studio, e sem ela esta rota seria a unica sem saida na visao app.
+ * O QUE SOBRA É O FEED CRU, o mesmo que `/studio/comunidade/[id]/` já montava para as de
+ * fora. Sem `acoesDoPost`, sem `acaoDePublicar`, e a capa sem `gerenciavel`.
+ *
+ * ESTA ROTA É A PORTA, E O SELETOR É A NAVEGAÇÃO. Ela abre na comunidade da casa porque
+ * ela é a que ele sempre assina; trocar no seletor leva para `/studio/comunidade/[id]/`,
+ * onde a capa e o feed falam da mesma comunidade. Antes o seletor trocava só o feed, por
+ * estado, e a capa acima continuava mostrando a comunidade anterior.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 /** Medidos no build: a comunidade da casa e quantas publicações ela abre. */
@@ -35,8 +42,6 @@ export default function PaginaComunidade() {
       className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
       data-margem-quase-nula
     >
-      {/* A CAPA NO LUGAR DO CABEÇALHO DE TEXTO (2026-08-28): a foto da comunidade com o
-          nome dentro, no gesto da abertura de Descobrir. Ela também é a porta da gestão. */}
       <CapaDaComunidade
         comunidadeId={COMUNIDADE_OFICIAL}
         nome={DA_CASA.nome}
@@ -44,19 +49,9 @@ export default function PaginaComunidade() {
         hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
         publicacoes={PUBLICACOES_DA_CASA}
         assinantes={DA_CASA.assinantes}
-        imagens={catalogoComum().imagens}
-        gerenciavel
       />
 
-      {/* O FEED COM A GESTÃO DENTRO: publicar é um botão em cima dele, e apagar mora no
-          próprio post. Ver o cabeçalho de comunidade-no-studio.tsx. */}
-      <ComunidadeNoStudio
-        comunidadeId={COMUNIDADE_OFICIAL}
-        nome={DA_CASA.nome}
-        descricao={DA_CASA.descricao}
-        hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
-        imagens={catalogoComum().imagens}
-      />
+      <Comunidade comunidadeId={COMUNIDADE_OFICIAL} />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

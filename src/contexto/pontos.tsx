@@ -55,8 +55,13 @@ const PREFIXO = "agenda-cultural:pontos:";
  * no estado, e um estado da versão 3 hidrataria sem os dois — derrubando a tela
  * da missão em `comprovacoes.filter`, que é exatamente o erro que a versão 2 já
  * tinha ensinado com `publicacoesSalvas`.
+ *
+ * A versão 5 é a saída de `publicacoesSalvas`, em 29/08/2026: guardar publicação saiu do
+ * produto inteiro. O campo some do estado, e um estado da versão 4 hidratando aqui traria
+ * de volta uma lista que ninguém mais lê nem limpa. Campo que SAI é degrau tanto quanto
+ * campo que entra.
  */
-const VERSAO_DO_FORMATO = 4;
+const VERSAO_DO_FORMATO = 5;
 
 interface Guardado {
   versao: number;
@@ -82,7 +87,6 @@ const LISTAS = [
   "resgates",
   "publicacoes",
   "assinadas",
-  "publicacoesSalvas",
   "presencas",
   "linguagensAlcancadas",
   "ufsAlcancadas",

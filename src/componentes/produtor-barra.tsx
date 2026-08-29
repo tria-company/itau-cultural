@@ -66,7 +66,7 @@ export function BarraDoStudio({
           {ABAS.map((aba) => {
             // A SEÇÃO INTEIRA ACENDE, e não só a rota exata: a Comunidade e a Loja ganharam
             // sub-telas no porte de 2026-08-28, e com a comparação exata as quatro abas
-            // apagavam juntas em /studio/comunidade/guardadas/ e irmãs. Início fica de fora
+            // apagavam juntas em /studio/comunidade/publicacao/ e irmãs. Início fica de fora
             // porque `/studio` prefixa todas as outras.
             // `caminho === secao` conta também: em `/studio/pontos/` (a Carteira) o
             // prefixo com barra não casa, e as quatro abas apagavam juntas, sem nenhum

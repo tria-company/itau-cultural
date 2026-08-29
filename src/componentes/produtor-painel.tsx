@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { usePontos } from "@/contexto/pontos";
-import { COMUNIDADES } from "@/dados/comunidade";
 import { Folha } from "@/componentes/base/folha";
 import { iniciaisDe, usePerfil } from "@/componentes/perfil-estado";
 import {
@@ -1178,20 +1177,6 @@ function VisaoGeral({
             nota: hidratado
               ? `fichas para resgatar, nível ${motor.nivel().numero} · ${motor.nivel().nome}`
               : "somando as suas fichas",
-          },
-          {
-            href: "/studio/comunidade/marketplace/",
-            rotulo: "Comunidades",
-            numero: String(COMUNIDADES.length),
-            nota: "produtores e organizações por território",
-          },
-          {
-            // GUARDADAS SÓ SE ALCANÇA DAQUI NO APARELHO: a barra flutuante tem quatro abas
-            // e nao cabe mais uma. Na web ela tambem esta na coluna, sob Comunidade.
-            href: "/studio/comunidade/guardadas/",
-            rotulo: "Guardadas",
-            numero: hidratado ? String(motor.atual.publicacoesSalvas.length) : "—",
-            nota: "publicações que você marcou",
           },
           {
             href: "/studio/ocorrencias/",

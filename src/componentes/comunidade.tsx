@@ -7,7 +7,6 @@ import {
   ICONE_CORACAO,
   ICONE_CORACAO_CHEIO,
   ICONE_FALA,
-  ICONE_SALVOS,
 } from "@/componentes/base/icones";
 import { MenuDeEscolha } from "@/componentes/menu-escolha";
 import { PalcoYoutube } from "@/componentes/palco";
@@ -33,7 +32,7 @@ export function Monograma({ autorId, pequeno }: { autorId: string; pequeno?: boo
 
 export function nomeDe(autorId: string): string {
   // O NOME QUE O PRODUTOR DEU vence o semeado, e vale nos tres lugares que chamam esta
-  // funcao: o cartao do feed, a linha das guardadas e a publicacao aberta. Antes de o
+  // funcao: o cartao do feed, o seletor e a publicacao aberta. Antes de o
   // armazem hidratar ela devolve `null`, e cai no semeado — que e o que o HTML do build
   // traz, entao a hidratacao nao diverge.
   return nomeGerido(autorId) ?? pessoaPorId(autorId)?.nome ?? "Alguém";
@@ -83,7 +82,6 @@ function Cartao({
   const { motor, hidratado } = usePontos();
 
   const reagi = hidratado && (motor.atual.reacoesDadas[publicacao.id] ?? 0) > 0;
-  const guardada = hidratado && motor.atual.publicacoesSalvas.includes(publicacao.id);
   const comentarios = publicacao.comentarios.reduce(
     (soma, c) => soma + 1 + (c.respostas?.length ?? 0),
     0,
@@ -92,10 +90,6 @@ function Cartao({
   function reagir() {
     if (reagi) return;
     motor.emitir("comunidade.reacao.dada", { tipo: "publicacao", id: publicacao.id });
-  }
-
-  function guardar() {
-    motor.emitir("comunidade.publicacao.salva", { tipo: "publicacao", id: publicacao.id });
   }
 
   function abrir() {
@@ -160,18 +154,6 @@ function Cartao({
           {ICONE_FALA}
           <span>{comentarios}</span>
         </button>
-        <button
-          type="button"
-          className="pastilha"
-          data-ativa={guardada ? "sim" : "nao"}
-          onClick={guardar}
-          aria-pressed={guardada}
-          aria-label={guardada ? "Remover dos guardados" : "Guardar"}
-          disabled={!hidratado}
-        >
-          {ICONE_SALVOS}
-        </button>
-
         {/* AS AÇÕES DE QUEM MANTÉM A COMUNIDADE, no próprio post (pedido de 2026-08-28).
             Ficam à direita, discretas, e só aparecem para quem pode: apagar o que se
             publicou não é uma viagem a outra tela, é um gesto sobre a coisa. */}
@@ -191,7 +173,7 @@ function Cartao({
  *
  * Dois menus e não um só porque as duas listas respondem a perguntas diferentes:
  * «para onde eu volto» e «o que existe além». Misturadas, a segunda enterra a
- * primeira assim que o marketplace crescer.
+ * primeira assim que a lista de fora crescer.
  */
 function Seletor({ atual, aoTrocar }: { atual: string; aoTrocar: (id: string) => void }) {
   const { motor, hidratado } = usePontos();
@@ -244,7 +226,21 @@ export function Comunidade({
   acaoDePublicar?: ReactNode;
 }) {
   const { motor, hidratado } = usePontos();
-  const [atual, setAtual] = useState(comunidadeId);
+  const router = useRouter();
+
+  /**
+   * TROCAR DE COMUNIDADE É NAVEGAR, E NÃO TROCAR ESTADO (29/08/2026).
+   *
+   * Antes o seletor guardava a escolha num `useState` local: o feed trocava, e a capa
+   * renderizada acima pela página continuava mostrando a comunidade anterior, porque ela
+   * recebe o id do servidor e ninguém a avisava. Eram duas maneiras de trocar de comunidade
+   * que não se conheciam, com a rota `[id]` existindo em paralelo.
+   *
+   * Agora há uma só. A escolha vira endereço, a página inteira responde por ela, e o
+   * endereço pode ser copiado e colado.
+   */
+  const atual = comunidadeId;
+  const trocar = (id: string) => router.push(`/studio/comunidade/${id}/`);
 
   const comunidade = comunidadePorId(atual);
   if (!comunidade) return <Vazio>Esta comunidade não existe.</Vazio>;
@@ -262,7 +258,7 @@ export function Comunidade({
     // 1.100px nao mostra mais foto, mostra a mesma foto maior, e o texto embaixo vira uma
     // linha de 180 caracteres. O limite mora no CSS, sob `[data-view="web"]`.
     <div className="flex flex-col gap-4 comunidade-coluna">
-      <Seletor atual={atual} aoTrocar={setAtual} />
+      <Seletor atual={atual} aoTrocar={trocar} />
 
       {/* A ficha e a faixa só aparecem fora da casa: na comunidade do Itaú a
           pessoa já está dentro, e não há o que decidir. */}

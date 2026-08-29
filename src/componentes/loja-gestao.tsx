@@ -11,9 +11,9 @@ import type { FaseDoResgate } from "@/lib/pontos/tipos";
 /**
  * loja-gestao.tsx — quem resgatou o quê, quando, e em que pé está a entrega.
  *
- * O CATÁLOGO SAIU DAQUI (2026-08-28) e foi para a própria vitrine: criar item, mexer no
- * preço e no estoque acontecem olhando para o item. Uma tela de gestão à parte existiu e
- * não foi encontrada, o que é o mesmo que não existir.
+ * O CATÁLOGO SAIU DAQUI em 28/08 e foi para a vitrine; em 29/08 ele saiu da vitrine também
+ * e foi para `/studio/minha-loja/`, junto com esta tela. O que ficou provado nas duas
+ * mudanças: gestão de item mora onde o item se desenha, e o que é gestão mora no Studio.
  *
  * O que sobra é o que é lista e não cabe num cartão: o histórico de resgates, com quem,
  * quando, quanto pagou e a esteira. O relógio do motor é virtual e ancorado, e os dois
@@ -54,7 +54,7 @@ export function GestaoDaLoja() {
       <header className="prod-cabecalho" data-coluna-de-leitura>
         <div className="prod-cabecalho-linha">
           <Link
-            href="/studio/pontos/loja/"
+            href="/studio/minha-loja/"
             className="prod-superficie prod-voltar"
             data-voltar-studio
           >

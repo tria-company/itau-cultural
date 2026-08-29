@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
@@ -111,15 +110,6 @@ export function CapaDaComunidade({
           >
             {ICONE_LAPIS}
           </button>
-          <Link
-            href="/studio/comunidade/gerenciar/"
-            className="prod-comunidade-capa-lapis"
-            aria-label="Quem está na comunidade"
-            title="Quem está na comunidade"
-            data-ver-pessoas
-          >
-            <span aria-hidden>👤</span>
-          </Link>
         </div>
       ) : null}
 
@@ -188,6 +178,19 @@ export function CapaDaComunidade({
               data-descricao-comunidade
             />
           </Campo>
+
+          {/* O ÚNICO INTERRUPTOR QUE SOBROU, e ele vale de verdade desde 29/08/2026.
+              Ele vivia na tela de membros, que morreu; ficar sem lugar seria deixá-lo
+              gravado e inalcançável, que é como ele passou a primeira semana. */}
+          <label className="prod-dimensao">
+            <input
+              type="checkbox"
+              checked={perfil.comentariosAbertos}
+              onChange={(e) => alterarPerfil({ comentariosAbertos: e.target.checked })}
+              data-comentarios-abertos
+            />
+            <span className="prod-dimensao-rotulo">Comentários abertos</span>
+          </label>
 
           <p className="prod-campo-nota">
             Campo em branco volta para o que a semente diz.

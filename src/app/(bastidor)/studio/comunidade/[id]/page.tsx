@@ -6,6 +6,7 @@ import { PUBLICACOES_DO_ACERVO } from "@/dados/comunidade-feed";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor";
+import { slugsDeComunidade } from "@/dados/comunidade-capas";
 
 /**
  * Studio · Comunidade, uma comunidade do acervo.
@@ -25,14 +26,25 @@ function quantasPublicacoes(id: string): number {
   return TODAS_AS_PUBLICACOES.filter((p) => p.comunidadeId === id).length;
 }
 
+/**
+ * AS 23 DO BUILD MAIS OS OITO ENDERECOS RESERVADOS (29/08/2026).
+ *
+ * Comunidade criada pelo produtor nasce no navegador, e sob `output: export` id sem HTML e
+ * 404 duro. E a mesma solucao que as 20 publicacoes ja usam, e o mesmo motivo pelo qual as
+ * duas constantes moram em `@/dados/comunidade-capas` e nao no armazem: constante exportada
+ * de modulo `"use client"` vira referencia de cliente e chega aqui como `undefined`.
+ */
 export function generateStaticParams() {
-  return COMUNIDADES.map((c) => ({ id: c.id }));
+  return [...COMUNIDADES.map((c) => ({ id: c.id })), ...slugsDeComunidade().map((id) => ({ id }))];
 }
 
 export default async function PaginaDeComunidade({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const comunidade = comunidadePorId(id);
-  if (!comunidade) notFound();
+  // Endereco reservado ainda vazio: a pagina existe, e quem a preenche e o armazem no
+  // cliente. Recusar aqui daria 404 na comunidade que o produtor acabou de criar.
+  const reservado = slugsDeComunidade().includes(id);
+  if (!comunidade && !reservado) notFound();
 
   return (
     <div
@@ -45,11 +57,11 @@ export default async function PaginaDeComunidade({ params }: { params: Promise<{
           elenco. Quem gerencia é só a comunidade da casa. */}
       <CapaDaComunidade
         comunidadeId={id}
-        nome={comunidade.nome}
-        descricao={comunidade.descricao}
+        nome={comunidade?.nome ?? ""}
+        descricao={comunidade?.descricao ?? ""}
         hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
         publicacoes={quantasPublicacoes(id)}
-        assinantes={comunidade.assinantes}
+        assinantes={comunidade?.assinantes ?? 0}
       />
 
       <Comunidade comunidadeId={id} />

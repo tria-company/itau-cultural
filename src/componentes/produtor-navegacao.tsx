@@ -74,22 +74,15 @@ const TELAS_DE_TOPO: ItemDeTopo[] = [
     href: "/studio/comunidade",
     rotulo: "Comunidade",
     icone: ICONE_COMUNIDADE,
-    filhos: [
-      { href: "/studio/comunidade/gerenciar", rotulo: "Quem está na comunidade" },
-      { href: "/studio/comunidade/marketplace", rotulo: "Comunidades" },
-      { href: "/studio/comunidade/guardadas", rotulo: "Guardadas" },
-    ],
   },
   {
-    // RÓTULO E DESTINO DIZEM A MESMA COISA: «Loja de pontos» abre a vitrine, e a carteira
-    // fica logo abaixo. Ver a nota gêmea em produtor-barra.tsx.
+    // SEM FILHOS DESDE 29/08/2026. «Resgates» virou tela do Studio, e a Carteira se alcança
+    // pelo saldo no topo da própria vitrine — que é onde a pessoa olha quando quer saber
+    // quanto tem. Sub-menu de dois itens para uma aba de consumo foi o que o pedido reprovou
+    // na Comunidade, e vale igual aqui.
     href: "/studio/pontos/loja",
     rotulo: "Loja de pontos",
     icone: ICONE_LOJA,
-    filhos: [
-      { href: "/studio/pontos", rotulo: "Carteira" },
-      { href: "/studio/pontos/gestao", rotulo: "Resgates" },
-    ],
   },
 ];
 
@@ -142,15 +135,35 @@ export function ProdutorNavegacao({
   };
 
   /** As onze pautas, na forma de filho: as sem ficha entram desabilitadas, e dizem por quê. */
-  const filhosDasPautas = PAUTAS.map((p) => {
-    const d = DESCRICAO_DA_PAUTA[p];
-    return {
-      href: d.rota.replace(/\/$/, ""),
-      rotulo: d.rotulo,
-      objetivo: conjunto.has(p) ? d.objetivo : `${d.objetivo}, ficha ainda não construída`,
-      pronta: conjunto.has(p),
-    };
-  });
+  const filhosDasPautas: FilhoDaLateral[] = [
+    ...PAUTAS.map((p) => {
+      const d = DESCRICAO_DA_PAUTA[p];
+      return {
+        href: d.rota.replace(/\/$/, ""),
+        rotulo: d.rotulo,
+        objetivo: conjunto.has(p) ? d.objetivo : `${d.objetivo}, ficha ainda não construída`,
+        pronta: conjunto.has(p),
+      };
+    }),
+    /**
+     * AS DUAS OFICINAS, e não pautas (29/08/2026).
+     *
+     * Elas entram na mesma lista porque a pessoa as procura no mesmo lugar: é aqui que fica
+     * tudo que ela alimenta. Mas NÃO entram na união `PAUTAS`, que é consumida por 12
+     * arquivos e implica ficha em atos, panorama, linha de pendência no Início e entrada no
+     * «+ Criar». Comunidade e Loja não são fichas: são bancadas, com feed e folha.
+     */
+    {
+      href: "/studio/minhas-comunidades",
+      rotulo: "Comunidades",
+      objetivo: "As comunidades que você mantém: capa, nome, e o que se publica nelas.",
+    },
+    {
+      href: "/studio/minha-loja",
+      rotulo: "Loja",
+      objetivo: "Os itens que você põe à venda por fichas, e quem já resgatou.",
+    },
+  ];
 
   /** Os filhos de uma tela de topo: as pautas são montadas, o resto vem da constante. */
   const filhosDe = (t: ItemDeTopo): FilhoDaLateral[] =>
@@ -207,7 +220,7 @@ export function ProdutorNavegacao({
       <ul className="prod-lateral-grupo">
         {TELAS_DE_TOPO.map((t) => {
           // O «você está aqui» vale para a seção inteira, e não só para a rota exata: em
-          // /studio/comunidade/guardadas/ a lateral apagava tudo e a pessoa perdia a
+          // /studio/comunidade/publicacao/ a lateral apagava tudo e a pessoa perdia a
           // referência. Início fica de fora porque `/studio` prefixa todas as outras.
           const secao = t.href === "/studio/pontos/loja" ? "/studio/pontos" : t.href;
           const daSecao = secao !== "/studio" && caminho.startsWith(`${secao}/`);

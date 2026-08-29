@@ -99,7 +99,6 @@ function estadoInicial(personaId: string, dados: DadosDoPrograma): EstadoDoMotor
     resgates: [],
     publicacoes: dados.publicacoes.map((p) => ({ ...p, comentarios: [...p.comentarios] })),
     assinadas: ["ic"],
-    publicacoesSalvas: [],
     reacoesDadas: {},
     presencas: [],
     linguagensAlcancadas: [],
@@ -453,17 +452,6 @@ export class Motor {
         break;
       }
 
-      case "comunidade.publicacao.salva": {
-        const id = evento.alvo?.id;
-        if (!id) break;
-        // Alternar: o mesmo gesto guarda e devolve. Salvar sem poder dessalvar
-        // é uma lista que só cresce, e ninguém volta numa lista assim.
-        s.publicacoesSalvas = s.publicacoesSalvas.includes(id)
-          ? s.publicacoesSalvas.filter((x) => x !== id)
-          : [...s.publicacoesSalvas, id];
-        break;
-      }
-
       case "comunidade.comentario.criado": {
         const publicacao = s.publicacoes.find((p) => p.id === evento.alvo?.id);
         if (!publicacao) break;
@@ -554,9 +542,6 @@ export class Motor {
         const id = evento.alvo?.id;
         if (!id) break;
         s.publicacoes = s.publicacoes.filter((p) => p.id !== id);
-        // Sai tambem de quem a tinha guardado: guardada que aponta para publicacao
-        // inexistente e uma linha vazia na tela de Guardadas.
-        s.publicacoesSalvas = s.publicacoesSalvas.filter((x) => x !== id);
         break;
       }
 
@@ -592,14 +577,26 @@ export class Motor {
         // de bug que só aparece no dia da entrega.
         if (recompensa.estoque !== null) recompensa.estoque -= 1;
 
+        // ITEM DE LINK JÁ NASCE ENTREGUE. A esteira de cinco fases descreve uma entrega
+        // que a casa faz; quando quem entrega é o e-commerce de fora, não há nada a
+        // acompanhar: o cupom saiu junto com o clique. `avancarDias` não mexe em quem já
+        // chegou ao fim, então o resgate fica onde nasceu.
+        const porLink = recompensa.entrega === "link";
         s.resgates.unshift({
           id: "res_" + s.sequenciaDeEventos,
           recompensaId: recompensa.id,
-          fase: "resgatado",
+          fase: porLink ? "entregue" : "resgatado",
           em: s.agora,
           // Congelados: ver a nota em `Resgate`, tipos.ts.
           titulo: recompensa.titulo,
           custoPago: recompensa.custo,
+          ...(porLink
+            ? {
+                link: recompensa.link,
+                cupom: recompensa.cupom,
+                lojaDeFora: recompensa.lojaDeFora,
+              }
+            : {}),
         });
         rastro.efeitos.push({ tipo: "resgateFeito", recompensa });
         break;

@@ -1103,6 +1103,14 @@ async function gateDaRede(cdp, base) {
     "/studio/editorial/",
     "/studio/catalogos/",
     "/studio/ocorrencias/",
+    // AS QUATRO DO REFINAMENTO (29/08/2026). A loja nao tinha portao nenhum ate aqui, e ela
+    // e justamente onde entrou o primeiro endereco externo do Studio: o link de afiliado do
+    // item de retirada fora. O gate le `src`/`href` de RECURSO e nao observa ancora, que e
+    // exatamente a distincao que `dados/ingressos.ts` ja tinha escrito para o botao da Sympla.
+    "/studio/minhas-comunidades/",
+    "/studio/minha-loja/",
+    "/studio/minha-loja/resgates/",
+    "/studio/pontos/loja/",
   ];
 
   for (const rota of rotas) {

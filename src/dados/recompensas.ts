@@ -241,6 +241,34 @@ export const RECOMPENSAS: RecompensaDefinida[] = [
     imagemAlt: "Um grupo de pessoas, entre homens, mulheres, crianças, todos negros, caminham em uma rua de terra. alguns dançam, carregam instrumentos musicais de percussão, vestem roupas coloridas.",
     imagemCredito: "divulgação",
   },
+
+  /* ── Um item de retirada FORA, para a demonstração ter o que mostrar ────────
+   *
+   * O produtor cola um endereço de afiliado e um cupom que zera o carrinho; quem resgata
+   * termina a compra na loja de fora, de graça. O endereço aqui é de EXEMPLO e não aponta
+   * para conta de afiliado de ninguém: um link real de afiliado neste arquivo seria receita
+   * de alguém dentro de um protótipo de proposta.
+   *
+   * Zero rede continua valendo. É um `<a href>` que a pessoa CLICA, não uma requisição que
+   * o protótipo faz — a mesma distinção que `dados/ingressos.ts` já escreveu para o botão
+   * da Sympla, e que os dois portões de rede medem sem observar âncora.
+   * ---------------------------------------------------------------------- */
+  {
+    id: "rec-livro-parceiro",
+    familia: "editorial",
+    titulo: "Livro na livraria parceira",
+    descricao:
+      "Um título do catálogo, retirado na livraria parceira. O cupom zera o carrinho: você paga em fichas, não em dinheiro.",
+    custo: 160,
+    estoque: 25,
+    entrega: "link",
+    link: "https://exemplo.livrariaparceira.com.br/catalogo/um-seculo-de-agora",
+    lojaDeFora: "Livraria parceira",
+    cupom: "CULTURA100",
+    imagem: "/acervo/185da8ff0eaf5905.jpeg",
+    imagemAlt: "A imagem colorida mostra um apanhado de livros em um sebo.",
+    imagemCredito: "Shutterstock",
+  },
 ];
 
 export const FAMILIAS: { id: RecompensaDefinida["familia"]; rotulo: string; resumo: string }[] = [

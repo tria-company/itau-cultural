@@ -29,6 +29,27 @@ import { COMUNIDADE_OFICIAL } from "./comunidade";
 export const PREFIXO_DA_PUBLICACAO = "pub-produtor-";
 export const SLUGS_RESERVADOS = 20;
 
+/**
+ * O MESMO PROBLEMA, PARA A COMUNIDADE (29/08/2026).
+ *
+ * O produtor passou a poder manter mais de uma comunidade, e comunidade criada no
+ * navegador não tem HTML no `out/`. A saída é a que já funciona para publicação: oito
+ * endereços reservados no build, e a criação recusa o nono dizendo por quê.
+ *
+ * Oito e não vinte porque comunidade é peça grande, não post: um produtor que mantém oito
+ * já é um caso extremo, e cada slug reservado é uma página gerada em toda build.
+ */
+export const PREFIXO_DA_COMUNIDADE = "com-produtor-";
+export const COMUNIDADES_RESERVADAS = 8;
+
+/** Os oito endereços, para `generateStaticParams` não ter de saber a aritmética. */
+export function slugsDeComunidade(): string[] {
+  return Array.from(
+    { length: COMUNIDADES_RESERVADAS },
+    (_, i) => `${PREFIXO_DA_COMUNIDADE}${String(i + 1).padStart(3, "0")}`,
+  );
+}
+
 export interface CapaDeComunidade {
   comunidadeId: string;
   /** Caminho no acervo, sempre local: não há requisição externa em runtime. */

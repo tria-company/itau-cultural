@@ -32,6 +32,15 @@ import type {
 
 export const COMUNIDADE_OFICIAL = "ic";
 
+/**
+ * QUEM É O PRODUTOR DESTE STUDIO.
+ *
+ * Não é autenticação e não pretende ser: é o valor que `donoId` carrega nas comunidades que
+ * ele mantém, para a pergunta «esta é minha?» ser feita ao dado em vez de a uma constante
+ * comparada à mão em cinco lugares (29/08/2026).
+ */
+export const PRODUTOR_DA_CASA = "produtor:ic";
+
 export const COMUNIDADES: ComunidadeDefinida[] = [
   {
     id: COMUNIDADE_OFICIAL,
@@ -41,6 +50,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     natureza: "oficial",
     linguagens: [],
     assinantes: 48210,
+    donoId: PRODUTOR_DA_CASA,
   },
 
   {
@@ -52,6 +62,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "MS",
     linguagens: ["musica"],
     assinantes: 3120,
+    donoId: null,
   },
   {
     id: "c-teatro-amazonas",
@@ -62,6 +73,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "AM",
     linguagens: ["musica", "teatro"],
     assinantes: 9840,
+    donoId: null,
   },
   {
     id: "c-bordadeiras",
@@ -72,6 +84,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "MG",
     linguagens: ["artes-visuais"],
     assinantes: 1470,
+    donoId: null,
   },
   {
     id: "c-itamatatiua",
@@ -82,6 +95,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "MA",
     linguagens: ["artes-visuais"],
     assinantes: 980,
+    donoId: null,
   },
   {
     id: "c-rendeiras-cariri",
@@ -92,6 +106,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "CE",
     linguagens: ["artes-visuais"],
     assinantes: 1130,
+    donoId: null,
   },
   {
     id: "c-caixa-belem",
@@ -102,6 +117,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "PA",
     linguagens: ["artes-visuais"],
     assinantes: 6210,
+    donoId: null,
   },
   {
     id: "c-coletivo-bispo",
@@ -112,6 +128,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "BA",
     linguagens: ["teatro"],
     assinantes: 2340,
+    donoId: null,
   },
   {
     id: "c-brigada-henfil",
@@ -122,6 +139,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "PE",
     linguagens: ["artes-visuais"],
     assinantes: 2890,
+    donoId: null,
   },
   {
     id: "c-basirah",
@@ -132,6 +150,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "DF",
     linguagens: ["danca"],
     assinantes: 1760,
+    donoId: null,
   },
   {
     id: "c-armazem",
@@ -142,6 +161,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "PR",
     linguagens: ["teatro"],
     assinantes: 4020,
+    donoId: null,
   },
   {
     id: "c-caixa-do-elefante",
@@ -152,6 +172,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "RS",
     linguagens: ["teatro"],
     assinantes: 3410,
+    donoId: null,
   },
   {
     id: "c-artmosfera",
@@ -162,6 +183,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "SC",
     linguagens: ["artes-visuais"],
     assinantes: 1520,
+    donoId: null,
   },
   {
     id: "c-a-cena",
@@ -172,6 +194,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "PB",
     linguagens: ["danca"],
     assinantes: 890,
+    donoId: null,
   },
   {
     id: "c-atelie-gravura",
@@ -182,6 +205,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "GO",
     linguagens: ["artes-visuais"],
     assinantes: 1240,
+    donoId: null,
   },
   {
     id: "c-bonobando",
@@ -192,6 +216,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "AC",
     linguagens: ["artes-visuais"],
     assinantes: 640,
+    donoId: null,
   },
   {
     id: "c-cine-falcatrua",
@@ -202,6 +227,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "ES",
     linguagens: ["arte-e-tecnologia", "artes-visuais"],
     assinantes: 1980,
+    donoId: null,
   },
   {
     id: "c-o-imaginario",
@@ -212,6 +238,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     uf: "RO",
     linguagens: ["teatro"],
     assinantes: 720,
+    donoId: null,
   },
 
   /* ── Cinco artistas do acervo, com comunidade CURADA ───────────────────────
@@ -234,6 +261,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     assinantes: 27400,
     fonte: "https://enciclopedia.itaucultural.org.br/pessoas/65144-ailton-krenak",
     curada: true,
+    donoId: null,
   },
   {
     id: "c-alceu-valenca",
@@ -246,6 +274,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     assinantes: 41300,
     fonte: "https://enciclopedia.itaucultural.org.br/pessoas/14718-alceu-valenca",
     curada: true,
+    donoId: null,
   },
   {
     id: "c-adriana-varejao",
@@ -258,6 +287,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     assinantes: 18900,
     fonte: "https://enciclopedia.itaucultural.org.br/pessoas/5282-adriana-varejao",
     curada: true,
+    donoId: null,
   },
   {
     id: "c-abdias-nascimento",
@@ -270,6 +300,7 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     assinantes: 22600,
     fonte: "https://enciclopedia.itaucultural.org.br/pessoas/22552-abdias-nascimento",
     curada: true,
+    donoId: null,
   },
   {
     id: "c-adelia-sampaio",
@@ -282,18 +313,40 @@ export const COMUNIDADES: ComunidadeDefinida[] = [
     assinantes: 12800,
     fonte: "https://enciclopedia.itaucultural.org.br/pessoas/65321-adelia-sampaio",
     curada: true,
+    donoId: null,
   },
 ];
 
-const POR_ID = new Map(COMUNIDADES.map((c) => [c.id, c]));
-
+/**
+ * BUSCA NO ARRAY, E NÃO NUM MAPA MONTADO NO CARREGAMENTO.
+ *
+ * `comunidade-estado.ts` empurra as comunidades criadas pelo produtor para dentro de
+ * `COMUNIDADES`, no lugar, do mesmo jeito que `loja-estado.ts` faz com `RECOMPENSAS`. Um
+ * `Map` construído uma vez não veria as novas, e `comunidadePorId` devolveria `undefined`
+ * para um id que a própria lista mostra. Vinte e tantas entradas não pedem índice.
+ */
 export function comunidadePorId(id: string): ComunidadeDefinida | undefined {
-  return POR_ID.get(id);
+  return COMUNIDADES.find((c) => c.id === id);
 }
 
-/** As do marketplace — tudo menos a oficial. */
+/**
+ * QUEM MANTÉM ESTA COMUNIDADE É O PRODUTOR DESTE STUDIO?
+ *
+ * A pergunta que substitui os cinco `=== COMUNIDADE_OFICIAL` espalhados. Id que não existe
+ * responde `false`, e é o que se quer: publicação órfã não dá poder a ninguém.
+ */
+export function ehMinha(comunidadeId: string): boolean {
+  return comunidadePorId(comunidadeId)?.donoId === PRODUTOR_DA_CASA;
+}
+
+/** As que ele mantém, na ordem em que entraram: a da casa primeiro, as criadas depois. */
+export function minhasComunidades(): ComunidadeDefinida[] {
+  return COMUNIDADES.filter((c) => c.donoId === PRODUTOR_DA_CASA);
+}
+
+/** As de fora — tudo que não é dele. */
 export function comunidadesDoMarketplace(): ComunidadeDefinida[] {
-  return COMUNIDADES.filter((c) => c.natureza !== "oficial");
+  return COMUNIDADES.filter((c) => c.donoId !== PRODUTOR_DA_CASA);
 }
 
 /**

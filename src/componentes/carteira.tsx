@@ -45,7 +45,27 @@ function CartaoDeResgate({ resgate }: { resgate: Resgate }) {
           <Moeda /> {custo}
         </span>
       </div>
-      <Esteira fase={resgate.fase} />
+      {/* RESGATE POR LINK NÃO TEM ESTEIRA. Cinco degraus todos acesos, num pedido que
+          nunca teve etapa, seria a tela contando uma entrega que a casa não fez. O que ele
+          tem é o cupom, e a porta para onde a retirada acontece de verdade. */}
+      {resgate.link ? (
+        <>
+          <p className="tipo-legenda text-tinta-2">
+            Cupom <strong data-cupom-do-recibo>{resgate.cupom || "no carrinho"}</strong>
+          </p>
+          <a
+            href={resgate.link}
+            target="_blank"
+            rel="noreferrer"
+            className="tipo-legenda"
+            data-abrir-loja-de-fora
+          >
+            Abrir {resgate.lojaDeFora || "a loja"} ↗
+          </a>
+        </>
+      ) : (
+        <Esteira fase={resgate.fase} />
+      )}
     </li>
   );
 }

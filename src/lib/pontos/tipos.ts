@@ -52,7 +52,6 @@ export type NomeDeEvento =
   | "ocorrencia.salva"
   | "ocorrencia.presenca.confirmada"
   | "acesso.dia.distinto"
-  | "comunidade.publicacao.salva"
   | "comunidade.comentario.criado"
   | "comunidade.reacao.dada"
   | "comunidade.assinada"
@@ -388,10 +387,22 @@ export interface ComunidadeDefinida {
    * elenco. Aqui a curadoria assina, e a tela declara a assinatura.
    */
   curada?: boolean;
-  /** UF de origem — o marketplace ordena por território, não por tamanho. */
+  /** UF de origem — a lista de fora ordena por território, não por tamanho. */
   uf?: string;
   linguagens: string[];
   assinantes: number;
+  /**
+   * QUEM MANTÉM ESTA COMUNIDADE, ou `null` quando não é ninguém deste produto.
+   *
+   * Até 29/08/2026 «minha comunidade» era a constante `COMUNIDADE_OFICIAL === "ic"`,
+   * comparada à mão em cinco lugares. Isso bastava enquanto havia uma; com o produtor
+   * podendo manter várias, a posse virou pergunta ao dado.
+   *
+   * As 22 do acervo têm `null` de propósito, e continuam sem dono editável: elas pertencem
+   * a instituições, coletivos e pessoas reais, amarradas à Enciclopédia. É a mesma linha
+   * que o projeto se recusou a cruzar em `curada`.
+   */
+  donoId: string | null;
 }
 
 export interface ComentarioDefinido {
@@ -460,8 +471,30 @@ export interface RecompensaDefinida {
   imagem: string;
   imagemAlt: string;
   imagemCredito: string;
-  /** O que a pessoa recebe de fato, dito antes do resgate. */
-  entrega: "presencial" | "digital" | "correio" | "no-produto";
+  /**
+   * O que a pessoa recebe de fato, dito antes do resgate.
+   *
+   * `"link"` entrou em 29/08/2026: o produtor cola um endereço de afiliado com um cupom que
+   * zera o carrinho, e quem resgata termina a compra numa loja de fora. Quem entrega é o
+   * e-commerce, não a casa, e por isso este é o único valor sem esteira de cinco fases.
+   */
+  entrega: "presencial" | "digital" | "correio" | "no-produto" | "link";
+  /**
+   * O ENDEREÇO DE AFILIADO, e os dois campos que o acompanham. Só quando `entrega === "link"`,
+   * e aí obrigatórios: item de link sem endereço é um resgate que não leva a lugar nenhum.
+   *
+   * O discriminante mais o valor mais a validação são o mesmo desenho de
+   * `canalIngresso`/`linkDeIngresso` na ficha de evento (`tipos-acesso.ts:218`), que já
+   * resolveu este problema para o botão da Sympla.
+   *
+   * É um `<a href>` que a pessoa CLICA, e não uma requisição que o protótipo faz: a promessa
+   * medida de zero rede em runtime continua valendo, e está escrita em `dados/ingressos.ts`.
+   */
+  link?: string;
+  /** Onde a pessoa vai cair, dito ANTES do resgate. */
+  lojaDeFora?: string;
+  /** O código que zera o carrinho lá. */
+  cupom?: string;
 }
 
 export type FaseDoResgate =
@@ -484,6 +517,14 @@ export interface Resgate {
    */
   titulo?: string;
   custoPago?: number;
+  /**
+   * O ENDEREÇO E O CUPOM, congelados na mesma hora e pela mesma razão que o título e o
+   * preço: o produtor pode trocar o cupom amanhã, e recibo não se reescreve. Quem resgatou
+   * ontem continua com o código que recebeu.
+   */
+  link?: string;
+  cupom?: string;
+  lojaDeFora?: string;
 }
 
 /* ── Efeitos ─────────────────────────────────────────────────────────────── */
@@ -529,8 +570,6 @@ export interface EstadoDoMotor {
   publicacoes: PublicacaoDefinida[];
   /** Ids das comunidades que esta persona assina. */
   assinadas: string[];
-  /** Ids das publicações guardadas para ler depois. */
-  publicacoesSalvas: string[];
   reacoesDadas: Record<string, number>;
   presencas: string[];
   /** Linguagens já atravessadas, para o bônus não pagar duas vezes. */

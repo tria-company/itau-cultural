@@ -12,6 +12,7 @@ const ROTULO_DA_ENTREGA: Record<RecompensaDefinida["entrega"], string> = {
   digital: "Liberado na hora, dentro do app.",
   correio: "Enviado pelo correio para o endereço que você informar.",
   "no-produto": "Vale dentro do próprio app, sem envio.",
+  link: "Retirada numa loja de fora, com o cupom que zera o carrinho.",
 };
 
 export function RecompensaItem({ recompensa: semente }: { recompensa: RecompensaDefinida }) {
@@ -83,12 +84,44 @@ export function RecompensaItem({ recompensa: semente }: { recompensa: Recompensa
 
       {feito ? (
         <>
-          <p className="aviso" data-tom="acao">
-            Resgatado. A entrega já está na sua carteira, com as cinco etapas.
-          </p>
-          <Link href="/studio/pontos/" className="botao-acao no-underline">
-            Acompanhar a entrega
-          </Link>
+          {/* DUAS ENTREGAS, DUAS RESPOSTAS. A esteira de cinco fases descreve o que a
+              casa faz; quando quem entrega é uma loja de fora, o que a pessoa precisa
+              agora é o cupom e o endereço, e não um lugar para acompanhar.
+
+              O `<a>` externo segue o gesto que o produto já usa para o botão da Sympla
+              (`evento/[slug]/page.tsx`): outra aba, `rel="noreferrer"`, seta, e a legenda
+              dizendo que se está saindo. Âncora que a pessoa clica não é requisição que o
+              protótipo faz, e é o que sustenta a promessa de zero rede em runtime. */}
+          {recompensa.entrega === "link" ? (
+            <>
+              <p className="aviso" data-tom="acao">
+                Resgatado. Use o cupom{" "}
+                <strong data-cupom-do-resgate>{recompensa.cupom || "no carrinho"}</strong>{" "}
+                para zerar o carrinho.
+              </p>
+              <a
+                href={recompensa.link}
+                target="_blank"
+                rel="noreferrer"
+                className="botao-acao no-underline"
+                data-abrir-loja-de-fora
+              >
+                Abrir {recompensa.lojaDeFora || "a loja"} ↗
+              </a>
+              <p className="tipo-legenda text-tinta-2 italic">
+                Você sai do app. A retirada acontece lá.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="aviso" data-tom="acao">
+                Resgatado. A entrega já está na sua carteira, com as cinco etapas.
+              </p>
+              <Link href="/studio/pontos/" className="botao-acao no-underline">
+                Acompanhar a entrega
+              </Link>
+            </>
+          )}
         </>
       ) : (
         <>

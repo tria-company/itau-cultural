@@ -8,9 +8,9 @@ import {
   ICONE_CORACAO_CHEIO,
   ICONE_ENVIAR,
   ICONE_FALA,
-  ICONE_SALVOS,
 } from "@/componentes/base/icones";
 import { Monograma, assinaturaDe, nomeDe } from "@/componentes/comunidade";
+import { comentariosAbertosDe } from "@/componentes/comunidade-estado";
 import { PalcoYoutube } from "@/componentes/palco";
 import { Vazio } from "@/componentes/pontos-base";
 import { usePontos } from "@/contexto/pontos";
@@ -153,7 +153,7 @@ export function PublicacaoAberta({
   if (!publicacao) return <Vazio>Esta publicação não existe mais.</Vazio>;
 
   const reagi = hidratado && (motor.atual.reacoesDadas[publicacao.id] ?? 0) > 0;
-  const guardada = hidratado && motor.atual.publicacoesSalvas.includes(publicacao.id);
+  const aceitaComentario = comentariosAbertosDe(publicacao.comunidadeId);
   const total = publicacao.comentarios.reduce(
     (soma, c) => soma + 1 + (c.respostas?.length ?? 0),
     0,
@@ -250,22 +250,6 @@ export function PublicacaoAberta({
             {reagi ? ICONE_CORACAO_CHEIO : ICONE_CORACAO}
             <span>{publicacao.reacoes}</span>
           </button>
-          <button
-            type="button"
-            className="pastilha"
-            data-ativa={guardada ? "sim" : "nao"}
-            onClick={() =>
-              motor.emitir("comunidade.publicacao.salva", {
-                tipo: "publicacao",
-                id: publicacao.id,
-              })
-            }
-            aria-pressed={guardada}
-            aria-label={guardada ? "Remover dos guardados" : "Guardar"}
-            disabled={!hidratado}
-          >
-            {ICONE_SALVOS}
-          </button>
           <span className="tipo-legenda text-tinta-3 inline-flex items-center gap-1">
             <span className="inline-flex size-3.5">{ICONE_FALA}</span>
             {total} {total === 1 ? "comentário" : "comentários"}
@@ -340,24 +324,33 @@ export function PublicacaoAberta({
         </div>
       )}
 
-      <div className="responder">
-        <label className="sr-only" htmlFor="responder">
-          Seu comentário
-        </label>
-        <input
-          id="responder"
-          ref={campo}
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder="Responder com algo útil…"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") enviar();
-          }}
-        />
-        <button type="button" onClick={enviar} disabled={!texto.trim()} aria-label="Enviar">
-          {ICONE_ENVIAR}
-        </button>
-      </div>
+      {/* COMENTÁRIO FECHADO É CAMPO QUE NÃO APARECE, e não campo que aparece e recusa.
+          A chave existe desde 28/08 e era gravada sem que ninguém a lesse; passou a valer
+          em 29/08/2026. Quem lê continua vendo a conversa que já está lá. */}
+      {aceitaComentario ? (
+        <div className="responder">
+          <label className="sr-only" htmlFor="responder">
+            Seu comentário
+          </label>
+          <input
+            id="responder"
+            ref={campo}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder="Responder com algo útil…"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") enviar();
+            }}
+          />
+          <button type="button" onClick={enviar} disabled={!texto.trim()} aria-label="Enviar">
+            {ICONE_ENVIAR}
+          </button>
+        </div>
+      ) : (
+        <p className="tipo-legenda text-tinta-2" data-comentarios-fechados>
+          Esta comunidade está com os comentários fechados.
+        </p>
+      )}
     </div>
   );
 }

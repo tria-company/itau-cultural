@@ -214,14 +214,10 @@ export const REGRAS: Regra[] = [
       { conceder: { ativo: "ficha", valor: 2, motivo: "Mais um dia de repertório" } },
     ],
   },
-  {
-    id: "r-guardar-publicacao",
-    versao: 1,
-    descreve: "Guardar uma publicação para ler depois",
-    quando: "comunidade.publicacao.salva",
-    maxPorDia: 5,
-    entao: [{ conceder: { ativo: "percurso", valor: 5, motivo: "Publicação guardada" } }],
-  },
+  // GUARDAR PUBLICAÇÃO SAIU DO PRODUTO em 29/08/2026, e com ela a regra que a pagava:
+  // `r-guardar-publicacao` dava 5 de percurso por vez, com teto de 5 por dia. A economia
+  // perde 25 de percurso por dia no melhor caso, e nenhum outro número se move: o gesto
+  // não pagava ficha nem reputação, e nenhuma missão ou emblema o citava.
   {
     id: "r-comentar",
     versao: 1,

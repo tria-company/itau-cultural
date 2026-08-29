@@ -166,6 +166,11 @@ function normalizarItem(bruto: unknown): RecompensaDefinida | null {
     entrega: (typeof b.entrega === "string"
       ? b.entrega
       : "presencial") as RecompensaDefinida["entrega"],
+    // Os três do item de link (29/08/2026). Opcionais: item gravado antes disto não os
+    // tem, e a folha cai no caso sem link, que é o que ele sempre foi.
+    ...(typeof b.link === "string" ? { link: b.link } : {}),
+    ...(typeof b.lojaDeFora === "string" ? { lojaDeFora: b.lojaDeFora } : {}),
+    ...(typeof b.cupom === "string" ? { cupom: b.cupom } : {}),
   };
 }
 

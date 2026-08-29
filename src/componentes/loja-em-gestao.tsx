@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { BotaoDoStudio } from "@/componentes/base/barra-de-acao";
 import { CampoDeImagem } from "@/componentes/base/campo-de-imagem";
@@ -15,13 +16,21 @@ import type { ImagemDeclarada } from "@/dados/tipos-produtor";
 import type { RecompensaDefinida } from "@/lib/pontos/tipos";
 
 /**
- * loja-na-vitrine.tsx — a loja com o que o dono dela pode fazer, na própria vitrine.
+ * loja-em-gestao.tsx — a loja pelo lado de quem a abastece.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * ADICIONAR E EDITAR ITEM MORAM AQUI, e não numa tela de gestão à parte. A tela à parte
- * existiu e não foi encontrada, o que é o mesmo que não existir: quem quer mexer no preço
- * está olhando para o preço. Mesmo arranjo do feed da comunidade — a vitrine é portada e
- * não sabe o que é gestão; ela recebe por prop o botão de criar e as ações de cada item.
+ * ELA MUDOU DE ENDEREÇO EM 29/08/2026, e o nome mudou junto. Era `loja-na-vitrine`, montada
+ * dentro de `/studio/pontos/loja/`, com um lápis sobre cada cartão da vitrine que a pessoa
+ * usa para gastar fichas. Funcionava, e era a mesma tela servindo a duas pessoas.
+ *
+ * O corte pedido foi de uma linha: dentro do Studio fica tudo que ele mexe, e a Loja, irmã
+ * de Início e Comunidade, é onde ele compra. Cadastrar item mora aqui, em
+ * `/studio/minha-loja/`; a vitrine voltou a ser só vitrine.
+ *
+ * O DESENHO DO CARTÃO NÃO MUDOU. Esta tela monta a mesma `<Recompensas>` da vitrine, e lhe
+ * entrega por prop o botão de criar e o lápis de cada item. O componente é portado do outro
+ * ramo e não sabe o que é gestão: ele só desenha o que recebe. Foi assim que a gestão entrou
+ * sem reescrever a tela, e é assim que ela sai.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -35,6 +44,9 @@ interface Rascunho {
   semLimite: boolean;
   entrega: RecompensaDefinida["entrega"];
   imagem: ImagemDeclarada | null;
+  link: string;
+  lojaDeFora: string;
+  cupom: string;
 }
 
 function vazio(): Rascunho {
@@ -48,6 +60,9 @@ function vazio(): Rascunho {
     semLimite: false,
     entrega: "presencial",
     imagem: imagemVazia(),
+    link: "",
+    lojaDeFora: "",
+    cupom: "",
   };
 }
 
@@ -67,10 +82,13 @@ function doItem(r: RecompensaDefinida): Rascunho {
       alt: r.imagemAlt,
       licenca: null,
     },
+    link: r.link ?? "",
+    lojaDeFora: r.lojaDeFora ?? "",
+    cupom: r.cupom ?? "",
   };
 }
 
-export function LojaNaVitrine({
+export function LojaEmGestao({
   hoje,
   imagens,
 }: {
@@ -82,10 +100,19 @@ export function LojaNaVitrine({
   const [aTirar, setATirar] = useState<string | null>(null);
 
   const custoOk = rascunho !== null && Number(rascunho.custo) >= 1;
+  /**
+   * O DISCRIMINANTE EXIGE O VALOR. Item declarado como «retira numa loja de fora» sem o
+   * endereço é um resgate que não leva a lugar nenhum: a pessoa paga a ficha e recebe um
+   * botão morto. Mesma guarda que a ficha de evento faz com `canalIngresso` e
+   * `linkDeIngresso` (`tipos-produtor.ts:1227`).
+   */
+  const linkOk =
+    rascunho !== null && (rascunho.entrega !== "link" || rascunho.link.trim() !== "");
   const podeGravar =
     rascunho !== null &&
     rascunho.titulo.trim() !== "" &&
     custoOk &&
+    linkOk &&
     imagemCompleta(rascunho.imagem);
 
   function gravar() {
@@ -100,6 +127,11 @@ export function LojaNaVitrine({
       imagem: rascunho.imagem.caminho,
       imagemAlt: rascunho.imagem.alt,
       imagemCredito: rascunho.imagem.credito,
+      // Os três só existem quando o discriminante os pede: gravar cupom num item
+      // presencial deixaria lixo esperando alguém acreditar nele.
+      link: rascunho.entrega === "link" ? rascunho.link.trim() : "",
+      lojaDeFora: rascunho.entrega === "link" ? rascunho.lojaDeFora.trim() : "",
+      cupom: rascunho.entrega === "link" ? rascunho.cupom.trim() : "",
     };
     if (rascunho.id === null) armazem.criar(campos);
     else armazem.alterar(rascunho.id, campos);
@@ -108,6 +140,21 @@ export function LojaNaVitrine({
 
   return (
     <>
+      <header className="prod-cabecalho">
+        <div className="prod-cabecalho-linha">
+          <Link href="/studio/pautas/" className="prod-superficie prod-voltar" data-voltar-studio>
+            <span className="prod-voltar-texto">‹ Studio</span>
+            <span className="prod-voltar-x" aria-hidden>
+              ✕
+            </span>
+          </Link>
+          <Link href="/studio/minha-loja/resgates/" className="pastilha" data-ver-resgates>
+            Resgates
+          </Link>
+        </div>
+        <h1 className="prod-titulo">Loja</h1>
+      </header>
+
       <Recompensas
         hoje={hoje}
         acaoDeCriar={
@@ -148,7 +195,7 @@ export function LojaNaVitrine({
           <BotaoDoStudio
             primaria
             desabilitado={!podeGravar}
-            porQueDesabilitado="Precisa de título, preço a partir de 1 ficha, e foto com crédito e texto alternativo."
+            porQueDesabilitado="Precisa de título, preço a partir de 1 ficha, foto com crédito e texto alternativo, e o endereço quando a retirada é numa loja de fora."
             aoClicar={gravar}
             data-gravar-item
           >
@@ -258,9 +305,56 @@ export function LojaNaVitrine({
                   <option value="digital">Digital</option>
                   <option value="correio">Correio</option>
                   <option value="no-produto">No app</option>
+                  <option value="link">Loja de fora</option>
                 </select>
               </Campo>
             </div>
+
+            {/* SÓ QUANDO A ENTREGA PEDE. Três campos escondidos atrás de um seletor é o
+                mesmo desenho do canal de ingresso na ficha de evento, e pela mesma razão:
+                pedir endereço de afiliado a quem vai entregar um cartaz pelo correio é
+                perguntar o que não se aplica. */}
+            {rascunho.entrega === "link" ? (
+              <>
+                <Campo
+                  rotulo="Endereço"
+                  obrigatorio
+                  nota="Onde a pessoa termina a compra. Abre em outra aba."
+                >
+                  <input
+                    type="text"
+                    value={rascunho.link}
+                    onChange={(e) => setRascunho({ ...rascunho, link: e.target.value })}
+                    className="prod-campo-entrada"
+                    data-link-do-item
+                    aria-invalid={rascunho.link.trim() === ""}
+                  />
+                </Campo>
+
+                <div className="prod-par">
+                  <Campo rotulo="Loja" nota="O nome que a tela mostra.">
+                    <input
+                      type="text"
+                      value={rascunho.lojaDeFora}
+                      onChange={(e) =>
+                        setRascunho({ ...rascunho, lojaDeFora: e.target.value })
+                      }
+                      className="prod-campo-entrada"
+                      data-loja-do-item
+                    />
+                  </Campo>
+                  <Campo rotulo="Cupom" nota="O código que zera o carrinho.">
+                    <input
+                      type="text"
+                      value={rascunho.cupom}
+                      onChange={(e) => setRascunho({ ...rascunho, cupom: e.target.value })}
+                      className="prod-campo-entrada"
+                      data-cupom-do-item
+                    />
+                  </Campo>
+                </div>
+              </>
+            ) : null}
 
             {/* TIRAR MORA NA FOLHA, e nao no cartao: e o unico gesto sem volta daqui, e
                 cartao de vitrine nao e lugar de gesto sem volta. Dois toques. */}
