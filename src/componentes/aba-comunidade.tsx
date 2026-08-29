@@ -1,28 +1,30 @@
 "use client";
 
-import { ComunidadesParaLer } from "@/componentes/comunidades-para-ler";
+import { useState } from "react";
+import { Explorar } from "@/componentes/comunidade-explorar";
 import { MeuFeed } from "@/componentes/comunidade-meu-feed";
 import { usePontos } from "@/contexto/pontos";
 import { PRODUTOR_DA_CASA, comunidadePorId } from "@/dados/comunidade";
 
 /**
- * aba-comunidade.tsx — quem decide o que a aba mostra.
+ * aba-comunidade.tsx — as duas metades da aba Comunidade.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * DUAS TELAS NUM ENDEREÇO SÓ, e a escolha é do estado da pessoa (pedido de 29/08/2026):
- * sem seguir ninguém, a aba é a galeria, porque não há feed que fazer; seguindo uma que
- * seja, ela é o feed próprio, com o que essas comunidades publicaram, misturado.
+ * MEU FEED E EXPLORAR, no topo (pedido de 29/08/2026). O primeiro é o que as comunidades
+ * que ele segue publicaram, misturado e do mais novo para o mais velho. O segundo é o resto,
+ * das que ele ainda NÃO segue, ordenado pelo que ele já demonstrou interesse. As duas listas
+ * nunca mostram o mesmo post: é isso que faz valer a pena trocar de aba.
  *
- * É o contrato de qualquer rede, e é o que faz o botão «Seguir» valer alguma coisa: antes
- * dele o gesto existia e não mudava nada na tela seguinte.
+ * A ABA QUE ABRE DEPENDE DE TER FEED. Quem não segue ninguém cai em Explorar, porque «Meu
+ * feed» vazio como primeira tela é uma porta fechada; quem segue alguém cai no feed, que é
+ * o que ele voltou aqui para ver. Trocar continua a um toque, nos dois casos.
  *
- * A GALERIA NÃO SOME quando o feed aparece: ela ganha endereço próprio, em
- * `/studio/comunidade/descobrir/`, e o feed leva até ela. Sem isso, seguir a primeira
- * comunidade trancaria a porta de encontrar a segunda.
+ * O TRILHO É `.prod-trilho-abas`, que já existe e já sabe desenhar aba ativa e inativa. Um
+ * segmentado novo aqui seria uma terceira gramática para a mesma pergunta, e este projeto já
+ * aposentou um por isso.
  *
  * QUEM DECIDE É O CLIENTE, porque quem sabe é o `localStorage`. No servidor não há
- * assinatura, e o HTML do build sai com a galeria: é o que uma pessoa que chega sem estado
- * vê, e é o que a hidratação confirma para ela.
+ * assinatura, o HTML do build sai em Explorar, e é o que uma pessoa sem estado vê.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 export function AbaComunidade() {
@@ -32,5 +34,39 @@ export function AbaComunidade() {
     hidratado &&
     motor.atual.assinadas.some((id) => comunidadePorId(id)?.donoId !== PRODUTOR_DA_CASA);
 
-  return segueAlguma ? <MeuFeed /> : <ComunidadesParaLer />;
+  // `null` = ainda não escolheu à mão, e vale a regra. Assim que ele toca numa aba, a
+  // escolha dele vence, inclusive a de ficar no feed vazio para ver que está vazio.
+  const [escolhida, setEscolhida] = useState<"feed" | "explorar" | null>(null);
+  const atual = escolhida ?? (segueAlguma ? "feed" : "explorar");
+
+  return (
+    <div className="prod-corpo" data-aba-comunidade={atual}>
+      <div className="prod-trilho-abas" role="tablist" aria-label="O que mostrar">
+        <button
+          type="button"
+          role="tab"
+          className="prod-pauta"
+          data-ativa={atual === "feed" ? "sim" : "nao"}
+          aria-selected={atual === "feed"}
+          onClick={() => setEscolhida("feed")}
+          data-aba="feed"
+        >
+          Meu feed
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className="prod-pauta"
+          data-ativa={atual === "explorar" ? "sim" : "nao"}
+          aria-selected={atual === "explorar"}
+          onClick={() => setEscolhida("explorar")}
+          data-aba="explorar"
+        >
+          Explorar
+        </button>
+      </div>
+
+      {atual === "feed" ? <MeuFeed /> : <Explorar />}
+    </div>
+  );
 }

@@ -50,7 +50,7 @@ export function MeuFeed() {
   );
 
   return (
-    <div className="prod-corpo" data-meu-feed>
+    <div data-meu-feed>
       <div className="prod-vinculo" data-resumo-do-feed>
         <span className="prod-registro-corpo">
           <strong className="prod-registro-titulo">
@@ -73,7 +73,12 @@ export function MeuFeed() {
       </div>
 
       <div className="flex flex-col gap-4 comunidade-coluna">
-        {publicacoes.length === 0 ? (
+        {seguidas.length === 0 ? (
+          <Painel titulo="Você ainda não segue nenhuma">
+            Abra Explorar aqui em cima, ou veja as comunidades uma a uma em Descobrir. O que
+            você seguir passa a chegar neste feed.
+          </Painel>
+        ) : publicacoes.length === 0 ? (
           <Painel titulo="Ainda sem publicações">
             As comunidades que você segue ainda não publicaram nada.
           </Painel>
