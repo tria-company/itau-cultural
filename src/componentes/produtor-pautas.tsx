@@ -14,7 +14,32 @@ import type { Pauta } from "@/dados/tipos-produtor";
  *
  * A PAUTA SEM FICHA APARECE, DESABILITADA, com o objetivo dela no `title`: é a diferença
  * entre uma superfície que mostra o próprio tamanho e uma que esconde o que falta.
+ *
+ * AS DUAS BANCADAS ENTRARAM EM 29/08/2026, e a primeira versão as esqueceu aqui: elas foram
+ * só para a coluna da web, que no aparelho não existe. Quem abre a aba Studio num telefone
+ * via as onze pautas e mais nada, e Comunidades e Loja só se alcançavam digitando a URL.
+ *
+ * Elas ficam em seção própria porque respondem a outra pergunta. As onze são «o que você
+ * publica»: cada uma abre uma ficha, produz um registro, alimenta uma tela pública. As duas
+ * são «o que você mantém»: um feed e uma vitrine, que existem antes e depois de cada post.
+ * Misturadas na mesma grade, a contagem «11 de 11 prontas» passaria a mentir.
  */
+
+/** As duas bancadas do produtor. Não são `Pauta`: não têm ficha em atos nem panorama. */
+const BANCADAS = [
+  {
+    id: "comunidades",
+    rota: "/studio/minhas-comunidades/",
+    rotulo: "Comunidades",
+    objetivo: "As comunidades que você mantém: capa, nome, e o que se publica nelas.",
+  },
+  {
+    id: "loja",
+    rota: "/studio/minha-loja/",
+    rotulo: "Loja",
+    objetivo: "Os itens que você põe à venda por fichas, e quem já resgatou.",
+  },
+] as const;
 
 export interface ImagemDeAtalho {
   caminho: string;
@@ -91,6 +116,38 @@ export function PautasDoStudio({
                   {capa}
                   <span className="prod-atalho-rotulo">
                     {d.rotulo}
+                    <span aria-hidden>▸</span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="prod-secao" aria-labelledby="prod-bancadas-titulo">
+          <h2 className="prod-secao-titulo" id="prod-bancadas-titulo">
+            Manter
+          </h2>
+          <div className="prod-atalhos" data-atalhos-bancadas>
+            {BANCADAS.map((b, i) => {
+              const img = imagens[(PAUTAS.length + i) % Math.max(1, imagens.length)] ?? null;
+              return (
+                <Link
+                  key={b.id}
+                  href={b.rota}
+                  className="prod-atalho"
+                  data-atalho={b.id}
+                  title={b.objetivo}
+                >
+                  <span className="prod-atalho-capa">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- capa local do acervo
+                      <img src={img.caminho} alt="" loading="lazy" />
+                    ) : null}
+                    {img ? <span className="prod-atalho-credito">{img.credito}</span> : null}
+                  </span>
+                  <span className="prod-atalho-rotulo">
+                    {b.rotulo}
                     <span aria-hidden>▸</span>
                   </span>
                 </Link>

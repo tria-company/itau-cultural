@@ -1991,6 +1991,52 @@
   flex-wrap: nowrap;
 }
 
+/**
+ * O SALDO DA LOJA E UMA LINHA, INCLUSIVE NO APARELHO.
+ *
+ * A regra de cima quebra `.prod-vinculo` em coluna no aparelho, e esta certa para o que ela
+ * mira: linha de lista com dois ou tres botoes na ponta, que empilhados nao cabem em 370px.
+ * O saldo nao e isso. Ele tem um numero curto de um lado e uma pastilha curta do outro, e
+ * empilhado vira um cartao de tres andares com o «Carteira ›» solto embaixo, desalinhado do
+ * numero que ele explica (reprovado a olho, 29/08/2026).
+ *
+ * `align-items: center` porque os dois lados tem alturas diferentes: o numero leva a linha
+ * do nivel embaixo, e a pastilha nao leva nada.
+ */
+[data-view="mobile"] .prod-vinculo[data-saldo-da-loja] {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prod-vinculo[data-saldo-da-loja] > .prod-registro-acoes {
+  flex: none;
+  flex-wrap: nowrap;
+}
+
+/**
+ * O SALDO DA LOJA E UMA LINHA, INCLUSIVE NO APARELHO.
+ *
+ * A regra de cima quebra `.prod-vinculo` em coluna no aparelho, e esta certa para o que ela
+ * mira: linha de lista com dois ou tres botoes na ponta, que empilhados nao cabem em 370px.
+ * O saldo nao e isso. Ele tem um numero curto de um lado e uma pastilha curta do outro, e
+ * empilhado vira um cartao de tres andares com o «Carteira ›» solto embaixo, desalinhado do
+ * numero que ele explica (reprovado a olho, 29/08/2026).
+ *
+ * `align-items: center` porque os dois lados tem alturas diferentes: o numero leva a linha
+ * do nivel embaixo, a pastilha nao leva nada.
+ */
+[data-view="mobile"] .prod-vinculo[data-saldo-da-loja] {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prod-vinculo[data-saldo-da-loja] > .prod-registro-acoes {
+  flex: none;
+  flex-wrap: nowrap;
+}
+
 /* ===========================================================================
  * A GRADE DE SESSÕES
  * ======================================================================== */
