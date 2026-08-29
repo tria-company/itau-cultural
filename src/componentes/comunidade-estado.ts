@@ -334,6 +334,32 @@ export function nomeGerido(comunidadeId: string): string | null {
 }
 
 /**
+ * A CAPA VIGENTE DE UMA COMUNIDADE, ou `null` quando não há nenhuma.
+ *
+ * Função de módulo, e não gancho, pela mesma razão de `nomeGerido`: a galeria de comunidades
+ * pergunta por vinte e tantas de uma vez, dentro de um `map`. O que o produtor subiu pelo
+ * lápis vence a semente; antes de hidratar as duas dão o mesmo, que é o que o HTML do build
+ * traz, então a hidratação não diverge.
+ */
+export function capaVigenteDe(
+  comunidadeId: string,
+): { imagem: string; alt: string; credito: string } | null {
+  const propria = estado?.perfis[comunidadeId]?.capa;
+  if (propria && propria.caminho.trim() !== "") {
+    return { imagem: propria.caminho, alt: propria.alt, credito: propria.credito };
+  }
+  const semeada = capaSemeada(comunidadeId);
+  if (semeada) {
+    return {
+      imagem: semeada.imagem,
+      alt: semeada.imagemAlt,
+      credito: semeada.imagemCredito,
+    };
+  }
+  return null;
+}
+
+/**
  * A COMUNIDADE ACEITA COMENTÁRIO?
  *
  * A chave existia desde 28/08 e era gravada por uma tela que ninguém mais tem — e NUNCA

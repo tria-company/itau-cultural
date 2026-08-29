@@ -1,57 +1,36 @@
-import { Comunidade } from "@/componentes/comunidade";
-import { CapaDaComunidade } from "@/componentes/comunidade-capa";
-import {
-  COMUNIDADE_OFICIAL,
-  COMUNIDADES,
-  PUBLICACOES,
-  comunidadePorId,
-} from "@/dados/comunidade";
-import { PUBLICACOES_DO_ACERVO } from "@/dados/comunidade-feed";
+import { ComunidadesParaLer } from "@/componentes/comunidades-para-ler";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
-import { CONTEXTO_DO_PRODUTOR, catalogoComum } from "@/dados/mock/seed-produtor";
+import { catalogoComum } from "@/dados/mock/seed-produtor";
 
 /**
- * Studio · Comunidade, o feed de quem lê.
+ * Studio · Comunidade, a porta.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * ELA VOLTOU A SER LEITURA EM 29/08/2026. Até aqui esta rota atendia duas pessoas ao mesmo
- * tempo: montava `ComunidadeNoStudio`, com publicar, editar e apagar, e uma capa com lápis.
- * O pedido foi de uma linha: dentro do Studio fica tudo que ele mexe, e a aba Comunidade é
- * o que ele consome. A gestão mudou para `/studio/minhas-comunidades/[id]/`.
+ * ELA ERA O FEED DA CASA, e virou a ESCOLHA (pedido de 29/08/2026). Abrir direto numa
+ * comunidade e oferecer as outras dentro de um menu suspenso escondia o produto: quem
+ * chegava via uma comunidade e precisava descobrir que existiam vinte e duas.
  *
- * O QUE SOBRA É O FEED CRU, o mesmo que `/studio/comunidade/[id]/` já montava para as de
- * fora. Sem `acoesDoPost`, sem `acaoDePublicar`, e a capa sem `gerenciavel`.
+ * Agora ela é uma galeria de cartazes, cada um com a capa, o nome dentro da capa e quantas
+ * publicações a comunidade tem. Escolher uma leva a `/studio/comunidade/[id]/`, onde ele
+ * entra como integrante: sem lápis, sem publicar, sem apagar. Quem MANTÉM comunidade faz
+ * isso em `/studio/minhas-comunidades/`, que é a bancada dele no Studio.
  *
- * ESTA ROTA É A PORTA, E O SELETOR É A NAVEGAÇÃO. Ela abre na comunidade da casa porque
- * ela é a que ele sempre assina; trocar no seletor leva para `/studio/comunidade/[id]/`,
- * onde a capa e o feed falam da mesma comunidade. Antes o seletor trocava só o feed, por
- * estado, e a capa acima continuava mostrando a comunidade anterior.
+ * A PÁGINA É MAGRA DE PROPÓSITO. As capas e as contagens vêm do motor, que já tem as 122
+ * publicações no cliente; passar tudo por prop do servidor duplicaria o mesmo dado no HTML.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-
-/** Medidos no build: a comunidade da casa e quantas publicações ela abre. */
-const DA_CASA = comunidadePorId(COMUNIDADE_OFICIAL) ?? COMUNIDADES[0];
-const PUBLICACOES_DA_CASA = [...PUBLICACOES, ...PUBLICACOES_DO_ACERVO].filter(
-  (p) => p.comunidadeId === COMUNIDADE_OFICIAL,
-).length;
-
 export default function PaginaComunidade() {
   return (
     <div
       className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
       data-margem-quase-nula
     >
-      <CapaDaComunidade
-        comunidadeId={COMUNIDADE_OFICIAL}
-        nome={DA_CASA.nome}
-        descricao={DA_CASA.descricao}
-        hoje={CONTEXTO_DO_PRODUTOR.dataDeReferencia}
-        publicacoes={PUBLICACOES_DA_CASA}
-        assinantes={DA_CASA.assinantes}
-      />
+      <header className="prod-cabecalho">
+        <h1 className="prod-titulo">Comunidades</h1>
+      </header>
 
-      <Comunidade comunidadeId={COMUNIDADE_OFICIAL} />
+      <ComunidadesParaLer />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

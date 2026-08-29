@@ -5279,6 +5279,107 @@
   transform: rotate(90deg);
 }
 
+/* ---- a galeria de comunidades ----------------------------------------------- */
+
+/**
+ * O CARTAZ DE UMA COMUNIDADE: a capa com o nome DENTRO dela.
+ *
+ * Mesmo gesto da abertura de Descobrir e da capa da comunidade, um porte abaixo: foto,
+ * veu subindo do pe para o texto ter contraste, e o nome vivendo na imagem. A galeria e a
+ * porta da aba, e cartaz e o que faz alguem escolher — lista de nomes nao faz.
+ *
+ * `auto-fill` com piso de 15rem: no aparelho da uma coluna, e a foto ocupa a largura toda,
+ * que e o que um cartaz quer. Na web vira duas ou tres conforme a janela.
+ */
+.comunidade-galeria {
+  display: grid;
+  gap: var(--espaco-pilha);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+.comunidade-tijolo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.comunidade-tijolo-capa {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+}
+
+.comunidade-tijolo-capa > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O VEU E CONDICAO DE LEITURA, nao decoracao: sem ele o nome branco cai sobre uma foto
+ * clara e some. Sobe do pe porque e onde o texto mora. */
+.comunidade-tijolo-veu {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--ic-preto) 82%, transparent) 0%,
+    color-mix(in srgb, var(--ic-preto) 45%, transparent) 45%,
+    transparent 100%
+  );
+}
+
+.comunidade-tijolo-texto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  min-width: 0;
+}
+
+/* DUAS LINHAS, E NAO MAIS. «Armazem Companhia de Teatro» ja usa as duas num cartao de
+ * 15rem; a terceira empurraria a contagem para a parte clara do veu, onde ela some. Com o
+ * teto, todo cartaz da galeria tem a mesma altura de texto. */
+.comunidade-tijolo-nome {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1.1;
+  color: var(--ic-branco);
+}
+
+.comunidade-tijolo-meta {
+  font-size: var(--tipo-legenda);
+  color: color-mix(in srgb, var(--ic-branco) 78%, transparent);
+}
+
+.comunidade-tijolo-credito {
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+}
+
+.comunidade-tijolo:hover .comunidade-tijolo-capa {
+  border-color: var(--cor-borda-forte);
+}
+
+.comunidade-tijolo:focus-visible .comunidade-tijolo-capa {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
 /* ---- a coluna do feed na web ------------------------------------------------ */
 
 /**
