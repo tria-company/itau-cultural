@@ -14,8 +14,8 @@ import { Painel, Vazio } from "@/componentes/pontos-base";
 import { nomeGerido } from "@/componentes/comunidade-estado";
 import { usePontos } from "@/contexto/pontos";
 import {
-  COMUNIDADE_OFICIAL,
   COMUNIDADES,
+  PRODUTOR_DA_CASA,
   comunidadePorId,
   pessoaPorId,
 } from "@/dados/comunidade";
@@ -71,7 +71,14 @@ function Enquete({ opcoes }: { opcoes: { rotulo: string; pct: number }[] }) {
   );
 }
 
-function Cartao({
+/**
+ * O CARTÃO DO POST, exportado desde 29/08/2026 para o feed próprio poder reusá-lo.
+ *
+ * O feed de uma comunidade e o feed de quem segue várias desenham o mesmo objeto, e o
+ * autor do post já diz de onde ele veio, porque nas publicações do acervo o autor É a
+ * comunidade. Um segundo cartão seria a mesma coisa escrita duas vezes.
+ */
+export function Cartao({
   publicacao,
   acoesDoDono,
 }: {
@@ -163,57 +170,6 @@ function Cartao({
   );
 }
 
-/**
- * O seletor: dois menus e um botão.
- *
- * O PRIMEIRO menu lista as que a pessoa segue, com a do Itaú Cultural sempre no
- * topo — é a casa e não se deixa de seguir. O SEGUNDO lista as que ela ainda não
- * segue, e escolher uma ali é uma VISITA: o feed troca na hora e a faixa abaixo
- * diz que ela está de passagem, com o botão de seguir à mão.
- *
- * Dois menus e não um só porque as duas listas respondem a perguntas diferentes:
- * «para onde eu volto» e «o que existe além». Misturadas, a segunda enterra a
- * primeira assim que a lista de fora crescer.
- */
-function Seletor({ atual, aoTrocar }: { atual: string; aoTrocar: (id: string) => void }) {
-  const { motor, hidratado } = usePontos();
-
-  const seguidas = hidratado ? motor.atual.assinadas : [COMUNIDADE_OFICIAL];
-  const sigoAAtual = seguidas.includes(atual);
-
-  const paraOpcao = (c: (typeof COMUNIDADES)[number]) => ({
-    id: c.id,
-    rotulo: c.nome,
-    nota: c.uf,
-  });
-
-  const minhas = COMUNIDADES.filter((c) => seguidas.includes(c.id)).map(paraOpcao);
-  const outras = COMUNIDADES.filter(
-    (c) => c.natureza !== "oficial" && !seguidas.includes(c.id),
-  ).map(paraOpcao);
-
-  return (
-    <div className="seletor-comunidade">
-      <MenuDeEscolha
-        rotulo="Minhas comunidades"
-        opcoes={minhas}
-        valor={sigoAAtual ? atual : null}
-        aoEscolher={aoTrocar}
-        textoVazio="nenhuma ainda"
-        placeholder="visitando outra"
-      />
-      <MenuDeEscolha
-        rotulo="Visitar outras"
-        opcoes={outras}
-        valor={sigoAAtual ? null : atual}
-        aoEscolher={aoTrocar}
-        textoVazio="você já segue todas"
-        placeholder={`${outras.length} para conhecer`}
-      />
-    </div>
-  );
-}
-
 export function Comunidade({
   comunidadeId,
   /** O que o dono pode fazer com CADA post. `undefined` some da tela. */
@@ -226,31 +182,43 @@ export function Comunidade({
   acaoDePublicar?: ReactNode;
 }) {
   const { motor, hidratado } = usePontos();
-  const router = useRouter();
 
   /**
-   * TROCAR DE COMUNIDADE É NAVEGAR, E NÃO TROCAR ESTADO (29/08/2026).
+   * TROCAR DE COMUNIDADE É NAVEGAR, E QUEM NAVEGA É A GALERIA (29/08/2026).
    *
-   * Antes o seletor guardava a escolha num `useState` local: o feed trocava, e a capa
-   * renderizada acima pela página continuava mostrando a comunidade anterior, porque ela
-   * recebe o id do servidor e ninguém a avisava. Eram duas maneiras de trocar de comunidade
-   * que não se conheciam, com a rota `[id]` existindo em paralelo.
+   * Aqui havia um seletor de dois menus suspensos que trocava o feed por estado local
+   * enquanto a capa acima continuava na comunidade anterior. Ele saiu inteiro: a porta da
+   * aba é a galeria em `/studio/comunidade/`, e uma segunda maneira de trocar, dentro da
+   * tela para onde a primeira leva, é ruído.
    *
-   * Agora há uma só. A escolha vira endereço, a página inteira responde por ela, e o
-   * endereço pode ser copiado e colado.
+   * Sobrou uma verdade só: esta tela mostra a comunidade do endereço.
    */
   const atual = comunidadeId;
-  const trocar = (id: string) => router.push(`/studio/comunidade/${id}/`);
 
   const comunidade = comunidadePorId(atual);
   if (!comunidade) return <Vazio>Esta comunidade não existe.</Vazio>;
 
   const publicacoes = motor.atual.publicacoes.filter((p) => p.comunidadeId === atual);
-  const assinada = hidratado && motor.atual.assinadas.includes(atual);
   const oficial = comunidade.natureza === "oficial";
+  const seguindo = hidratado && motor.atual.assinadas.includes(atual);
 
-  function seguir() {
-    motor.emitir("comunidade.assinada", { tipo: "comunidade", id: atual });
+  /**
+   * SEGUIR ALIMENTA O FEED PRÓPRIO, e é o que dá sentido a esta aba.
+   *
+   * Quem segue uma ou mais comunidades passa a abrir a aba num feed misturado, com o que
+   * elas publicaram, em vez da galeria. É o mesmo contrato de qualquer rede: você escolhe
+   * quem lê você de volta.
+   *
+   * DEIXAR DE SEGUIR É OUTRO EVENTO, e não o mesmo alternando. `comunidade.assinada` paga
+   * 10 de percurso, com teto de 3 por dia; se ele alternasse, seguir e deixar de seguir a
+   * mesma comunidade três vezes renderia 30 sem que nada acontecesse. Foi exatamente o
+   * defeito que o guardar de publicação tinha, e que este projeto já pagou uma vez.
+   */
+  function alternarSeguir() {
+    motor.emitir(seguindo ? "comunidade.deixada" : "comunidade.assinada", {
+      tipo: "comunidade",
+      id: atual,
+    });
   }
 
   return (
@@ -258,28 +226,28 @@ export function Comunidade({
     // 1.100px nao mostra mais foto, mostra a mesma foto maior, e o texto embaixo vira uma
     // linha de 180 caracteres. O limite mora no CSS, sob `[data-view="web"]`.
     <div className="flex flex-col gap-4 comunidade-coluna">
-      <Seletor atual={atual} aoTrocar={trocar} />
 
-      {/* A ficha e a faixa só aparecem fora da casa: na comunidade do Itaú a
-          pessoa já está dentro, e não há o que decidir. */}
+      {/* A ficha e o botão só aparecem fora da casa: na comunidade do Itaú a pessoa já
+          está dentro, e não há o que decidir. */}
       {!oficial && (
         <>
           <div className="faixa-visita">
             <span>
-              {assinada ? (
+              {seguindo ? (
                 <>Você segue <strong>{comunidade.nome}</strong>.</>
               ) : (
-                <>Você está visitando <strong>{comunidade.nome}</strong>.</>
+                <>Siga para ver as publicações no seu feed.</>
               )}
             </span>
             <button
               type="button"
-              className={assinada ? "botao-discreto" : "botao-acao"}
-              data-ativo={assinada ? "sim" : undefined}
-              onClick={seguir}
-              disabled={assinada || !hidratado}
+              className={seguindo ? "botao-discreto" : "botao-acao"}
+              data-ativo={seguindo ? "sim" : undefined}
+              onClick={alternarSeguir}
+              disabled={!hidratado}
+              data-seguir-comunidade
             >
-              {assinada ? "Seguindo" : "Seguir"}
+              {seguindo ? "Seguindo" : "Seguir"}
             </button>
           </div>
 

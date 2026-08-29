@@ -303,6 +303,15 @@ titulo("9. Comunidade");
 
   m.emitir("comunidade.assinada", { tipo: "comunidade", id: "c-bro-mcs" });
   conferir("assinou a comunidade", m.atual.assinadas.includes("c-bro-mcs"));
+
+  // DEIXAR DE SEGUIR E EVENTO PROPRIO (29/08/2026), e nao `assinada` alternando: seguir
+  // paga 10 de percurso, e um mesmo evento que alterna deixaria farmar percurso indo e
+  // voltando. Este nao paga nada, e o portao mede as duas metades.
+  const percursoAntes = m.saldoDe("percurso");
+  m.emitir("comunidade.deixada", { tipo: "comunidade", id: "c-bro-mcs" });
+  conferir("deixou de seguir", !m.atual.assinadas.includes("c-bro-mcs"));
+  conferir("e deixar de seguir nao paga nada", m.saldoDe("percurso") === percursoAntes);
+  m.emitir("comunidade.assinada", { tipo: "comunidade", id: "c-bro-mcs" });
   const contagem = m.atual.assinadas.length;
   m.emitir("comunidade.assinada", { tipo: "comunidade", id: "c-bro-mcs" });
   conferir("assinar duas vezes não duplica", m.atual.assinadas.length === contagem);

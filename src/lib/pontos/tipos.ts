@@ -55,6 +55,7 @@ export type NomeDeEvento =
   | "comunidade.comentario.criado"
   | "comunidade.reacao.dada"
   | "comunidade.assinada"
+  | "comunidade.deixada"
   /**
    * O PRODUTOR PUBLICA NA COMUNIDADE (2026-08-28). Os tres estao de fora de
    * `UMA_VEZ_POR_ITEM` e de `VALE_SEQUENCIA`, e nenhuma regra os cita: publicar nao paga

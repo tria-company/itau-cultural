@@ -445,6 +445,21 @@ export class Motor {
         break;
       }
 
+      /**
+       * DEIXAR DE SEGUIR É EVENTO PRÓPRIO, e não `assinada` alternando.
+       *
+       * `r-assinar` paga 10 de percurso por seguir, com teto de 3 por dia. Um mesmo evento
+       * que alterna deixaria seguir e desseguir a mesma comunidade três vezes render 30
+       * sem que nada tivesse acontecido. Foi o defeito que o guardar de publicação teve, e
+       * ele custou uma regra inteira. Este não paga nada, de propósito.
+       */
+      case "comunidade.deixada": {
+        const id = evento.alvo?.id;
+        if (!id || !s.assinadas.includes(id)) break;
+        s.assinadas = s.assinadas.filter((x) => x !== id);
+        break;
+      }
+
       case "comunidade.assinada": {
         const id = evento.alvo?.id;
         if (!id || s.assinadas.includes(id)) break;

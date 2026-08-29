@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { capaVigenteDe, nomeGerido } from "@/componentes/comunidade-estado";
 import { usePontos } from "@/contexto/pontos";
-import { COMUNIDADES, COMUNIDADE_OFICIAL } from "@/dados/comunidade";
+import { COMUNIDADES, PRODUTOR_DA_CASA } from "@/dados/comunidade";
 import type { ComunidadeDefinida, PublicacaoDefinida } from "@/lib/pontos/tipos";
 
 /**
@@ -25,8 +25,19 @@ import type { ComunidadeDefinida, PublicacaoDefinida } from "@/lib/pontos/tipos"
  * que o CMS publicou. Sem nenhuma das três, o cartaz fica sem foto e diz o nome do mesmo
  * jeito: cartaz sem foto é honesto, foto inventada não.
  *
+ * AS DELE NÃO ENTRAM AQUI. Esta aba é sobre comunidade dos outros: é onde ele lê, comenta
+ * e segue, como integrante. As que ele mantém têm bancada própria, em
+ * `/studio/minhas-comunidades/`, e mostrá-las nas duas telas era justamente a confusão que
+ * este refinamento inteiro veio desfazer. A pergunta é feita ao dado, por `donoId`.
+ *
  * AS QUE ELE SEGUE VÊM PRIMEIRO, e não misturadas. São duas perguntas diferentes: «para
- * onde eu volto» e «o que existe além». Misturadas, a segunda enterra a primeira.
+ * onde eu volto» e «o que existe além». Misturadas, a segunda enterra a primeira. A seção
+ * só aparece quando tem alguém: cabeçalho sobre lista vazia é ruído.
+ *
+ * A BUSCA FILTRA AS DUAS SEÇÕES DE UMA VEZ, por nome e por UF. São vinte e duas comunidades
+ * numa grade de cartazes, e rolar até achar «Rendeiras de Bilro do Cariri» é o tipo de
+ * trabalho que um campo de uma linha resolve. Ela some quando há menos de oito: campo de
+ * busca sobre lista curta é enfeite.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -71,6 +82,7 @@ function Tijolo({ cartaz }: { cartaz: Cartaz }) {
 
 export function ComunidadesParaLer() {
   const { motor, hidratado } = usePontos();
+  const [busca, setBusca] = useState("");
 
   const publicacoes = motor.atual.publicacoes;
 
@@ -82,7 +94,8 @@ export function ComunidadesParaLer() {
     const quantas = new Map<string, number>();
     for (const p of publicacoes) quantas.set(p.comunidadeId, (quantas.get(p.comunidadeId) ?? 0) + 1);
 
-    return COMUNIDADES.map((c): Cartaz => {
+    // `donoId` decide: as dele ficam de fora desta aba inteira.
+    return COMUNIDADES.filter((c) => c.donoId !== PRODUTOR_DA_CASA).map((c): Cartaz => {
       const propria = capaVigenteDe(c.id);
       const doFeed = primeira.get(c.id);
       return {
@@ -96,21 +109,55 @@ export function ComunidadesParaLer() {
     });
   }, [publicacoes]);
 
-  // Antes de hidratar vale o que o HTML do build traz: a casa, que toda persona assina.
-  const seguidas = hidratado ? motor.atual.assinadas : [COMUNIDADE_OFICIAL];
-  const minhas = cartazes.filter((c) => seguidas.includes(c.comunidade.id));
-  const outras = cartazes.filter((c) => !seguidas.includes(c.comunidade.id));
+  // Antes de hidratar não há assinatura nenhuma a declarar: a única que o estado traz de
+  // fábrica é a da casa, e a casa não entra nesta tela.
+  const seguidas = hidratado ? motor.atual.assinadas : [];
+
+  // Sem acento e sem caixa: quem procura «brô» digita «bro», e ficar de fora por causa de
+  // um circunflexo é a busca punindo o teclado da pessoa.
+  const achatar = (t: string) =>
+    t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const alvo = achatar(busca.trim());
+  const casa = (c: Cartaz) =>
+    alvo === "" ||
+    achatar(c.nome).includes(alvo) ||
+    achatar(c.comunidade.uf ?? "").includes(alvo);
+
+  const filtrados = cartazes.filter(casa);
+  const seguindo = filtrados.filter((c) => seguidas.includes(c.comunidade.id));
+  const outras = filtrados.filter((c) => !seguidas.includes(c.comunidade.id));
 
   return (
     <div className="prod-corpo" data-comunidades-para-ler>
-      <section className="prod-secao">
-        <h2 className="prod-secao-titulo">Suas comunidades</h2>
-        <div className="comunidade-galeria" data-galeria="minhas">
-          {minhas.map((c) => (
-            <Tijolo key={c.comunidade.id} cartaz={c} />
-          ))}
-        </div>
-      </section>
+      {cartazes.length >= 8 ? (
+        <label className="prod-campo">
+          <span className="sr-only">Buscar comunidade</span>
+          <input
+            type="search"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder={`Buscar entre ${cartazes.length} comunidades`}
+            className="prod-campo-entrada"
+            data-buscar-comunidade
+          />
+        </label>
+      ) : null}
+
+      {filtrados.length === 0 ? (
+        <p className="prod-campo-nota" data-busca-sem-resultado>
+          Nenhuma comunidade com «{busca.trim()}».
+        </p>
+      ) : null}
+      {seguindo.length > 0 ? (
+        <section className="prod-secao">
+          <h2 className="prod-secao-titulo">Você segue</h2>
+          <div className="comunidade-galeria" data-galeria="seguindo">
+            {seguindo.map((c) => (
+              <Tijolo key={c.comunidade.id} cartaz={c} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {outras.length > 0 ? (
         <section className="prod-secao">

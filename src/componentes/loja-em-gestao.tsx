@@ -101,18 +101,22 @@ export function LojaEmGestao({
 
   const custoOk = rascunho !== null && Number(rascunho.custo) >= 1;
   /**
-   * O DISCRIMINANTE EXIGE O VALOR. Item declarado como «retira numa loja de fora» sem o
-   * endereço é um resgate que não leva a lugar nenhum: a pessoa paga a ficha e recebe um
-   * botão morto. Mesma guarda que a ficha de evento faz com `canalIngresso` e
-   * `linkDeIngresso` (`tipos-produtor.ts:1227`).
+   * O LINK É O QUE DECIDE A ENTREGA, e não um seletor (29/08/2026).
+   *
+   * A primeira versão escondia os três campos atrás de `Entrega = "Loja de fora"`, como a
+   * ficha de evento faz com o canal de ingresso. Estava errado para esta loja: aqui o link
+   * de afiliado é o caso NORMAL, não a exceção. Quem cadastra item cola o endereço do
+   * produto, e esconder o campo atrás de uma escolha que ninguém sabe que precisa fazer é
+   * esconder o produto.
+   *
+   * Agora o campo está sempre à vista, e preenchê-lo é que torna o item de retirada fora.
+   * O seletor de entrega descreve as outras quatro, para quem entrega em casa.
    */
-  const linkOk =
-    rascunho !== null && (rascunho.entrega !== "link" || rascunho.link.trim() !== "");
+  const porLink = rascunho !== null && rascunho.link.trim() !== "";
   const podeGravar =
     rascunho !== null &&
     rascunho.titulo.trim() !== "" &&
     custoOk &&
-    linkOk &&
     imagemCompleta(rascunho.imagem);
 
   function gravar() {
@@ -123,15 +127,16 @@ export function LojaEmGestao({
       descricao: rascunho.descricao.trim(),
       custo: Number(rascunho.custo),
       estoque: rascunho.semLimite ? null : Number(rascunho.estoque || 0),
-      entrega: rascunho.entrega,
+      // O ENDEREÇO MANDA. Com link, a entrega é «link» e o seletor não discute; sem link,
+      // vale o que ele diz, e os três campos saem vazios para não deixar cupom órfão
+      // esperando alguém acreditar nele.
+      entrega: porLink ? "link" : rascunho.entrega,
       imagem: rascunho.imagem.caminho,
       imagemAlt: rascunho.imagem.alt,
       imagemCredito: rascunho.imagem.credito,
-      // Os três só existem quando o discriminante os pede: gravar cupom num item
-      // presencial deixaria lixo esperando alguém acreditar nele.
-      link: rascunho.entrega === "link" ? rascunho.link.trim() : "",
-      lojaDeFora: rascunho.entrega === "link" ? rascunho.lojaDeFora.trim() : "",
-      cupom: rascunho.entrega === "link" ? rascunho.cupom.trim() : "",
+      link: porLink ? rascunho.link.trim() : "",
+      lojaDeFora: porLink ? rascunho.lojaDeFora.trim() : "",
+      cupom: porLink ? rascunho.cupom.trim() : "",
     };
     if (rascunho.id === null) armazem.criar(campos);
     else armazem.alterar(rascunho.id, campos);
@@ -195,7 +200,7 @@ export function LojaEmGestao({
           <BotaoDoStudio
             primaria
             desabilitado={!podeGravar}
-            porQueDesabilitado="Precisa de título, preço a partir de 1 ficha, foto com crédito e texto alternativo, e o endereço quando a retirada é numa loja de fora."
+            porQueDesabilitado="Precisa de título, preço a partir de 1 ficha, e foto com crédito e texto alternativo."
             aoClicar={gravar}
             data-gravar-item
           >
@@ -269,6 +274,45 @@ export function LojaEmGestao({
               <span className="prod-dimensao-rotulo">Sem limite de estoque</span>
             </label>
 
+            {/* O LINK DE AFILIADO, SEMPRE À VISTA. Preencher aqui é o que faz o item ser
+                retirado numa loja de fora: quem resgata recebe o cupom e um botão que abre
+                o endereço em outra aba, e a entrega deixa de ser da casa. */}
+            <Campo
+              rotulo="Link de afiliado"
+              nota="O endereço do produto. Em branco, a entrega é sua."
+            >
+              <input
+                type="text"
+                value={rascunho.link}
+                onChange={(e) => setRascunho({ ...rascunho, link: e.target.value })}
+                className="prod-campo-entrada"
+                data-link-do-item
+              />
+            </Campo>
+
+            {porLink ? (
+              <div className="prod-par">
+                <Campo rotulo="Loja" nota="O nome que a tela mostra.">
+                  <input
+                    type="text"
+                    value={rascunho.lojaDeFora}
+                    onChange={(e) => setRascunho({ ...rascunho, lojaDeFora: e.target.value })}
+                    className="prod-campo-entrada"
+                    data-loja-do-item
+                  />
+                </Campo>
+                <Campo rotulo="Cupom" nota="O código que zera o carrinho.">
+                  <input
+                    type="text"
+                    value={rascunho.cupom}
+                    onChange={(e) => setRascunho({ ...rascunho, cupom: e.target.value })}
+                    className="prod-campo-entrada"
+                    data-cupom-do-item
+                  />
+                </Campo>
+              </div>
+            ) : null}
+
             <div className="prod-par">
               <Campo rotulo="Família">
                 <select
@@ -289,72 +333,33 @@ export function LojaEmGestao({
                   ))}
                 </select>
               </Campo>
+              {/* Com link, a entrega já está decidida, e o seletor sairia mentindo. */}
               <Campo rotulo="Entrega">
-                <select
-                  value={rascunho.entrega}
-                  onChange={(e) =>
-                    setRascunho({
-                      ...rascunho,
-                      entrega: e.target.value as RecompensaDefinida["entrega"],
-                    })
-                  }
-                  className="prod-campo-entrada"
-                  data-entrega-do-item
-                >
-                  <option value="presencial">Presencial</option>
-                  <option value="digital">Digital</option>
-                  <option value="correio">Correio</option>
-                  <option value="no-produto">No app</option>
-                  <option value="link">Loja de fora</option>
-                </select>
+                {porLink ? (
+                  <p className="prod-campo-nota" data-entrega-por-link>
+                    Retirada na loja de fora, pelo link.
+                  </p>
+                ) : (
+                  <select
+                    value={rascunho.entrega}
+                    onChange={(e) =>
+                      setRascunho({
+                        ...rascunho,
+                        entrega: e.target.value as RecompensaDefinida["entrega"],
+                      })
+                    }
+                    className="prod-campo-entrada"
+                    data-entrega-do-item
+                  >
+                    <option value="presencial">Presencial</option>
+                    <option value="digital">Digital</option>
+                    <option value="correio">Correio</option>
+                    <option value="no-produto">No app</option>
+                  </select>
+                )}
               </Campo>
             </div>
 
-            {/* SÓ QUANDO A ENTREGA PEDE. Três campos escondidos atrás de um seletor é o
-                mesmo desenho do canal de ingresso na ficha de evento, e pela mesma razão:
-                pedir endereço de afiliado a quem vai entregar um cartaz pelo correio é
-                perguntar o que não se aplica. */}
-            {rascunho.entrega === "link" ? (
-              <>
-                <Campo
-                  rotulo="Endereço"
-                  obrigatorio
-                  nota="Onde a pessoa termina a compra. Abre em outra aba."
-                >
-                  <input
-                    type="text"
-                    value={rascunho.link}
-                    onChange={(e) => setRascunho({ ...rascunho, link: e.target.value })}
-                    className="prod-campo-entrada"
-                    data-link-do-item
-                    aria-invalid={rascunho.link.trim() === ""}
-                  />
-                </Campo>
-
-                <div className="prod-par">
-                  <Campo rotulo="Loja" nota="O nome que a tela mostra.">
-                    <input
-                      type="text"
-                      value={rascunho.lojaDeFora}
-                      onChange={(e) =>
-                        setRascunho({ ...rascunho, lojaDeFora: e.target.value })
-                      }
-                      className="prod-campo-entrada"
-                      data-loja-do-item
-                    />
-                  </Campo>
-                  <Campo rotulo="Cupom" nota="O código que zera o carrinho.">
-                    <input
-                      type="text"
-                      value={rascunho.cupom}
-                      onChange={(e) => setRascunho({ ...rascunho, cupom: e.target.value })}
-                      className="prod-campo-entrada"
-                      data-cupom-do-item
-                    />
-                  </Campo>
-                </div>
-              </>
-            ) : null}
 
             {/* TIRAR MORA NA FOLHA, e nao no cartao: e o unico gesto sem volta daqui, e
                 cartao de vitrine nao e lugar de gesto sem volta. Dois toques. */}
