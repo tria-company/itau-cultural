@@ -3044,7 +3044,11 @@
 [data-view="web"] [data-registro-detalhe] .prod-secao > .prod-grafico,
 [data-view="web"] [data-registro-detalhe] .prod-secao > .prod-grafico-eixo,
 [data-view="web"] [data-registro-detalhe] .prod-secao > .prod-inicio-stats,
+[data-view="web"] [data-registro-detalhe] .prod-secao > [data-conta-numeros],
 [data-view="web"] [data-registro-detalhe] .prod-secao > .prod-detalhe-fotos {
+  /* `[data-conta-numeros]` entrou em 31/08/2026, quando «Numeros» virou faixa: sem ele a
+   * faixa parava no meio da largura e «Interacoes», logo abaixo, ia ate o fim. Duas medidas
+   * do mesmo registro, com a mesma forma, terminando em lugares diferentes. */
   grid-column: 1 / -1;
 }
 
@@ -3189,6 +3193,58 @@
 }
 
 /* A chave do armazem e o unico valor que PODE quebrar: ela e um identificador longo. */
+/**
+ * NA WEB, «NUMEROS» E UMA FAIXA, e nao uma pilha de linhas.
+ *
+ * A lista de rotulo-a-esquerda e valor-a-direita e certa no aparelho: 370px nao comportam
+ * tres celulas lado a lado, e ali a leitura e mesmo de cima para baixo. Na web ela virava
+ * tres linhas finas num quadro alto, com metros de vazio entre o rotulo e o numero, ao lado
+ * de uma faixa de «Interacoes» que diz a mesma especie de coisa de outro jeito (reprovado a
+ * olho, 31/08/2026).
+ *
+ * Deitada, ela vira a MESMA peca que `.prod-inicio-stats`: numero grande em cima, rotulo
+ * micro embaixo, e um fio entre as celulas. Duas medidas do mesmo registro passam a ter uma
+ * gramatica so.
+ *
+ * `column-reverse` porque a ordem do JSX e rotulo e depois valor, e no aparelho e essa a
+ * ordem certa de leitura. Inverter no CSS mantem a arvore identica nas duas visoes (D-05),
+ * que e o que este projeto proibe resolver com um componente irmao.
+ */
+[data-view="web"] .prod-conta[data-conta-numeros] {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+[data-view="web"] [data-conta-numeros] > .prod-conta-linha {
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: var(--espaco-cartao);
+}
+
+/* O fio vira vertical, e some do topo: divisoria na ponta e moldura, nao divisao. */
+[data-view="web"] [data-conta-numeros] > .prod-conta-linha + .prod-conta-linha {
+  border-top: 0;
+  border-inline-start: 1px solid var(--cor-borda);
+}
+
+[data-view="web"] [data-conta-numeros] .prod-conta-rotulo {
+  overflow-wrap: anywhere;
+  font-size: var(--tipo-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+[data-view="web"] [data-conta-numeros] .prod-conta-valor {
+  font-family: var(--fonte-display);
+  font-size: var(--tipo-titulo-2);
+  line-height: 1.05;
+}
+
 .prod-conta-valor:has(code) {
   white-space: normal;
   overflow-wrap: anywhere;

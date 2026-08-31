@@ -161,7 +161,10 @@ export function RegistroDetalhe({
           <h2 className="prod-secao-titulo" id="prod-detalhe-numeros">
             {numeros.familia === "evento" ? "Bilheteria" : "Números"}
           </h2>
-          <div className="prod-conta">
+          {/* MARCADO PARA A WEB VIRAR FAIXA. A árvore é a mesma nas duas visões (D-05): no
+              aparelho continua a lista de rótulo e valor, que é o que cabe em 370px; na web
+              o CSS a deita e ela passa a ler como a faixa de «Interações», logo abaixo. */}
+          <div className="prod-conta" data-conta-numeros>
             {numeros.familia === "evento" ? (
               <>
                 <div className="prod-conta-linha">
