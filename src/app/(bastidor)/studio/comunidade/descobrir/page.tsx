@@ -1,4 +1,4 @@
-import { ComunidadesParaLer } from "@/componentes/comunidades-para-ler";
+import { AbaComunidade } from "@/componentes/aba-comunidade";
 import { BarraDoStudio } from "@/componentes/produtor-barra";
 import { PAUTAS_COM_FICHA } from "@/dados/produtor-rotas";
 import { catalogoComum } from "@/dados/mock/seed-produtor";
@@ -6,10 +6,12 @@ import { catalogoComum } from "@/dados/mock/seed-produtor";
 /**
  * Studio · Comunidade · descobrir.
  *
- * A GALERIA, PARA QUEM JÁ TEM FEED. `/studio/comunidade/` abre na galeria enquanto ele não
- * segue ninguém, e passa a abrir no feed próprio assim que ele segue a primeira. A partir
- * daí a galeria precisa de endereço, senão ela fica inalcançável no dia seguinte ao
- * primeiro «Seguir».
+ * A MESMA CASCA, COM A TERCEIRA ABA JÁ ABERTA. Desde 31/08/2026 «Descobrir» é uma das três
+ * abas de `/studio/comunidade/`, e não uma tela à parte: quem chega por este endereço vê
+ * exatamente o que veria tocando na aba, com as outras duas a um toque.
+ *
+ * O endereço fica porque endereço se copia e se guarda, e porque era daqui que a pastilha
+ * antiga apontava. Duas portas, uma sala: é a mesma casca montada nas duas.
  */
 export default function Pagina() {
   return (
@@ -21,7 +23,7 @@ export default function Pagina() {
         <h1 className="prod-titulo">Descobrir comunidades</h1>
       </header>
 
-      <ComunidadesParaLer />
+      <AbaComunidade inicial="descobrir" />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />
     </div>

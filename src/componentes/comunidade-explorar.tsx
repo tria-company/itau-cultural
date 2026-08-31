@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo } from "react";
 import { Cartao } from "@/componentes/comunidade";
 import { Painel } from "@/componentes/pontos-base";
@@ -117,15 +116,6 @@ export function Explorar() {
               ? `mais perto de ${alcancadas.slice(0, 3).join(", ")}, que você já atravessou`
               : "as mais recentes, até você atravessar alguma linguagem"}
           </span>
-        </span>
-        <span className="prod-registro-acoes">
-          <Link
-            href="/studio/comunidade/descobrir/"
-            className="pastilha"
-            data-descobrir-comunidades
-          >
-            Comunidades ›
-          </Link>
         </span>
       </div>
 

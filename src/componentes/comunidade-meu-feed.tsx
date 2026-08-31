@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo } from "react";
 import { Cartao, nomeDe } from "@/componentes/comunidade";
 import { Painel } from "@/componentes/pontos-base";
@@ -60,15 +59,6 @@ export function MeuFeed() {
             {seguidas.slice(0, 3).map((id) => nomeDe(id)).join(" · ")}
             {seguidas.length > 3 ? ` e mais ${seguidas.length - 3}` : ""}
           </span>
-        </span>
-        <span className="prod-registro-acoes">
-          <Link
-            href="/studio/comunidade/descobrir/"
-            className="pastilha"
-            data-descobrir-comunidades
-          >
-            Descobrir ›
-          </Link>
         </span>
       </div>
 
