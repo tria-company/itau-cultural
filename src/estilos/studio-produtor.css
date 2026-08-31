@@ -5279,6 +5279,22 @@
   transform: rotate(90deg);
 }
 
+/* ---- as duas metades da aba Comunidade --------------------------------------- */
+
+/**
+ * O RESUMO E O FEED SAO DUAS COISAS, e precisam de um respiro entre elas.
+ *
+ * `[data-meu-feed]` e `[data-explorar]` deixaram de ser `.prod-corpo` quando entraram dentro
+ * do trilho de abas, e levaram junto o `gap` que a classe dava: a linha «2 comunidades»
+ * encostava no primeiro cartao, sem costura nenhuma (reprovado a olho, 31/08/2026).
+ */
+[data-meu-feed],
+[data-explorar] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
 /* ---- a galeria de comunidades ----------------------------------------------- */
 
 /**
@@ -5391,9 +5407,17 @@
  * linha (reprovado a olho, 2026-08-28).
  *
  * A capa fica de fora de proposito: ela e cartaz, e cartaz quer a largura toda.
+ *
+ * A ABA DE COMUNIDADE ENTRA INTEIRA, e nao so o feed dentro dela. O trilho «Meu feed |
+ * Explorar» nascia colado na borda esquerda, o resumo das comunidades ia de ponta a ponta
+ * com 2.200px, e os posts ficavam numa coluna de 44rem no meio: tres alinhamentos
+ * diferentes na mesma tela, nenhum conversando com o outro (reprovado a olho, 31/08/2026).
+ * Constranger o container resolve os tres de uma vez, e a `.comunidade-coluna` de dentro
+ * passa a ser redundante em vez de conflitante.
  */
 [data-view="web"] .comunidade-coluna,
 [data-view="web"] .prod-comunidade-capa,
+[data-view="web"] [data-aba-comunidade],
 [data-view="web"] .prod-cabecalho[data-coluna-de-leitura] {
   /* `width: 100%` PORQUE O PAI E COLUNA FLEX: sem ele, `margin-inline: auto` faz o item
    * encolher ate o conteudo em vez de parar no teto -- o cabecalho de «Quem esta na
