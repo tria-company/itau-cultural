@@ -3466,9 +3466,29 @@
  * edicao, e UM botao de adicionar. Sem caixa dentro de caixa: linhas tocaveis, como as
  * listas do painel raiz.
  */
+/**
+ * OS NUMEROS SAO UM BLOCO, e nao tres coisas soltas na largura.
+ *
+ * Ate 31/08/2026 isto era `display: flex` com `gap: 1rem` e `flex: 1 1 0` em cada celula:
+ * numa area de conteudo larga, «8 SALVOS», «3 COMPARTILHADOS» e «3 COMENTARIOS» acabavam a
+ * meio metro um do outro, sem nada que dissesse que eram a mesma medida, e o titulo da
+ * secao pairava acima sem tocar em nenhum (reprovado a olho, 31/08/2026).
+ *
+ * A caixa faz o trabalho que o espaco nao fazia: uma superficie, e um fio entre as celulas.
+ * O fio e `border-inline-start` na irma, e nunca na primeira — divisoria na ponta e moldura,
+ * nao divisao.
+ *
+ * `flex-wrap: nowrap` de proposito: sao tres ou quatro numeros curtos, e uma quebra poria o
+ * fio vertical no comeco de uma fileira, onde ele nao divide nada. Se um dia forem seis,
+ * quem for mexer vai precisar decidir a fileira, e nao herdar uma quebra por acidente.
+ */
 .prod-inicio-stats {
   display: flex;
-  gap: 1rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
 }
 
 .prod-inicio-stat {
@@ -3477,6 +3497,11 @@
   min-width: 0;
   flex-direction: column;
   gap: 0.25rem;
+  padding: var(--espaco-cartao);
+}
+
+.prod-inicio-stat + .prod-inicio-stat {
+  border-inline-start: 1px solid var(--cor-borda);
 }
 
 .prod-inicio-stat > strong {
@@ -3486,6 +3511,8 @@
 }
 
 .prod-inicio-stat > span {
+  /* Quebra em vez de cortar: «COMPARTILHADOS» nao cabe em 1/3 de 370px numa linha so. */
+  overflow-wrap: anywhere;
   font-size: var(--tipo-micro);
   letter-spacing: 0.05em;
   text-transform: uppercase;
