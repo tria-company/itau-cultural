@@ -31,10 +31,6 @@ export default function PaginaComunidade() {
       className="flex flex-col gap-5 px-1 py-4 desk:px-2 desk:py-6"
       data-margem-quase-nula
     >
-      <header className="prod-cabecalho" data-coluna-de-leitura>
-        <h1 className="prod-titulo">Comunidades</h1>
-      </header>
-
       <AbaComunidade />
 
       <BarraDoStudio pautasComFicha={PAUTAS_COM_FICHA} imagens={catalogoComum().imagens} />

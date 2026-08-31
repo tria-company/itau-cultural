@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { nomeDe } from "@/componentes/comunidade";
+import { CapaDoFeed } from "@/componentes/comunidade-capa-do-feed";
 import { ComunidadesParaLer } from "@/componentes/comunidades-para-ler";
 import { Explorar } from "@/componentes/comunidade-explorar";
 import { MeuFeed } from "@/componentes/comunidade-meu-feed";
 import { usePontos } from "@/contexto/pontos";
-import { PRODUTOR_DA_CASA, comunidadePorId } from "@/dados/comunidade";
+import { COMUNIDADES, PRODUTOR_DA_CASA, comunidadePorId } from "@/dados/comunidade";
 
 /**
  * aba-comunidade.tsx — as tres metades da aba Comunidade.
@@ -36,8 +37,13 @@ import { PRODUTOR_DA_CASA, comunidadePorId } from "@/dados/comunidade";
  * segmentado novo aqui seria uma terceira gramática para a mesma pergunta, e este projeto já
  * aposentou um por isso.
  *
+ * A CAPA DO TOPO DIZ DE QUEM É O QUE ESTÁ EMBAIXO. Ela é do app quando a tela mistura
+ * várias comunidades, e da comunidade quando a tela é de uma só — filtrada no menu de «Meu
+ * feed». Pôr a foto de uma delas sobre um feed misturado seria a tela afirmando que tudo
+ * aquilo é daquela comunidade.
+ *
  * QUEM DECIDE É O CLIENTE, porque quem sabe é o `localStorage`. No servidor não há
- * assinatura, o HTML do build sai em Explorar, e é o que uma pessoa sem estado vê.
+ * assinatura, o HTML do build sai em Descobrir, e é o que uma pessoa sem estado vê.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 type Metade = "feed" | "explorar" | "descobrir";
@@ -104,8 +110,37 @@ export function AbaComunidade({ inicial }: { inicial?: Metade }) {
     );
   }
 
+  // A CAPA SÓ É DE UMA COMUNIDADE quando a tela é de uma comunidade só: no feed, com
+  // exatamente uma marcada no filtro. Em Explorar e em Descobrir ela é sempre do app,
+  // porque as duas falam de muitas por definição.
+  const umaSo = atual === "feed" && filtro.length === 1 ? filtro[0] : null;
+
+  /**
+   * OS NÚMEROS DA CAPA CONTAM O QUE ESTÁ NA TELA, e não o que está guardado.
+   *
+   * Cada aba tem um universo próprio, e a primeira versão usava o filtro do feed nas três:
+   * em Explorar a capa dizia «1 comunidade» porque havia uma marcada no menu do feed, e em
+   * Descobrir dizia «0 comunidades» com vinte e duas na grade logo abaixo. Capa que conta
+   * outra coisa que a página é pior que capa sem número.
+   */
+  const deFora = COMUNIDADES.filter((c) => c.donoId !== PRODUTOR_DA_CASA).map((c) => c.id);
+  const naoSeguidas = deFora.filter((id) => !seguidas.includes(id));
+  const visiveis = filtro.length === 0 ? seguidas : filtro;
+
+  const universo =
+    atual === "feed" ? visiveis : atual === "explorar" ? naoSeguidas : deFora;
+  const publicacoesDaCapa = motor.atual.publicacoes.filter((p) =>
+    umaSo ? p.comunidadeId === umaSo : universo.includes(p.comunidadeId),
+  ).length;
+
   return (
     <div className="prod-corpo" data-aba-comunidade={atual}>
+      <CapaDoFeed
+        comunidadeId={umaSo}
+        publicacoes={publicacoesDaCapa}
+        comunidades={universo.length}
+      />
+
       <div className="prod-trilho-abas" role="tablist" aria-label="O que mostrar">
         {ABAS.map((a) =>
           a.id === "feed" ? (
