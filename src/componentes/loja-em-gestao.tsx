@@ -274,11 +274,11 @@ export function LojaEmGestao({
               <span className="prod-dimensao-rotulo">Sem limite de estoque</span>
             </label>
 
-            {/* O LINK DE AFILIADO, SEMPRE À VISTA. Preencher aqui é o que faz o item ser
+            {/* O LINK DO PRODUTO, SEMPRE À VISTA. Preencher aqui é o que faz o item ser
                 retirado numa loja de fora: quem resgata recebe o cupom e um botão que abre
                 o endereço em outra aba, e a entrega deixa de ser da casa. */}
             <Campo
-              rotulo="Link de afiliado"
+              rotulo="Link do produto"
               nota="O endereço do produto. Em branco, a entrega é sua."
             >
               <input
