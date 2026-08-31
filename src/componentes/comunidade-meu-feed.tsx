@@ -28,7 +28,7 @@ import { PRODUTOR_DA_CASA, comunidadePorId } from "@/dados/comunidade";
  * refinamento inteiro veio desfazer.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-export function MeuFeed() {
+export function MeuFeed({ filtro = [] }: { filtro?: readonly string[] }) {
   const { motor, hidratado } = usePontos();
 
   const seguidas = useMemo(
@@ -39,13 +39,20 @@ export function MeuFeed() {
     [motor, hidratado],
   );
 
+  /**
+   * NADA MARCADO QUER DIZER TODAS, e não nenhuma. Filtro que começa vazio e esconde tudo é
+   * uma tela quebrada no primeiro toque, e obriga a pessoa a marcar tudo só para voltar ao
+   * estado em que ela já estava.
+   */
+  const visiveis = filtro.length === 0 ? seguidas : seguidas.filter((id) => filtro.includes(id));
+
   const publicacoes = useMemo(
     () =>
       motor.atual.publicacoes
-        .filter((p) => seguidas.includes(p.comunidadeId))
+        .filter((p) => visiveis.includes(p.comunidadeId))
         .slice()
         .sort((a, b) => a.diasAtras - b.diasAtras),
-    [motor, seguidas],
+    [motor, visiveis],
   );
 
   return (
@@ -53,11 +60,12 @@ export function MeuFeed() {
       <div className="prod-vinculo" data-resumo-do-feed>
         <span className="prod-registro-corpo">
           <strong className="prod-registro-titulo">
-            {seguidas.length} {seguidas.length === 1 ? "comunidade" : "comunidades"}
+            {publicacoes.length} {publicacoes.length === 1 ? "publicação" : "publicações"}
           </strong>
           <span className="prod-registro-meta">
-            {seguidas.slice(0, 3).map((id) => nomeDe(id)).join(" · ")}
-            {seguidas.length > 3 ? ` e mais ${seguidas.length - 3}` : ""}
+            {visiveis.slice(0, 3).map((id) => nomeDe(id)).join(" · ")}
+            {visiveis.length > 3 ? ` e mais ${visiveis.length - 3}` : ""}
+            {filtro.length > 0 ? " · filtrado" : ""}
           </span>
         </span>
       </div>

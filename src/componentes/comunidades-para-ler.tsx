@@ -68,11 +68,19 @@ function Tijolo({ cartaz }: { cartaz: Cartaz }) {
         <span className="comunidade-tijolo-texto">
           <strong className="comunidade-tijolo-nome">{nome}</strong>
           <span className="comunidade-tijolo-meta">
-            {publicacoes} {publicacoes === 1 ? "publicação" : "publicações"} ·{" "}
-            {comunidade.assinantes.toLocaleString("pt-BR")} assinantes
+            {comunidade.assinantes.toLocaleString("pt-BR")}{" "}
+            {comunidade.assinantes === 1 ? "pessoa" : "pessoas"} · {publicacoes}{" "}
+            {publicacoes === 1 ? "publicação" : "publicações"}
+            {comunidade.uf ? ` · ${comunidade.uf}` : ""}
           </span>
         </span>
       </span>
+      {/* A DESCRICAO FICA FORA DA CAPA, e nao dentro. Sobre a foto, com o veu, ela
+          disputaria contraste com o nome e viraria terceira linha de texto branco sobre
+          imagem; embaixo ela le como legenda, que e o que ela e. */}
+      {comunidade.descricao !== "" ? (
+        <span className="comunidade-tijolo-sobre">{comunidade.descricao}</span>
+      ) : null}
       {cartaz.imagemCredito !== "" ? (
         <span className="comunidade-tijolo-credito">{cartaz.imagemCredito}</span>
       ) : null}

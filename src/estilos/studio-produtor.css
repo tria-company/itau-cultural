@@ -5279,6 +5279,46 @@
   transform: rotate(90deg);
 }
 
+/* ---- as tres metades da aba Comunidade --------------------------------------- */
+
+/**
+ * A ABA «MEU FEED» E TAMBEM UM MENU (31/08/2026).
+ *
+ * Ela seleciona a aba E abre a lista das comunidades que ele segue, para filtrar uma ou
+ * mais. O painel e o mesmo `.seletor-painel` que o menu de escolha ja usa: ancorar num
+ * `relative` proprio e reusar o desenho evita uma segunda gramatica de dropdown na mesma
+ * tela.
+ */
+.prod-aba-menu {
+  position: relative;
+  display: flex;
+}
+
+.prod-aba-menu > .prod-pauta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* A seta aponta para baixo: o painel desce. Mesmo gesto da sanfona da coluna. */
+.prod-aba-seta {
+  display: block;
+  transition: transform var(--dur-1) var(--ease-padrao);
+  transform: rotate(90deg);
+}
+
+.prod-aba-menu > .prod-pauta[aria-expanded="true"] .prod-aba-seta {
+  transform: rotate(-90deg);
+}
+
+/* O painel do menu vive numa aba, e nao num campo de formulario: ele precisa de largura
+ * propria, porque a aba e estreita e as opcoes sao nomes de comunidade. */
+.prod-aba-menu .seletor-painel {
+  right: auto;
+  left: 0;
+  min-width: 14rem;
+}
+
 /* ---- as duas metades da aba Comunidade --------------------------------------- */
 
 /**
@@ -5380,6 +5420,17 @@
 .comunidade-tijolo-meta {
   font-size: var(--tipo-legenda);
   color: color-mix(in srgb, var(--ic-branco) 78%, transparent);
+}
+
+/* DUAS LINHAS de descricao: o suficiente para dizer do que se trata, e pouco o bastante
+ * para que todo cartaz da grade tenha a mesma altura. */
+.comunidade-tijolo-sobre {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
 }
 
 .comunidade-tijolo-credito {
