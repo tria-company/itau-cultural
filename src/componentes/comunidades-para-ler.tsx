@@ -65,6 +65,12 @@ function Tijolo({ cartaz }: { cartaz: Cartaz }) {
           <img src={imagem} alt={imagemAlt} loading="lazy" />
         ) : null}
         <span className="comunidade-tijolo-veu" aria-hidden />
+        {/* O CRÉDITO ENTROU NA FOTO, no canto de cima. Solto embaixo do cartão ele virava
+            uma quarta linha de texto competindo com a descrição, e crédito de foto pertence
+            à foto: é o mesmo lugar em que a capa grande da comunidade já o põe. */}
+        {cartaz.imagemCredito !== "" ? (
+          <span className="comunidade-tijolo-credito">{cartaz.imagemCredito}</span>
+        ) : null}
         <span className="comunidade-tijolo-texto">
           <strong className="comunidade-tijolo-nome">{nome}</strong>
           <span className="comunidade-tijolo-meta">
@@ -75,15 +81,15 @@ function Tijolo({ cartaz }: { cartaz: Cartaz }) {
           </span>
         </span>
       </span>
-      {/* A DESCRICAO FICA FORA DA CAPA, e nao dentro. Sobre a foto, com o veu, ela
-          disputaria contraste com o nome e viraria terceira linha de texto branco sobre
-          imagem; embaixo ela le como legenda, que e o que ela e. */}
-      {comunidade.descricao !== "" ? (
-        <span className="comunidade-tijolo-sobre">{comunidade.descricao}</span>
-      ) : null}
-      {cartaz.imagemCredito !== "" ? (
-        <span className="comunidade-tijolo-credito">{cartaz.imagemCredito}</span>
-      ) : null}
+
+      {/* O CORPO É UM BLOCO, e não texto solto sob a foto. A descrição fica fora da capa
+          de propósito: sobre a imagem ela disputaria contraste com o nome e viraria uma
+          terceira linha branca; aqui ela lê como legenda, que é o que ela é. */}
+      <span className="comunidade-tijolo-corpo">
+        {comunidade.descricao !== "" ? (
+          <span className="comunidade-tijolo-sobre">{comunidade.descricao}</span>
+        ) : null}
+      </span>
     </Link>
   );
 }

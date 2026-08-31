@@ -5349,17 +5349,40 @@
  */
 .comunidade-galeria {
   display: grid;
-  gap: var(--espaco-pilha);
+  /* `--espaco-cartao` e nao `--espaco-pilha`: cartaz e peca, nao item de lista, e com meio
+   * rem entre eles a grade lia como uma colcha em vez de uma prateleira. */
+  gap: var(--espaco-cartao);
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
+/**
+ * O CARTAZ E UMA SUPERFICIE SO, e nao uma foto com texto solto embaixo.
+ *
+ * Antes a borda era da capa, e a descricao e o credito flutuavam por fora dela: cada cartao
+ * terminava numa altura diferente conforme a descricao tivesse uma ou duas linhas, e a
+ * grade ficava com o pe serrilhado (reprovado a olho, 31/08/2026). Agora a borda envolve o
+ * conjunto, e `height: 100%` mais `flex: 1` no corpo fazem todos os cartazes de uma fileira
+ * terminarem no mesmo lugar.
+ */
 .comunidade-tijolo {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
   color: inherit;
   text-decoration: none;
   min-width: 0;
+}
+
+.comunidade-tijolo-corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--espaco-cartao);
 }
 
 .comunidade-tijolo-capa {
@@ -5368,8 +5391,6 @@
   align-items: flex-end;
   aspect-ratio: 3 / 2;
   overflow: hidden;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-m);
   background: var(--cor-superficie-2);
 }
 
@@ -5423,7 +5444,7 @@
 }
 
 /* DUAS LINHAS de descricao: o suficiente para dizer do que se trata, e pouco o bastante
- * para que todo cartaz da grade tenha a mesma altura. */
+ * para nenhum cartaz virar paragrafo. */
 .comunidade-tijolo-sobre {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -5433,16 +5454,27 @@
   color: var(--cor-tinta-2);
 }
 
+/* No canto de cima da foto, discreto: e procedencia, nao informacao que alguem procura. */
 .comunidade-tijolo-credito {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
   font-size: var(--tipo-micro);
-  color: var(--cor-tinta-3);
+  color: color-mix(in srgb, var(--ic-branco) 75%, transparent);
 }
 
-.comunidade-tijolo:hover .comunidade-tijolo-capa {
+.comunidade-tijolo:hover {
   border-color: var(--cor-borda-forte);
 }
 
-.comunidade-tijolo:focus-visible .comunidade-tijolo-capa {
+.comunidade-tijolo:focus-visible {
   outline: 2px solid var(--cor-foco);
   outline-offset: 2px;
 }
