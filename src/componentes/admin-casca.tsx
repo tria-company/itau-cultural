@@ -58,6 +58,16 @@ export function CascaDoAdmin({ children }: { children: React.ReactNode }) {
                 Visão geral
               </Link>
             </li>
+            <li>
+              <Link
+                href="/admin/equipe/"
+                className="adm-aba"
+                data-secao="equipe"
+                aria-current={caminho === "/admin/equipe" ? "page" : undefined}
+              >
+                Equipe
+              </Link>
+            </li>
             {SECOES_DO_ADMIN.map((s) => (
               <li key={s.slug}>
                 <Link

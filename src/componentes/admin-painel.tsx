@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePoderDeAdmin } from "@/componentes/admin-estado";
+import { TAMANHO_DA_EQUIPE } from "@/componentes/admin-equipe";
 import { BarrasDoAdmin, MedidorDoAdmin, RoscaDoAdmin } from "@/componentes/admin-graficos";
 import { ROTULO_DA_ACAO, ROTULO_DO_ALVO } from "@/dados/admin-acoes";
 import type { DescricaoDaCoisa, PainelDaPlataforma } from "@/dados/admin-area";
@@ -87,6 +88,12 @@ export function AdminPainel({
       <section className="adm-secao" data-cartao="portas">
         <h2 className="adm-titulo">Administrar</h2>
         <ul className="adm-grade" data-coisas={area.length}>
+          <li>
+            <Link href="/admin/equipe/" className="adm-porta" data-coisa="equipe">
+              <span className="adm-porta-nome">Equipe</span>
+              <span className="adm-porta-num">{TAMANHO_DA_EQUIPE}</span>
+            </Link>
+          </li>
           {area.map((c) => (
             <li key={c.coisa}>
               <Link href={`/admin/${c.coisa}/`} className="adm-porta" data-coisa={c.coisa}>

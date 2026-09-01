@@ -1905,3 +1905,208 @@
   border-radius: var(--raio-p);
   background: var(--cor-acao-lavada);
 }
+
+/* ---------------------------------------------------------------------------
+ * A EQUIPE: o quadro de um lado, a subtela da pessoa do outro.
+ *
+ * DUAS COLUNAS NA WEB, e uma pilha no telefone. Mudar acesso é comparar duas
+ * pessoas; uma rota por pessoa obrigaria a voltar e entrar de novo a cada
+ * comparação. Onde não cabem duas colunas, a subtela toma a tela e o quadro sai.
+ * ------------------------------------------------------------------------- */
+
+.adm-equipe {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+[data-view="web"] .adm-equipe[data-aberta="sim"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.adm-equipe-quadro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* No telefone a subtela substitui o quadro: duas colunas não cabem em 370px, e
+   rolar por baixo de um painel aberto é pior que trocar de vista. */
+[data-view="mobile"] .adm-equipe[data-aberta="sim"] .adm-equipe-quadro {
+  display: none;
+}
+
+/* ---- Os números por papel, que também filtram ---- */
+.adm-equipe-numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-view="mobile"] .adm-equipe-numeros {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adm-equipe-numero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.adm-equipe-numero:hover {
+  border-color: var(--cor-acao);
+}
+
+.adm-equipe-numero:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.adm-equipe-numero[data-ativo="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+.adm-equipe-numero-valor {
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-equipe-numero-rotulo {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.adm-equipe-numero[data-ativo="sim"] .adm-equipe-numero-rotulo {
+  color: inherit;
+}
+
+/* ---- A linha da pessoa ---- */
+.adm-equipe-linha {
+  gap: 0.75rem;
+}
+
+/* MONOGRAMA, NUNCA FOTO. Não há foto de nenhuma destas pessoas porque nenhuma
+   delas existe: o quadro é autorado, e a tela diz isso embaixo. */
+.adm-equipe-monograma {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+  font-weight: 700;
+}
+
+.adm-equipe-papel {
+  flex: none;
+  min-width: 9rem;
+}
+
+[data-view="mobile"] .adm-equipe-papel {
+  min-width: 100%;
+}
+
+.adm-equipe-procedencia {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+/* ---- A subtela ---- */
+.adm-equipe-subtela {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+
+[data-view="web"] .adm-equipe-subtela {
+  position: sticky;
+  top: 5.5rem;
+}
+
+.adm-equipe-subtela-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.adm-equipe-alcance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+.adm-equipe-alcance li {
+  padding-inline-start: 0.875rem;
+  border-inline-start: 2px solid var(--cor-acao);
+}
+
+.adm-equipe-pautas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A chave é a mesma do mapa, mas aqui ela vive sobre papel do tema, e não sobre
+   o painel claro fixo do mapa: as cores vêm dos tokens. */
+.adm-equipe-pautas .msp-chave-trilho {
+  background: var(--cor-borda-forte);
+}
+
+.adm-equipe-pautas .msp-chave-rotulo {
+  color: var(--cor-tinta-2);
+  font-size: var(--tipo-detalhe);
+}
+
+.adm-equipe-pautas .msp-chave-rotulo em {
+  font-style: normal;
+  color: var(--cor-tinta-3);
+  font-size: var(--tipo-legenda);
+}
+
+.adm-equipe-nota {
+  margin: 0.5rem 0 0;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
