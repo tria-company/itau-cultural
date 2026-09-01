@@ -1,0 +1,332 @@
+/* ===========================================================================
+ * entrar.css — a entrada da plataforma.
+ *
+ * A TELA INTEIRA É A IMAGEM. O acervo ocupa o fundo de ponta a ponta e o formulário
+ * flutua por cima, centrado. É a única tela do produto em que a foto não divide espaço.
+ *
+ * DIVERGÊNCIA POR VISÃO PRESA A `[data-view]`, NUNCA A MEDIA QUERY. Na visão App o
+ * conteúdo vive dentro da moldura de celular — cerca de 370px dentro de uma janela de
+ * 1440px. Media query mede a JANELA, não a moldura, e manda layout de computador para
+ * dentro de um telefone. É o defeito que quebrou o cartão de missão.
+ *
+ * A TELA É ESCURA NAS DUAS TEMAS, e isso é escolha: o véu sobre a foto define o contraste
+ * do formulário, e inverter a entrada por tema faria o mesmo campo mudar de legibilidade
+ * conforme o sistema de quem abre. Os tokens de tinta clara vêm de `--ic-branco`.
+ * ======================================================================== */
+
+.entrar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: var(--espaco-cartao);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* A ENTRADA NÃO ROLA. Ela é a primeira tela do produto e cabe inteira na moldura: rolar
+   para achar o botão de entrar é o defeito mais barato que uma tela de login pode ter.
+   Por isso `height` fixa e `overflow: hidden` — e por isso o painel é enxuto. Se um campo
+   novo não couber, ele não entra na entrada; quem cresce é o cadastro. */
+.entrar-painel {
+  min-height: 0;
+}
+
+.entrar-fundo {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dois gradientes, não um: o de baixo garante contraste no rodapé e o radial escurece o
+   miolo onde os campos ficam. Com um só, o campo do meio flutua sobre a parte clara da
+   foto e o texto do placeholder some. */
+.entrar-veu {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      120% 80% at 50% 45%,
+      color-mix(in srgb, var(--ic-preto) 82%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ic-preto) 45%, transparent),
+      color-mix(in srgb, var(--ic-preto) 62%, transparent)
+    );
+}
+
+.entrar-painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  width: 100%;
+  max-width: 21rem;
+}
+
+/* --- Marca --- */
+
+.entrar-marca {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--espaco-pilha);
+}
+
+.entrar-logo {
+  width: auto;
+  height: 2.25rem;
+}
+
+/* --- Formulário --- */
+
+.entrar-forma {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.entrar-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* O rótulo existe para leitor de tela e para quem já digitou: placeholder some ao
+   escrever, e um formulário sem rótulo deixa quem revisa sem saber o que preencheu. */
+.entrar-campo-rotulo {
+  padding-left: 0.25rem;
+  color: color-mix(in srgb, var(--ic-branco) 70%, transparent);
+  font-size: var(--tipo-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.entrar-entrada {
+  width: 100%;
+  padding: 0.75rem 1.125rem;
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 18%, transparent);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  color: var(--ic-branco);
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  backdrop-filter: blur(8px);
+  transition: border-color var(--dur-1) var(--ease-padrao);
+}
+
+.entrar-entrada::placeholder {
+  color: color-mix(in srgb, var(--ic-branco) 40%, transparent);
+}
+
+.entrar-entrada:focus {
+  border-color: color-mix(in srgb, var(--ic-branco) 55%, transparent);
+  outline: none;
+}
+
+.entrar-entrada:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 2px;
+}
+
+/* --- A ação primária --- */
+
+.entrar-primario {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.8125rem 1.125rem;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--ic-branco);
+  color: var(--ic-preto);
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--dur-1) var(--ease-padrao);
+}
+
+.entrar-primario:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.entrar-primario:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.entrar-primario:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 3px;
+}
+
+/* --- Elos discretos --- */
+
+.entrar-elo {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: color-mix(in srgb, var(--ic-branco) 78%, transparent);
+  font: inherit;
+  font-size: var(--tipo-micro);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.entrar-elo:hover {
+  color: var(--ic-branco);
+}
+
+.entrar-elo:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 2px;
+}
+
+.entrar-elo-centro {
+  align-self: center;
+  padding-top: 0.25rem;
+}
+
+/* --- Separador --- */
+
+.entrar-ou {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: color-mix(in srgb, var(--ic-branco) 55%, transparent);
+  font-size: var(--tipo-micro);
+}
+
+.entrar-ou::before,
+.entrar-ou::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--ic-branco) 18%, transparent);
+}
+
+/* --- Social --- */
+
+.entrar-sociais {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.entrar-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6875rem 1.125rem;
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 24%, transparent);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 45%, transparent);
+  color: var(--ic-branco);
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: border-color var(--dur-1) var(--ease-padrao);
+}
+
+.entrar-social:hover {
+  border-color: color-mix(in srgb, var(--ic-branco) 50%, transparent);
+}
+
+.entrar-social:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 2px;
+}
+
+.entrar-social-glifo {
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* --- Rodapé --- */
+
+.entrar-criar {
+  margin: 0;
+  color: color-mix(in srgb, var(--ic-branco) 70%, transparent);
+  font-size: var(--tipo-micro);
+  text-align: center;
+}
+
+/* A FOTO COBRE A MOLDURA INTEIRA, e `100%` sozinho não garante isso: `.moldura-rolagem`
+   é container de rolagem, então um filho mais baixo que ela para onde o conteúdo para —
+   e a foto terminava no meio, com uma faixa chapada no pé. `--altura-moldura` é o token
+   que `base.css` expõe para exatamente este caso: «quem precisa cobrir a tela inteira por
+   dentro». Sem ele a medida seria copiada aqui e as duas divergiriam na primeira mudança
+   de moldura. */
+[data-view="mobile"] .entrar {
+  height: var(--altura-moldura);
+  min-height: var(--altura-moldura);
+}
+
+/* --- Visão web: o painel não estica, a foto respira --- */
+
+[data-view="web"] {
+  .entrar {
+    height: 100vh;
+    min-height: 100vh;
+    padding: var(--espaco-secao);
+  }
+
+  .entrar-painel {
+    max-width: 24rem;
+  }
+
+  .entrar-logo {
+    height: 2.75rem;
+  }
+}
+
+/* --- O cadastro: título e erro de campo --- */
+
+.entrar-titulo {
+  margin: 0;
+  color: var(--ic-branco);
+  font-size: var(--tipo-titulo-2);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  text-align: center;
+}
+
+/* O erro aparece ao SAIR do campo, não a cada tecla: acusar enquanto a pessoa digita
+   marca de vermelho um CPF que ainda está pela metade. */
+.entrar-erro {
+  padding-left: 0.25rem;
+  color: color-mix(in srgb, var(--ic-branco) 92%, var(--ic-laranja));
+  font-size: var(--tipo-micro);
+  font-weight: 600;
+}
+
+.entrar-campo[data-erro="sim"] .entrar-entrada {
+  border-color: color-mix(in srgb, var(--ic-laranja) 70%, transparent);
+}
+
+/* O motion respeita quem pediu menos movimento: sem animação o vídeo some e o `poster`
+   fica — a tela continua com imagem, e ninguém recebe movimento que não pediu. */
+@media (prefers-reduced-motion: reduce) {
+  video.entrar-fundo {
+    display: none;
+  }
+
+  .entrar {
+    background-image: url("/hub/heroi.jpg");
+    background-size: cover;
+    background-position: center;
+  }
+}

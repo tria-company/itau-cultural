@@ -26,7 +26,12 @@ import {
   ICONE_PLAY,
   ICONE_TOCAR,
 } from "@/componentes/base/icones";
-import { CHAVE_LISTA_PLAY, useMinhaLista } from "@/componentes/base/minha-lista";
+import {
+  CHAVE_LISTA_PLAY,
+  CHAVE_VISTOS_PLAY,
+  useMinhaLista,
+  useVistos,
+} from "@/componentes/base/minha-lista";
 import { CapaSemImagem } from "@/componentes/capa-sem-imagem";
 import { Grafismo } from "@/componentes/grafismo";
 import {
@@ -209,10 +214,13 @@ function Cartaz({
   item,
   naLista,
   aoAlternarLista,
+  aoAbrir,
 }: {
   item: ItemDoPlayNoCliente;
   naLista: boolean;
   aoAlternarLista: () => void;
+  /** Registra que a pessoa abriu este item — alimenta «Continuar assistindo». */
+  aoAbrir?: (slug: string) => void;
 }) {
   return (
     <li data-midia={item.slug} data-categoria-do-item={item.categoria}>
@@ -264,7 +272,11 @@ function Cartaz({
           <span className="play-cartaz-tipo tipo-micro">{item.rotuloCategoria}</span>
           {/* É ESTE link que cobre o cartaz inteiro, por `::after`. Ele fica no TÍTULO
               porque é o título que um leitor de tela deve anunciar ao chegar nele. */}
-          <Link href={item.rota} className="play-cartaz-titulo tipo-detalhe">
+          <Link
+            href={item.rota}
+            className="play-cartaz-titulo tipo-detalhe"
+            onClick={() => aoAbrir?.(item.slug)}
+          >
             {item.titulo}
           </Link>
         </span>
@@ -331,6 +343,7 @@ export function Play({
   const [concluidas, setConcluidas] = useState<string[]>([]);
   const [hidratado, setHidratado] = useState(false);
   const minhaLista = useMinhaLista(CHAVE_LISTA_PLAY);
+  const vistos = useVistos(CHAVE_VISTOS_PLAY);
 
   // A leitura do storage mora no efeito, nunca no primeiro render: sob `output: "export"`
   // o HTML é gerado no build e ler `localStorage` no render divergiria da hidratação.
@@ -355,6 +368,19 @@ export function Play({
   const naMinhaLista = useMemo(
     () => minhaLista.slugs.map((s) => porSlug.get(s)).filter((i) => i !== undefined),
     [minhaLista.slugs, porSlug],
+  );
+
+  /**
+   * O que a pessoa abriu, do mais recente para o mais antigo.
+   *
+   * NÃO É POSIÇÃO DE REPRODUÇÃO. O acervo não guarda em que segundo alguém parou — a
+   * funcionalidade 26 está marcada `não sustentada` por isso, e inventar o número seria
+   * fabricar dado. A fileira mostra o que foi aberto, que é real, e o rótulo promete
+   * exatamente isso.
+   */
+  const continuarAssistindo = useMemo(
+    () => vistos.slugs.map((s) => porSlug.get(s)).filter((i) => i !== undefined),
+    [vistos.slugs, porSlug],
   );
 
   /**
@@ -434,6 +460,74 @@ export function Play({
           servidor para receber publicação. Sem este bloco, a jornada do produtor terminaria
           no vazio — ele aperta publicar e a vitrine não muda. */}
       <PublicadoPeloProdutor pauta="play" titulo="Publicado por você nesta demonstração" />
+      {/* ------------------------------------------------------- os filtros, no topo
+       *
+       * TRÊS SELETORES NUMA LINHA, acima do destaque — a forma da referência. Antes eram
+       * duas estantes de chips no MEIO da tela, entre o destaque e as prateleiras: elas
+       * quebravam a leitura em duas e faziam o recorte parecer um assunto à parte, quando
+       * é o controle da vitrine inteira.
+       *
+       * «NOVIDADES» NÃO ENTROU, e é decisão de dado. Nenhuma das 529 mídias do acervo
+       * declara data — não há campo de publicação em `midia`. Um filtro chamado
+       * «novidades» ordenando por id de CMS afirmaria recência que a fonte não sustenta,
+       * e é exatamente a mentira barata que esta obra recusa. Linguagem entrou no lugar:
+       * ela é declarada, medida, e é o recorte que o produto inteiro usa. */}
+      <header className="play-filtros">
+        <label className="play-filtro">
+          <span className="sr-only">Categoria</span>
+          <select
+            className="filtros-select"
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            data-filtro-categoria
+          >
+            <option value={SEM_RECORTE}>Categoria</option>
+            {catalogo.categorias.map((c) => (
+              <option key={c.valor} value={c.valor}>
+                {c.rotulo}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="play-filtro">
+          <span className="sr-only">Linguagem</span>
+          <select
+            className="filtros-select"
+            value={fileira}
+            onChange={(e) => setFileira(e.target.value)}
+            data-filtro-linguagem
+          >
+            <option value={SEM_RECORTE}>Linguagem</option>
+            {prateleiras.map((p) => (
+              <option key={p.valor} value={p.valor}>
+                {p.rotulo}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="play-filtro">
+          <span className="sr-only">Acessibilidade</span>
+          <select
+            className="filtros-select"
+            value={dimensoesMarcadas[0] ?? ""}
+            onChange={(e) =>
+              setDimensoesMarcadas(
+                e.target.value ? [e.target.value as DimensaoAcessibilidade] : [],
+              )
+            }
+            data-filtro-acessibilidade
+          >
+            <option value="">Acessibilidade</option>
+            {DIMENSOES_DO_FILTRO.map((campo) => (
+              <option key={campo} value={campo}>
+                {ROTULOS_DE_DIMENSAO[campo]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </header>
 
       {/* ------------------------------------------------------------------ o destaque */}
       <section data-destaque={destaque.slug} className="play-destaque">
@@ -503,68 +597,6 @@ export function Play({
         </div>
       </section>
 
-      {/* --------------------------------------------------------------- os recortes
-       *
-       * OS DOIS TRILHOS NUM BLOCO SÓ, logo abaixo do destaque. Estavam em duas seções
-       * com título em negrito e um parágrafo de três frases entre eles, e o resultado
-       * media meia tela de conversa sobre o sistema antes da primeira prateleira —
-       * exatamente a queixa que reformulou o Cast («a página falava do sistema antes de
-       * falar do conteúdo»). Os chips não trazem mais contagem (25/08): o que o acervo
-       * precisa dizer sobre o que NÃO sustenta continua dito por `data-nao-sustenta` e
-       * pelo vazio explicado que a marcação devolve (D-90).
-       */}
-      <section className="play-recorte">
-        <Estante titulo="Categorias" rotulo="Recortar o catálogo por categoria">
-          <Chip
-            variante="explorar"
-            data-categoria={SEM_RECORTE || "todas"}
-            selecionado={categoria === SEM_RECORTE}
-            onClick={() => setCategoria(SEM_RECORTE)}
-          >
-            {ICONE_APPS}
-            Todas
-          </Chip>
-          {catalogo.categorias.map((c) => (
-            <Chip
-              key={c.valor}
-              variante="explorar"
-              data-categoria={c.valor}
-              selecionado={categoria === c.valor}
-              onClick={() => setCategoria(c.valor === categoria ? SEM_RECORTE : c.valor)}
-            >
-              {isValidElement(ICONE_DA_CATEGORIA[c.valor] ?? ICONE_TOCAR)
-                ? cloneElement((ICONE_DA_CATEGORIA[c.valor] ?? ICONE_TOCAR) as ReactElement)
-                : ICONE_TOCAR}
-              {c.rotulo}
-            </Chip>
-          ))}
-        </Estante>
-
-        {/* -------------------------------------- filtro de acessibilidade (D-90) */}
-        <Estante titulo="Recursos de acessibilidade" rotulo="Filtrar por recurso de acessibilidade">
-          {DIMENSOES_DO_FILTRO.map((campo) => {
-            const d = dimensoes.find((x) => x.campo === campo);
-            const n = d?.n ?? 0;
-            const marcada = dimensoesMarcadas.includes(campo);
-            return (
-              <Chip
-                key={campo}
-                variante="explorar"
-                data-acessibilidade-do-play={campo}
-                {...(n === 0 ? { "data-nao-sustenta": "sim" } : {})}
-                selecionado={marcada}
-                onClick={() =>
-                  setDimensoesMarcadas((atual) =>
-                    atual.includes(campo) ? atual.filter((x) => x !== campo) : [...atual, campo],
-                  )
-                }
-              >
-                {ROTULOS_DE_DIMENSAO[campo]}
-              </Chip>
-            );
-          })}
-        </Estante>
-      </section>
 
       {/* ------------------------------------------------------------------- a vitrine */}
       {recortando ? (
@@ -610,7 +642,8 @@ export function Play({
                   key={i.slug}
                   item={i}
                   naLista={minhaLista.tem(i.slug)}
-                  aoAlternarLista={() => minhaLista.alternar(i.slug)}
+                  aoAbrir={vistos.registrar}
+              aoAlternarLista={() => minhaLista.alternar(i.slug)}
                 />
               ))}
             </ul>
@@ -628,6 +661,38 @@ export function Play({
            * ELA NÃO CARREGA `data-prateleira`, e não é descuido: as prateleiras são uma
            * PARTIÇÃO do recorte — cada mídia em exatamente uma fileira, somando o total.
            * Esta é da pessoa e repete de propósito o que já está em outra fileira. */}
+          {/* ----------------------------------------------------- continuar assistindo
+           *
+           * O QUE A PESSOA ABRIU, do mais recente para o mais antigo — e o rótulo promete
+           * exatamente isso. NÃO é posição de reprodução: a funcionalidade 26 está marcada
+           * `não sustentada` porque o acervo não guarda em que segundo alguém parou, e
+           * inventar esse número seria fabricar dado. Abrir de novo traz o item de volta
+           * para a frente da fileira.
+           *
+           * VEM ANTES DE «MINHA LISTA» e das fileiras do acervo: é a única que responde
+           * «onde eu estava», e essa pergunta vem antes de «o que tem aqui». */}
+          {vistos.hidratado && continuarAssistindo.length ? (
+            <section data-continuar={continuarAssistindo.length} className="play-prateleira">
+              <div className="play-prateleira-cabecalho">
+                <h2 className="play-prateleira-titulo tipo-titulo-3">
+                  <Grafismo variacao="barra" className="h-[0.8em] w-auto text-acao-tinta" />
+                  Continuar assistindo
+                </h2>
+              </div>
+              <ul className="play-trilho">
+                {continuarAssistindo.map((i) => (
+                  <Cartaz
+                    key={i.slug}
+                    item={i}
+                    naLista={minhaLista.tem(i.slug)}
+                    aoAbrir={vistos.registrar}
+                    aoAlternarLista={() => minhaLista.alternar(i.slug)}
+                  />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           {minhaLista.hidratado && naMinhaLista.length ? (
             <section data-minha-lista={naMinhaLista.length} className="play-prateleira">
               <div className="play-prateleira-cabecalho">
@@ -648,6 +713,7 @@ export function Play({
                     key={i.slug}
                     item={i}
                     naLista
+                    aoAbrir={vistos.registrar}
                     aoAlternarLista={() => minhaLista.alternar(i.slug)}
                   />
                 ))}
@@ -691,6 +757,7 @@ export function Play({
                     key={i.slug}
                     item={i}
                     naLista={minhaLista.tem(i.slug)}
+                    aoAbrir={vistos.registrar}
                     aoAlternarLista={() => minhaLista.alternar(i.slug)}
                   />
                 ))}

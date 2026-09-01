@@ -3394,16 +3394,14 @@ async function blocoPlay(cdp, base) {
       const midias = todos('[data-midia]');
       const chips = todos('[data-categoria]');
       const recursos = todos('[data-acessibilidade-do-play]');
-      const t = texto(document.body);
       return {
         midias: midias.length,
-        declara113: /\\b113\\b/.test(t),
         chips: chips.length,
         categorias: chips.map((c) => ({ v: c.getAttribute('data-categoria'), rot: (c.innerText || '').replace(/\\n+/g, ' ').trim() })),
         recursos: recursos.map((r) => ({
           campo: r.getAttribute('data-acessibilidade-do-play'),
           naoSustenta: r.getAttribute('data-nao-sustenta'),
-          n: (r.querySelector('[data-denominador]')?.innerText ?? '').trim(),
+          rotulo: (r.innerText || '').replace(/\\n+/g, ' ').trim(),
           marcado: r.getAttribute('aria-pressed'),
         })),
         // A vitrine NÃO pode mais falar da cobertura da ponte: ver a asserção
@@ -3417,22 +3415,29 @@ async function blocoPlay(cdp, base) {
   // REFORMULAÇÃO 2026-08 (decisão do cliente): /play virou a vitrine de STREAMING —
   // vídeo, série e playlist, 113 mídias medidas. Podcast mora em /cast e o editorial
   // em /noticias; o catálogo unificado continua em catalogoDoPlay() e nas 529 rotas.
+  // AS CONTAGENS SAÍRAM DA TELA (2026-08-25, pedido do cliente sobre a tela do Play):
+  // o total ao lado de «mídias», o número em cada chip de categoria, o «n de 113» de cada
+  // recurso e o número no título de cada prateleira. O que era DECLARADO por escrito passa
+  // a ser conferido por MEDIÇÃO: o gate conta o DOM em vez de ler o rótulo. A exigência de
+  // fundo não mudou — 113 mídias na parede, e nenhuma inalcançável.
   exigir(
-    catalogo.midias === 113 && catalogo.declara113 && catalogo.chips === 4,
-    "APPX-02 · a vitrine mostra as 113 mídias de streaming, DECLARA o total, com um chip por categoria + «todas»",
-    `${catalogo.midias} mídias no DOM · a tela escreve «113»=${catalogo.declara113} · ${catalogo.chips} chips: ` +
+    catalogo.midias === 113 && catalogo.chips === 4,
+    "APPX-02 · a vitrine mostra as 113 mídias de streaming, com um chip por categoria + «todas»",
+    `${catalogo.midias} mídias no DOM · ${catalogo.chips} chips: ` +
       catalogo.categorias.map((c) => c.rot).join(" · "),
     "113 mídias, 4 chips",
   );
+  // D-90 continua valendo pelo que ele PROTEGE: os dois recursos que o acervo não sustenta
+  // seguem marcados com `data-nao-sustenta` ANTES de qualquer gesto — é o que impede que
+  // marcá-los devolva um vazio mudo. O que saiu foi o número impresso ao lado do rótulo.
   exigir(
     catalogo.recursos.length === 3 &&
-      catalogo.recursos.every((r) => /\d/.test(r.n)) &&
       catalogo.recursos.filter((r) => r.naoSustenta).length === 2 &&
       catalogo.recursos.every((r) => r.marcado === "false"),
-    "D-90 · os três recursos da tela 19 trazem o número ANTES da marcação, e os dois zerados declaram",
-    catalogo.recursos.map((r) => `${r.campo} «${r.n}»${r.naoSustenta ? " [nao-sustenta]" : ""}`).join(" · ") +
+    "D-90 · os três recursos da tela 19 estão na tela e os dois zerados declaram, antes da marcação",
+    catalogo.recursos.map((r) => `${r.campo} «${r.rotulo}»${r.naoSustenta ? " [nao-sustenta]" : ""}`).join(" · ") +
       ` · nenhum vem marcado antes do gesto`,
-    "3 recursos com número, 2 declarando o zero, 0 marcados",
+    "3 recursos, 2 declarando o zero, 0 marcados",
   );
   // D-92 CONTINUA VALENDO, E MUDOU DE TELA (23/08, decisão do cliente). O painel «não
   // pode ir? veja isto» declarava a cobertura da ponte — «14 das 529 mídias falam de um
@@ -3453,7 +3458,12 @@ async function blocoPlay(cdp, base) {
     naPagina5Async(`
       const antesUrl = location.pathname;
       const chip = document.querySelector('[data-categoria="series"]');
-      const prometido = Number(((chip.innerText || '').match(/(\\d+)\\s*$/) || [])[1]);
+      // O chip não anuncia mais o número (as contagens saíram da tela em 25/08). O que
+      // ele promete é medido na parede ANTES do clique: quantas mídias de «série» estão
+      // nas prateleiras. Depois do clique, o recorte tem de entregar exatamente essas.
+      const prometido = todos('[data-midia]').filter(
+        (i) => i.getAttribute('data-categoria-do-item') === 'series',
+      ).length;
       chip.click();
       await new Promise((r) => setTimeout(r, 600));
       const itens = todos('[data-midia]');
@@ -3466,8 +3476,8 @@ async function blocoPlay(cdp, base) {
       recortar.categorias.length === 1 &&
       recortar.categorias[0] === "series" &&
       recortar.antesUrl === recortar.depoisUrl,
-    "APPX-02 · um controle por categoria RECORTA sem navegar, e entrega o número que o chip anuncia",
-    `chip «séries» prometia ${recortar.prometido} · entregou ${recortar.entregue} · ` +
+    "APPX-02 · um controle por categoria RECORTA sem navegar, e entrega todas as mídias da categoria",
+    `«séries» tinha ${recortar.prometido} na parede · o recorte entregou ${recortar.entregue} · ` +
       `categorias no recorte ${JSON.stringify(recortar.categorias)} · ${recortar.antesUrl} → ${recortar.depoisUrl}`,
     "entregue == prometido, recorte homogêneo, URL intacta",
   );
@@ -3478,16 +3488,18 @@ async function blocoPlay(cdp, base) {
       await new Promise((r) => setTimeout(r, 400));
       const chip = document.querySelector('[data-acessibilidade-do-play="libras"]');
       const rotulo = (chip.innerText || '').replace(/\\n+/g, ' ').trim();
+      const naoSustenta = chip.getAttribute('data-nao-sustenta');
       chip.click();
       await new Promise((r) => setTimeout(r, 600));
-      return { rotulo, entregue: conta('[data-midia]'), url: location.pathname };
+      return { rotulo, naoSustenta, entregue: conta('[data-midia]'), url: location.pathname };
     `),
   );
   exigir(
-    libras.entregue === 3 && /3\s*de\s*113/.test(libras.rotulo),
-    "D-90 · Libras anuncia «3 de 113» e recorta as 3 mídias com Libras — todas vídeos, todas no streaming",
-    `chip «${libras.rotulo}» · ${libras.entregue} mídias no recorte · pathname ${libras.url}`,
-    "«3 de 113» e 3 mídias",
+    libras.entregue === 3 && libras.naoSustenta === null,
+    "D-90 · Libras é o único recurso que o acervo sustenta, e recorta as 3 mídias — todas vídeos, todas no streaming",
+    `chip «${libras.rotulo}» sem [data-nao-sustenta]=${libras.naoSustenta === null} · ` +
+      `${libras.entregue} mídias no recorte · pathname ${libras.url}`,
+    "3 mídias, e o chip não declara zero",
   );
   await fotografar(cdp, "05-08-play");
 

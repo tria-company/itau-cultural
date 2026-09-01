@@ -2,6 +2,71 @@
  "pageProps": {
   "entrevistas": [
    {
+    "id": 13928,
+    "title": "Luna Bastos traz \"A natureza segue seu compasso\" ao Itaú Cultural",
+    "shortDescription": "Em sua segunda participação no projeto Arte urbana, a artista explora os ritmos do mundo natural",
+    "slug": "luna-bastos-traz-a-natureza-segue-seu-compasso-ao-itau-cultural",
+    "publicationDate": "Publicado em 24/08/2026",
+    "publishedAt": "2026-08-24T11:29:00.000-03:00",
+    "updatedDate": "Atualizado às 11:35 de 24/08/2026",
+    "image": "https://s3.sa-east-1.amazonaws.com/prd.editor.fundacaoitau.org.br/public/image/20475/file/optimized-7fc240db887dd3634639d1566d92c4aa.jpeg",
+    "cover": true,
+    "rights": "André Seiti",
+    "cover_position": 50,
+    "programs_position": 50,
+    "miniature_position": 50,
+    "image_description": "Luna Bastos posa sentada no centro do banco com o mural totalmente concluído. Ela veste uma blusa de tricot azul-bic, saia terracota, meias e sapatos de plataforma azuis, além de óculos escuros. Atrás dela, o encosto do banco exibe uma rica padronagem de folhas verdes entrelaçadas, em perfeita harmonia com o painel informativo da fachada do prédio ao fundo.",
+    "category": "noticias",
+    "tags": [
+     "arte na rua",
+     "arte urbana"
+    ],
+    "participants": [],
+    "exhibition": false,
+    "occupation": false,
+    "accessibility": {
+     "audio_description": false,
+     "libras": false,
+     "descriptive_subtitle": false,
+     "closed_caption": false,
+     "open_caption": false,
+     "simultaneous_translation": false,
+     "stenotypy": false,
+     "subtitle": false
+    },
+    "page": {
+     "id": 13933,
+     "uuid": "958300ee-1534-4011-9ad0-cad70f8e8f55",
+     "pageType": "blocks",
+     "position": 1
+    },
+    "template_type": "default",
+    "observatorio_require_login": true,
+    "site": {
+     "id": 1,
+     "name": "Itaú Cultural",
+     "link": "itaucultural.org.br"
+    },
+    "section": "Notícias",
+    "hasAudioDescription": false,
+    "hasAccessibility": false,
+    "hasEstenotipia": false,
+    "hasClosedCaption": false,
+    "hasSubtitle": false,
+    "hasDescriptiveSubtitle": false,
+    "hasOpenCaption": false,
+    "hasTraducao": false,
+    "metaTitle": "Luna Bastos traz \"A natureza segue seu compasso\" ao Itaú Cultural",
+    "metaDescription": "Em sua segunda participação no projeto Arte urbana, a artista explora os ritmos do mundo natural",
+    "presential": false,
+    "schedules": [],
+    "ticket": false,
+    "hideTicket": false,
+    "soldOut": false,
+    "online": false,
+    "hideOnlineAccess": false
+   },
+   {
     "id": 13923,
     "title": "Morre a atriz Laura Cardoso, operária da criação artística",
     "shortDescription": "Laura foi homenageada pelo programa Ocupação em 2017. Relembre sua trajetória",
@@ -3194,84 +3259,6 @@
     "soldOut": false,
     "online": false,
     "hideOnlineAccess": false
-   },
-   {
-    "id": 931,
-    "title": "Zezé Motta: 80 anos entregando tudo",
-    "shortDescription": "Luísa Pécora escreve sobre os 80 anos de Zezé Motta, exercício que exige, tanto da jornalista quanto do público, olhar para o presente",
-    "slug": "zeze-motta-80-anos-entregando-tudo",
-    "publicationDate": "Publicado em 27/06/2024",
-    "publishedAt": "2024-06-27T23:00:00.000-03:00",
-    "updatedDate": "Atualizado às 03:00 de 11/05/2025",
-    "image": "https://s3.sa-east-1.amazonaws.com/prd.editor.fundacaoitau.org.br/public/image/1588/file/optimized-d71b93afeffc1205f646b82ba9f50ad9.jpg",
-    "cover": true,
-    "rights": "Marcus Leoni",
-    "cover_position": 50,
-    "programs_position": 50,
-    "miniature_position": 50,
-    "image_description": "Mulher negra aparentando mais de 60 anos aparece sentada, com a mão no queixo e olhando para o alto. Ela usa pulseiras e um anel, e apresenta um olhar sereno. Seus cabelos encaracolados estão na altura dos ombros e são castanhos. Ela usa uma camisa com estampa de onça.",
-    "category": "series",
-    "subcategory": "Efemérides",
-    "tags": [
-     "artes cênicas",
-     "teatro",
-     "audiovisual",
-     "filme"
-    ],
-    "participants": [
-     {
-      "id": 125,
-      "name": "Luísa Pécora",
-      "image": "https://s3.sa-east-1.amazonaws.com/prd.editor.fundacaoitau.org.br/public/participant/125/image/310d3fa53cd15bf3eb3ffea1aca024f2.jpg",
-      "columnist": true,
-      "active": false,
-      "description": "<p style=\"margin-left:0cm; margin-right:0cm\">Jornalista e criadora do site <a href=\"https://mulhernocinema.com/\" target=\"_blank\"><strong>Mulher no cinema</strong></a>.</p>\r\n",
-      "bio": "<p style=\"margin-left:0cm; margin-right:0cm\">Jornalista e criadora do site <a href=\"https://mulhernocinema.com/\" target=\"_blank\"><strong>Mulher no cinema</strong></a>.</p>\r\n"
-     }
-    ],
-    "exhibition": false,
-    "occupation": false,
-    "accessibility": {
-     "audio_description": false,
-     "libras": false,
-     "descriptive_subtitle": false,
-     "closed_caption": false,
-     "open_caption": false,
-     "simultaneous_translation": false,
-     "stenotypy": false,
-     "subtitle": false
-    },
-    "page": {
-     "id": 1089,
-     "uuid": "96719140-eb01-4560-9d5b-642cdf97ea18",
-     "pageType": "blocks",
-     "position": 1
-    },
-    "template_type": "default",
-    "observatorio_require_login": true,
-    "site": {
-     "id": 1,
-     "name": "Itaú Cultural",
-     "link": "itaucultural.org.br"
-    },
-    "section": "Séries",
-    "hasAudioDescription": false,
-    "hasAccessibility": false,
-    "hasEstenotipia": false,
-    "hasClosedCaption": false,
-    "hasSubtitle": false,
-    "hasDescriptiveSubtitle": false,
-    "hasOpenCaption": false,
-    "hasTraducao": false,
-    "metaTitle": "Zezé Motta: 80 anos entregando tudo",
-    "metaDescription": "Luísa Pécora escreve sobre os 80 anos de Zezé Motta, exercício que exige, tanto da jornalista quanto do público, olhar para o presente",
-    "presential": false,
-    "schedules": [],
-    "ticket": false,
-    "hideTicket": false,
-    "soldOut": false,
-    "online": false,
-    "hideOnlineAccess": false
    }
   ],
   "highlights": [],
@@ -3322,7 +3309,7 @@
     "template_type": "default",
     "observatorio_require_login": true,
     "section": "Notícias",
-    "countClick": 103629
+    "countClick": 105617
    }
   ],
   "subcategories": [],

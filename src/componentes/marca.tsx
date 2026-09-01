@@ -62,7 +62,7 @@ function ParDeMarca({
 
 export function AssinaturaIc({ prioridade = false }: { prioridade?: boolean }) {
   return (
-    <Link href="/apps" className="marca-ic" aria-label="Itaú Cultural, início">
+    <Link href="/descobrir" className="marca-ic" aria-label="Itaú Cultural, início">
       <ParDeMarca
         claro="/marca/itau-cultural.svg"
         escuro="/marca/itau-cultural-negativo.svg"

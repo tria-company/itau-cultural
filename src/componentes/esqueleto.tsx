@@ -102,11 +102,21 @@ export function TelaEsqueleto({
   nome,
   objetivo,
   acoes,
+  rodape,
   children,
 }: {
   nome: string;
-  objetivo: string;
+  /** Ausente nas telas que deixaram de ser esqueleto — ver o parágrafo abaixo. */
+  objetivo?: string;
   acoes?: React.ReactNode;
+  /**
+   * As mesmas ações, mas DEPOIS do conteúdo.
+   *
+   * Numa tela de escolha, o botão de avançar no cabeçalho fica acima daquilo que ele
+   * confirma: a pessoa lê «Avançar» antes de ver o que há para escolher. No fim ele é o
+   * passo seguinte de verdade, e é o que a mão alcança depois de percorrer a grade.
+   */
+  rodape?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
@@ -116,10 +126,15 @@ export function TelaEsqueleto({
           <Grafismo variacao="barra" className="h-5 w-auto shrink-0 text-acao-tinta" />
           <h1 className="text-2xl leading-tight font-bold desk:text-3xl">{nome}</h1>
         </div>
-        <p className="max-w-prose text-sm text-tinta-2">{objetivo}</p>
+        {/* A linha de objetivo é NOTA DE ESQUELETO: ela existe para dizer o que aquele
+            lugar vai ser quando existir. Numa tela que já é o produto, ela vira uma
+            explicação de si mesma logo acima do que se explica sozinho — por isso é
+            opcional, e some junto com o esqueleto. */}
+        {objetivo ? <p className="max-w-prose text-sm text-tinta-2">{objetivo}</p> : null}
         {acoes ? <div className="flex flex-wrap gap-2 pt-1">{acoes}</div> : null}
       </header>
       {children}
+      {rodape ? <div className="onb-rodape">{rodape}</div> : null}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { SelosDeLinguagem } from "@/componentes/selo-linguagem";
 import { Verbete } from "@/componentes/verbete";
 import { porSlug, slugsPorTipo } from "@/dados/grafo";
 import { vinculosDe } from "@/dados/ponte";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 /**
  * Verbete de termo da Enciclopédia — etiqueta de museu, não matéria.
@@ -15,7 +16,8 @@ import { vinculosDe } from "@/dados/ponte";
 
 export function generateStaticParams() {
   const slugs = slugsPorTipo("termo");
-  return (slugs.length ? slugs : ["sem-entidade"]).map((slug) => ({ slug }));
+  const cortados = limitarSlugs(slugs);
+  return (cortados.length ? cortados : ["sem-entidade"]).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({

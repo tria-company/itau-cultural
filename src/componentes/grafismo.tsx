@@ -54,10 +54,16 @@ export function Grafismo({ variacao = "barra", className, rotulo }: PropsGrafism
       {/* A barra invertida, como sólido — no manual ela é forma, não traço de fonte. */}
       <path d="M2 1.5H8.6L22 22.5H15.4L2 1.5Z" fill="currentColor" />
       {centroC === null ? null : (
-        // O `C` aberto à direita, com a mesma espessura visual da barra.
+        /* O `C` aberto à direita, com a mesma espessura visual da barra.
+         *
+         * A COR DELE NÃO É A DA BARRA (27.08). Os dois usavam `currentColor` e saíam
+         * laranja juntos; na marca, o C é a tinta e a barra é a cor de ação. Ele lê
+         * `--cor-do-c`, que cai em `--cor-tinta` — branco no tema escuro, preto no claro —
+         * e continua podendo ser sobrescrito onde a marca precisar dos dois na mesma cor.
+         */
         <path
           d={`M${centroC + 6.2} 5.4A8.6 8.6 0 1 0 ${centroC + 6.2} 18.6`}
-          stroke="currentColor"
+          stroke="var(--cor-do-c, var(--cor-tinta))"
           strokeWidth={4.2}
         />
       )}

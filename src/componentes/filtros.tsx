@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ICONE_MAPA } from "./base/icones";
 import { useMemo, useState } from "react";
 import { Chip, TrilhoDeChips } from "@/componentes/base/chip";
 import { Grafismo } from "@/componentes/grafismo";
@@ -19,6 +20,7 @@ import type {
   NumerosDosFiltros,
   ResumoDaFicha,
 } from "@/dados/filtros";
+import type { EstadoDeFiltro, MunicipioDeFiltro } from "@/dados/localizacao";
 import type { TrilhaResumo } from "@/dados/trilha";
 import type { DimensaoAcessibilidade } from "@/dados/tipos";
 
@@ -99,6 +101,8 @@ function milhar(n: number): string {
 type RecorteDeFicha = "" | "declara" | "nao-declara";
 
 export interface FiltrosProps {
+  /** Estados brasileiros do acervo, cada um com os municípios que ele tem. */
+  estados: EstadoDeFiltro[];
   indice: IndiceDTO;
   acessibilidade: AcessibilidadeDTO;
   dimensoes: DimensaoContada[];
@@ -109,6 +113,7 @@ export interface FiltrosProps {
 }
 
 export function Filtros({
+  estados,
   indice,
   acessibilidade,
   dimensoes,
@@ -121,6 +126,8 @@ export function Filtros({
   const [recorteDeFicha, setRecorteDeFicha] = useState<RecorteDeFicha>("");
   const [criterios, setCriterios] = useState<Criterio[]>([]);
   const [todasAsLinguagens, setTodasAsLinguagens] = useState(false);
+  const [ufEscolhida, setUfEscolhida] = useState("");
+  const [municipioEscolhido, setMunicipioEscolhido] = useState("");
 
   // ---- as estruturas de leitura do DTO, montadas UMA vez --------------------
   //
@@ -190,6 +197,49 @@ export function Filtros({
     setRecorteDeFicha((atual) => (atual === valor ? "" : valor));
   }
 
+  /**
+   * Os municípios do estado escolhido. Vazio quando não há estado — e é ele que desabilita
+   * o segundo campo, em vez de um booleano à parte que poderia divergir da lista.
+   */
+  const municipiosDaUf: MunicipioDeFiltro[] = useMemo(
+    () => estados.find((uf) => uf.slug === ufEscolhida)?.municipios ?? [],
+    [estados, ufEscolhida],
+  );
+
+  /**
+   * ESTADO E MUNICÍPIO SÃO UM CRITÉRIO SÓ, não dois. Marcar os dois ao mesmo tempo pediria
+   * ao motor a interseção de «Bahia» com «Salvador», que é sempre Salvador — e a tela
+   * mostraria dois recortes concorrendo pela mesma pergunta. Escolher município SUBSTITUI
+   * o estado no recorte; voltar para «todo o estado» devolve o estado.
+   */
+  function trocarTerritorio(valor: string, rotulo: string) {
+    setCriterios((atual) => {
+      const semTerritorio = atual.filter((c) => c.campo !== "territorio");
+      return valor ? [...semTerritorio, { campo: "territorio", valor, rotulo }] : semTerritorio;
+    });
+  }
+
+  function escolherUf(slug: string) {
+    setUfEscolhida(slug);
+    setMunicipioEscolhido("");
+    const uf = estados.find((e) => e.slug === slug);
+    trocarTerritorio(uf ? uf.slug : "", uf?.titulo ?? "");
+  }
+
+  function escolherMunicipio(slug: string) {
+    setMunicipioEscolhido(slug);
+    const m = municipiosDaUf.find((x) => x.slug === slug);
+    if (m) {
+      trocarTerritorio(m.slug, m.titulo);
+      return;
+    }
+    const uf = estados.find((e) => e.slug === ufEscolhida);
+    trocarTerritorio(uf ? uf.slug : "", uf?.titulo ?? "");
+  }
+
+  /** Quantas linguagens estão no recorte. O resumo da gaveta lê daqui. */
+  const linguagensMarcadas = criterios.filter((c) => c.campo === "linguagem").length;
+
   function alternarCriterio(opcao: OpcaoFaceta) {
     setCriterios((atual) => {
       const ja = atual.find((c) => c.campo === opcao.campo && c.valor === opcao.valor);
@@ -202,6 +252,8 @@ export function Filtros({
     setMarcadas([]);
     setRecorteDeFicha("");
     setCriterios([]);
+    setUfEscolhida("");
+    setMunicipioEscolhido("");
   }
 
   const marcado = (campo: DimensaoAcessibilidade) => marcadas.includes(campo);
@@ -220,42 +272,35 @@ export function Filtros({
       {/* Cabeçalho e o contador ao vivo                                    */}
       {/* ---------------------------------------------------------------- */}
       <header className="filtros-topo">
-        <h1 className="filtros-titulo">
-          <Grafismo
-            variacao="barra"
-            className="h-3.5 w-auto shrink-0 text-acao-tinta"
-          />
-          Filtros
-        </h1>
+        <div className="filtros-topo-linha">
+          <h1 className="filtros-titulo">
+            <Grafismo
+              variacao="barra"
+              className="h-3.5 w-auto shrink-0 text-acao-tinta"
+            />
+            Filtros
+          </h1>
 
-        <p
-          data-contador-vivo={recorte.total}
-          className="filtros-contador"
-          aria-live="polite"
-        >
-          <strong className="filtros-contador-numero">{milhar(recorte.total)}</strong>
-          <span className="filtros-contador-de">
-            de {milhar(indice.total)} entradas buscáveis
-          </span>
-          <span className="filtros-contador-criterios">
-            {criteriosAtivos === 0
-              ? "nenhum critério marcado — este é o acervo inteiro"
-              : `${criteriosAtivos} critério${criteriosAtivos > 1 ? "s" : ""} marcado${
-                  criteriosAtivos > 1 ? "s" : ""
-                }`}
-          </span>
+          <button
+            type="button"
+            data-limpar-filtros
+            className="filtros-limpar"
+            onClick={limparTudo}
+            disabled={criteriosAtivos === 0}
+          >
+            limpar tudo
+          </button>
+        </div>
+
+        {/* O total continua medido e continua no atributo, para os portões — ele só não
+            ocupa a primeira linha da tela. Cobertura tem tela própria: o Observatório. */}
+        <p data-contador-vivo={recorte.total} className="filtros-resumo" aria-live="polite">
+          {criteriosAtivos === 0
+            ? ""
+            : `${criteriosAtivos} filtro${criteriosAtivos > 1 ? "s" : ""} aplicado${
+                criteriosAtivos > 1 ? "s" : ""
+              }`}
         </p>
-
-        <button
-          type="button"
-          data-limpar-filtros
-          className="filtros-limpar"
-          onClick={limparTudo}
-          disabled={criteriosAtivos === 0}
-        >
-          limpar tudo
-        </button>
-
       </header>
 
       {/* ------------------------------------------------------------------ */}
@@ -270,162 +315,165 @@ export function Filtros({
       {/* ------------------------------------------------------------------ */}
       <div className="filtros-criterios web-coluna-fixa" data-coluna-criterios>
       {/* ---------------------------------------------------------------- */}
-      {/* 1. ACESSIBILIDADE — critério de primeira classe (D-91)            */}
+      {/* 1. ONDE — o primeiro filtro, porque é a primeira pergunta         */}
+      {/*                                                                    */}
+      {/* Antes a tela abria por acessibilidade, que é a decisão editorial   */}
+      {/* mais forte do produto — e continua na tela, logo abaixo. Mas a     */}
+      {/* primeira coisa que alguém quer de uma agenda cultural é onde, e    */}
+      {/* pôr o critério mais nobre na frente do mais usado troca a ordem    */}
+      {/* do argumento pela ordem do uso.                                    */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="filtros-bloco" data-bloco="localizacao">
+        <h2 className="filtros-bloco-titulo">
+          {ICONE_MAPA}
+          Onde
+        </h2>
+
+        <div className="filtros-locais">
+          <label className="filtros-local">
+            <span className="filtros-local-rotulo">Estado</span>
+            <select
+              className="filtros-select"
+              value={ufEscolhida}
+              onChange={(e) => escolherUf(e.target.value)}
+              data-filtro-uf
+            >
+              <option value="">Todo o Brasil</option>
+              {estados.map((uf) => (
+                <option key={uf.slug} value={uf.slug}>
+                  {uf.titulo}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="filtros-local">
+            <span className="filtros-local-rotulo">Município</span>
+            <select
+              className="filtros-select"
+              value={municipioEscolhido}
+              onChange={(e) => escolherMunicipio(e.target.value)}
+              disabled={municipiosDaUf.length === 0}
+              data-filtro-municipio
+            >
+              <option value="">
+                {municipiosDaUf.length === 0 ? "Escolha um estado" : "Todo o estado"}
+              </option>
+              {municipiosDaUf.map((m) => (
+                <option key={m.slug} value={m.slug}>
+                  {m.titulo}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* 2. ACESSIBILIDADE — critério de primeira classe (D-91)            */}
       {/* ---------------------------------------------------------------- */}
       <section className="filtros-bloco" data-bloco="acessibilidade">
         <h2 className="filtros-bloco-titulo">Acessibilidade</h2>
 
         <p className="filtros-bloco-linha">
-          <strong>{numeros.dimensoes} dimensões</strong> catalogadas ·{" "}
-          {numeros.dimensoesSustentadas} documentadas no acervo · {numeros.dimensoesZeradas}{" "}
-          medem zero
+          Marque o que você precisa para conseguir aproveitar.
         </p>
 
-        <ul className="filtros-dimensoes">
-          {dimensoes.map((d) => (
-            <li
-              key={d.campo}
-              className="filtros-dimensao"
-              data-dimensao-acessibilidade={d.campo}
-              {...(d.sustentada ? {} : { "data-nao-sustenta": `acessibilidade:${d.campo}` })}
-            >
-              <button
-                type="button"
-                aria-pressed={marcado(d.campo)}
-                className="filtros-marcavel"
-                onClick={() => alternarDimensao(d.campo)}
+        {/* DROPDOWN, E NÃO LISTA ABERTA. Oito dimensões abertas ocupavam meia tela para um
+            critério que a maioria não usa — e empurravam linguagem para baixo da dobra.
+            `<details>` é o controle nativo: abre e fecha sem JavaScript, o teclado já sabe
+            operar, e o resumo diz quantas estão marcadas com a folha fechada. */}
+        <details className="filtros-gaveta">
+          <summary className="filtros-gaveta-topo">
+            <span className="filtros-gaveta-rotulo">
+              {marcadas.length === 0
+                ? "Escolher recursos"
+                : `${marcadas.length} recurso${marcadas.length > 1 ? "s" : ""} marcado${
+                    marcadas.length > 1 ? "s" : ""
+                  }`}
+            </span>
+          </summary>
+
+          <ul className="filtros-dimensoes">
+            {dimensoes.map((d) => (
+              <li
+                key={d.campo}
+                className="filtros-dimensao"
+                data-dimensao-acessibilidade={d.campo}
+                {...(d.sustentada ? {} : { "data-nao-sustenta": `acessibilidade:${d.campo}` })}
               >
-                <span className="filtros-marcavel-caixa" aria-hidden />
-                <span className="filtros-marcavel-rotulo">{d.rotulo}</span>
-                <span className="filtros-marcavel-n" data-denominador={d.campo}>
-                  {milhar(d.declaradaVerdadeira)}
-                </span>
-              </button>
+                <button
+                  type="button"
+                  aria-pressed={marcado(d.campo)}
+                  className="filtros-marcavel"
+                  onClick={() => alternarDimensao(d.campo)}
+                >
+                  <span className="filtros-marcavel-caixa" aria-hidden />
+                  <span className="filtros-marcavel-rotulo">{d.rotulo}</span>
+                  <span className="filtros-marcavel-n" data-denominador={d.campo}>
+                    {milhar(d.declaradaVerdadeira)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
 
-              {d.sustentada ? (
-                <p className="filtros-dimensao-nota">
-                  {milhar(d.declaradaVerdadeira)} de {milhar(d.entreAsQueDeclaramNaFonte)} que
-                  preencheram a ficha
-                </p>
-              ) : (
-                <p className="filtros-dimensao-nota filtros-dimensao-zero">
-                  {d.declaracao}
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
-
-        <p className="filtros-bloco-linha filtros-diagnostico">
-          <strong>
-            {numeros.dimensoesZeradas} das {numeros.dimensoes} dimensões medem zero no acervo
-          </strong>{" "}
-          — {zeradas.map((d) => d.rotulo.toLowerCase()).join(", ")}
-        </p>
       </section>
 
       {/* ---------------------------------------------------------------- */}
       {/* 2. D-43 — declarado-ausente contra não-declarado                  */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="filtros-bloco" data-bloco="ficha">
-        <h2 className="filtros-bloco-titulo">A ficha foi preenchida?</h2>
-
-        <div className="filtros-par">
-          <div className="filtros-par-item" data-declarado-ausente="declara">
-            <button
-              type="button"
-              aria-pressed={recorteDeFicha === "declara"}
-              className="filtros-marcavel"
-              onClick={() => alternarFicha("declara")}
-            >
-              <span className="filtros-marcavel-caixa" aria-hidden />
-              <span className="filtros-marcavel-rotulo">só o que declarou a ficha</span>
-              <span className="filtros-marcavel-n" data-denominador="ficha-declaram">
-                {milhar(ficha.declaram)}
-              </span>
-            </button>
-            <p className="filtros-dimensao-nota">
-              {milhar(ficha.declaram)} de {milhar(ficha.total)} preencheram as{" "}
-              {numeros.dimensoes} dimensões — aí um «não» é ausência declarada
-            </p>
-          </div>
-
-          <div className="filtros-par-item" data-nao-declarado="nao-declara">
-            <button
-              type="button"
-              aria-pressed={recorteDeFicha === "nao-declara"}
-              className="filtros-marcavel"
-              onClick={() => alternarFicha("nao-declara")}
-            >
-              <span className="filtros-marcavel-caixa" aria-hidden />
-              <span className="filtros-marcavel-rotulo">só o que nunca declarou</span>
-              <span className="filtros-marcavel-n" data-denominador="ficha-nao-declaram">
-                {milhar(ficha.naoDeclaram)}
-              </span>
-            </button>
-            <p className="filtros-dimensao-nota">
-              {milhar(ficha.naoDeclaram)} de {milhar(ficha.total)} nunca declararam — aí um
-              «não» é silêncio, não negação
-            </p>
-          </div>
-        </div>
-
-        <p className="filtros-bloco-linha">
-          Quem declara, por classe:{" "}
-          {Object.entries(ficha.porClasse)
-            .sort((a, b) => b[1] - a[1])
-            .map(([classe, n]) => `${classe} ${milhar(n)}`)
-            .join(" · ")}
-        </p>
-      </section>
-
+      
       {/* ---------------------------------------------------------------- */}
       {/* 3. Linguagem e território — as duas facetas que RECORTAM          */}
       {/* ---------------------------------------------------------------- */}
       <section className="filtros-bloco" data-bloco="ontologia">
-        <h2 className="filtros-bloco-titulo">Linguagem e território</h2>
-        <TrilhoDeChips rotulo="Recortar por linguagem artística" className="trilho-chips-rola" setas>
-          {(todasAsLinguagens
-            ? facetas.linguagem
-            : facetas.linguagem.slice(0, TETO_LINGUAGENS)
-          ).map((o) => (
-            <Chip
-              key={`${o.campo}:${o.valor}`}
-              variante="explorar"
-              selecionado={criterioMarcado(o)}
-              onClick={() => alternarCriterio(o)}
-              // O nome do token, e não a cor: a bolinha é pintada pelo CSS a
-              // partir do dado, do mesmo jeito que `selo-linguagem.tsx` faz.
-              cor={o.cor ?? undefined}
-              contagem={milhar(o.n)}
-            >
-              {o.rotulo}
-            </Chip>
-          ))}
-          {!todasAsLinguagens && facetas.linguagem.length > TETO_LINGUAGENS ? (
-            <Chip
-              variante="explorar"
-              onClick={() => setTodasAsLinguagens(true)}
-              contagem={milhar(facetas.linguagem.length)}
-            >
-              Todas
-            </Chip>
-          ) : null}
-        </TrilhoDeChips>
+        <h2 className="filtros-bloco-titulo">Linguagem</h2>
 
-        <TrilhoDeChips rotulo="Recortar por território" className="trilho-chips-rola" setas>
-          {facetas.territorio.slice(0, TETO_TERRITORIOS).map((o) => (
-            <Chip
-              key={`${o.campo}:${o.valor}`}
-              variante="explorar"
-              selecionado={criterioMarcado(o)}
-              onClick={() => alternarCriterio(o)}
-              contagem={milhar(o.n)}
-            >
-              {o.rotulo}
-            </Chip>
-          ))}
-        </TrilhoDeChips>
+        {/* O TRILHO DE TERRITÓRIO SAIU (27.08): «Onde», no alto da tela, já recorta por
+            estado e município, e dois controles para a mesma pergunta é a tela pedindo
+            duas vezes a mesma coisa com respostas que podem discordar.
+
+            E LINGUAGEM VIROU GAVETA. São 33 linguagens; em trilho horizontal, as que não
+            cabem na primeira tela dependem de alguém adivinhar que aquilo rola. Aberta, a
+            lista mostra todas de uma vez e o resumo conta quantas estão marcadas. */}
+        <details className="filtros-gaveta">
+          <summary className="filtros-gaveta-topo">
+            <span className="filtros-gaveta-rotulo">
+              {linguagensMarcadas === 0
+                ? "Escolher linguagem"
+                : `${linguagensMarcadas} linguagem${linguagensMarcadas > 1 ? "s" : ""} marcada${
+                    linguagensMarcadas > 1 ? "s" : ""
+                  }`}
+            </span>
+          </summary>
+
+          <ul className="filtros-dimensoes">
+            {facetas.linguagem.map((o) => (
+              <li key={`${o.campo}:${o.valor}`} className="filtros-dimensao">
+                <button
+                  type="button"
+                  aria-pressed={criterioMarcado(o)}
+                  className="filtros-marcavel"
+                  onClick={() => alternarCriterio(o)}
+                >
+                  <span className="filtros-marcavel-caixa" aria-hidden />
+                  {/* A bolinha é pintada pelo CSS a partir do token do dado, do mesmo
+                      jeito que `selo-linguagem.tsx` faz — a cor da linguagem é dado. */}
+                  {o.cor ? (
+                    <span
+                      className="filtros-marcavel-cor"
+                      style={{ background: `var(${o.cor})` }}
+                      aria-hidden
+                    />
+                  ) : null}
+                  <span className="filtros-marcavel-rotulo">{o.rotulo}</span>
+                  <span className="filtros-marcavel-n">{milhar(o.n)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
       </section>
 
       </div>
@@ -436,124 +484,18 @@ export function Filtros({
       <div className="filtros-saida" data-coluna-saida>
       {/* ---------------------------------------------------------------- */}
       {/* 4. O que o acervo NÃO sustenta (D-90)                             */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="filtros-bloco" data-bloco="sem-lastro">
-        <h2 className="filtros-bloco-titulo">O que este acervo não recorta</h2>
-        {semLastro.map((c) => (
-          <div
-            key={c.campo}
-            className="filtros-sem-lastro"
-            {...(c.tipo === "inexistente"
-              ? { "data-criterio-inexistente": c.campo }
-              : { "data-nao-sustenta": `sem-lastro:${c.campo}` })}
-          >
-            <p className="filtros-sem-lastro-topo">
-              <button
-                type="button"
-                className="filtros-marcavel filtros-marcavel-morta"
-                disabled
-                aria-disabled="true"
-              >
-                <span className="filtros-marcavel-caixa" aria-hidden />
-                <span className="filtros-marcavel-rotulo">{c.rotulo}</span>
-              </button>
-              <span className="filtros-sem-lastro-selo">
-                {c.tipo === "inexistente"
-                  ? "o campo não existe no acervo"
-                  : "o campo existe e não recorta"}
-              </span>
-            </p>
-
-            <ul className="filtros-denominadores">
-              {c.denominadores.map((d) => (
-                <li key={d.chave} className="filtros-denominador" data-denominador={d.chave}>
-                  <strong className="filtros-denominador-numero">{milhar(d.n)}</strong>
-                  <span className="filtros-denominador-rotulo">{d.rotulo}</span>
-                </li>
-              ))}
-            </ul>
-
-            <p className="filtros-sem-lastro-frase">{c.frase}</p>
-          </div>
-        ))}
-      </section>
-
+      
       {/* ---------------------------------------------------------------- */}
       {/* 5. O recorte, aqui mesmo — e o que NÃO viaja para /buscar         */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="filtros-bloco" data-bloco="resultado">
-        <h2 className="filtros-bloco-titulo">
-          {recorte.total === 0 ? "Nenhum resultado — e por quê" : "O recorte"}
-        </h2>
-
-        {recorte.total === 0 ? (
-          <div className="filtros-zero" data-sem-resultado="filtros">
-            <p className="filtros-zero-frase">
-              <strong>Zero de {milhar(indice.total)} entradas</strong> atendem a este recorte
-            </p>
-            <ul className="filtros-zero-motivos">
-              {marcadas
-                .map((campo) => dimensoes.find((d) => d.campo === campo)!)
-                .filter((d) => !d.sustentada)
-                .map((d) => (
-                  <li key={d.campo} className="filtros-zero-motivo">
-                    <strong>{d.rotulo}</strong> está marcada e mede{" "}
-                    <strong>0 de {milhar(ficha.declaram)}</strong> — desmarque para ver
-                    resultados.
-                  </li>
-                ))}
-              {criterios.map((c) => (
-                <li key={`${c.campo}:${c.valor}`}>
-                  <strong>{c.rotulo}</strong> está marcado como {c.campo}.
-                </li>
-              ))}
-            </ul>
-            <p className="filtros-zero-frase">
-              Sem os critérios de acessibilidade, o mesmo recorte devolveria{" "}
-              <strong>{milhar(recorte.semAcessibilidade)}</strong> entradas.
-            </p>
-            <button type="button" className="filtros-limpar" onClick={limparTudo}>
-              limpar tudo e voltar às {milhar(indice.total)}
-            </button>
-            {trilhas.map((t) => (
-              <p key={t.id} data-trilha-relacionada={t.slug} className="filtros-trilha">
-                Ou veja a <strong>{t.titulo}</strong>.{" "}
-                <Link href={`/trilha/${t.slug}/`}>abrir a trilha</Link>
-              </p>
-            ))}
-          </div>
-        ) : (
-          <>
-            <p className="filtros-bloco-linha">
-              Mostrando {milhar(Math.min(TETO_PREVIA, recorte.total))} de{" "}
-              {milhar(recorte.total)}
-            </p>
-            <ul className="filtros-previa">
-              {recorte.previa.map((r) => (
-                <li key={r.chave} className="filtros-previa-item">
-                  <span className="filtros-previa-classe">{r.classe}</span>
-                  <span className="filtros-previa-titulo">{r.titulo}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-
-        {/* O que a busca PERDE continua dito antes do clique: ela não entende
-            acessibilidade, e sair daqui muda o número. Isso não é a tela se
-            explicando — é o aviso de uma ação que altera o recorte. */}
-        <p className="filtros-bloco-linha filtros-nao-viaja">
-          A busca não entende acessibilidade: ela deixa para trás {marcadas.length}{" "}
-          critério(s)
-          {recorteDeFicha === "" ? "" : " e o recorte da ficha"} e devolve{" "}
-          <strong>{milhar(recorte.semAcessibilidade)}</strong> em vez de{" "}
-          {milhar(recorte.total)}.
-        </p>
-
-        <Link href={enderecoDeBusca} className="filtros-ir-buscar">
-          abrir na busca só com o que ela entende
+      {/* A PRÉVIA DO RECORTE SAIU (27.08, pedido do cliente). Ela listava oito resultados
+          e o total dentro da própria tela de filtros — dois lugares mostrando resultado,
+          e o segundo sempre pela metade. Quem monta um recorte quer chegar aos resultados,
+          não espiá-los. A ação de saída fica, e agora é a ação primária da tela. */}
+      <div className="filtros-rodape">
+        <Link href={enderecoDeBusca} className="filtros-ir-buscar no-underline">
+          Ver resultados
         </Link>
-      </section>
+      </div>
       </div>
     </div>
   );

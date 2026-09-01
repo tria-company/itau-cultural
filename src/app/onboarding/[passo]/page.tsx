@@ -1,124 +1,172 @@
 import Link from "next/link";
-import { EsqueletoBloco, EsqueletoLista, TelaEsqueleto } from "@/componentes/esqueleto";
+import { EsqueletoLista, TelaEsqueleto } from "@/componentes/esqueleto";
 import { OnboardingDisposicao } from "@/componentes/onboarding-disposicao";
+import { OnboardingLinguagens } from "@/componentes/onboarding-linguagens";
+import { OnboardingRodape } from "@/componentes/onboarding-rodape";
+import { OnboardingSementes } from "@/componentes/onboarding-sementes";
 import { cidadesComAcervo } from "@/dados/cidade";
+import { catalogoDeSementes } from "@/dados/sementes";
 
 /**
- * Onboarding em três passos (telas 2, 3 e 4 de `docs/telas.md`).
+ * Onboarding em CINCO passos: disposição, linguagens, artistas, obras e o passo de
+ * contexto (território + acessibilidade).
  *
- * Só o passo 1 é Camada 1, e ele deixou de ser esqueleto: DESC-01 entregue, com os cartões
- * grandes de disposição lendo `disposicoes.ts` e gravando em `useSessao`.
+ * ─────────────────────────────────────────────────────────────────────────────────────
+ * O QUE MUDOU COM A S8, e por quê.
  *
- * Os passos 2 e 3 continuam esqueleto DE PROPÓSITO. São Camada 3 (território e
- * acessibilidade), e por D-19 Camada 3 nunca é pré-requisito de Camada 1 — nenhum deles
- * pode virar porteiro de Descobrir. É por isso que todo passo oferece a saída direta.
+ * Eram três passos — disposição, território, acessibilidade — e só o primeiro era Camada
+ * 1. Os passos de semeadura entraram no meio; território e acessibilidade continuam
+ * FUNDIDOS num passo só, que fecha a sequência. Os dois são Camada 3, os dois são
+ * contexto e não gosto, e nenhum é pré-requisito de nada (D-19).
+ *
+ * ARTISTAS E OBRAS SÃO DUAS TELAS, e a de obras não se recorta pela de artistas: o acervo
+ * não tem nenhuma aresta ligando pessoa a obra. O motivo medido está no cabeçalho de
+ * `onboarding-sementes.tsx`.
+ *
+ * NENHUM PASSO É PORTEIRO. «Pular» existe nos quatro e leva direto a Descobrir, que
+ * funciona sem semente nenhuma e diz na tela que está mostrando o feed base. É a mesma
+ * regra de sempre — Camada 3 nunca bloqueia Camada 1 — estendida ao onboarding inteiro,
+ * inclusive aos passos que são Camada 1.
+ *
+ * COMPONENTE DE SERVIDOR. `catalogoDeSementes()` roda no BUILD e alcança o grafo; o que
+ * atravessa a fronteira são as listas já recortadas — 33 linguagens com contagem, 194
+ * rostos e 676 entradas de busca. Os 23 MB do acervo ficam do lado de lá (DP-F).
  */
+
+const CATALOGO = catalogoDeSementes();
+
 const PASSOS = {
   "1": {
     titulo: "Onboarding 1 — disposição",
     camada: "C1" as const,
-    objetivo:
-      "Capturar intenção, não gosto declarado. A pergunta é «o que te move hoje?», e a seleção é múltipla e sem obrigatoriedade.",
     blocos: [] as string[],
   },
   "2": {
-    titulo: "Onboarding 2 — território e alcance",
+    titulo: "Onboarding 2 — linguagens",
+    camada: "C1" as const,
+    blocos: [] as string[],
+  },
+  "3": {
+    titulo: "Onboarding 3 — artistas",
+    camada: "C1" as const,
+    blocos: [] as string[],
+  },
+  "4": {
+    titulo: "Onboarding 4 — obras",
+    camada: "C1" as const,
+    blocos: [] as string[],
+  },
+  "5": {
+    titulo: "Onboarding 5 — território e acessibilidade",
     camada: "C3" as const,
-    objetivo:
-      "Saber de onde a pessoa parte, sem pedir endereço: cidade atual, raio em tempo e não em quilômetros, e o alternador «estou de viagem» — é por aqui que o cenário 2 entra.",
     blocos: [
       "cidade atual, com correção manual",
       "raio de deslocamento em tempo — até 30 min",
       "estou de viagem · destino e período",
-    ],
-  },
-  "3": {
-    titulo: "Onboarding 3 — acessibilidade",
-    camada: "C3" as const,
-    objetivo:
-      "Tratar acessibilidade como filtro de primeira classe, não como selo: as 8 dimensões que o próprio CMS do Itaú Cultural já modela.",
-    blocos: [
-      "audiodescrição · Libras · legenda descritiva",
-      "closed caption · legenda aberta",
-      "tradução simultânea · estenotipia · legenda",
-      "a escolha vale para o app inteiro e pode mudar depois",
+      "as 8 dimensões de acessibilidade que o CMS já modela",
     ],
   },
 };
 
-/** Exatamente três passos. Sob `output: "export"` esta lista é a rota (D-24). */
+/** Exatamente cinco passos. Sob `output: "export"` esta lista é a rota (D-24). */
 export function generateStaticParams() {
   return Object.keys(PASSOS).map((passo) => ({ passo }));
 }
 
+const PROXIMO: Record<string, string> = {
+  "1": "/onboarding/2/",
+  "2": "/onboarding/3/",
+  "3": "/onboarding/4/",
+  "4": "/onboarding/5/",
+  "5": "/descobrir/",
+};
+
+/* A grade de cada passo de semeadura, recortada por classe no BUILD. Artistas e obras são
+ * telas independentes — ver o cabeçalho deste arquivo. */
+const ARTISTAS = {
+  grade: CATALOGO.grade.filter((r) => r.classe === "pessoa"),
+  busca: CATALOGO.busca.filter((r) => r.classe === "pessoa"),
+};
+const OBRAS = {
+  grade: CATALOGO.grade.filter((r) => r.classe === "obra"),
+  busca: CATALOGO.busca.filter((r) => r.classe === "obra"),
+};
+
 export default async function Onboarding({ params }: { params: Promise<{ passo: string }> }) {
   const { passo } = await params;
   const conteudo = PASSOS[passo as keyof typeof PASSOS] ?? PASSOS["1"];
-  const proximo = { "1": "/onboarding/2", "2": "/onboarding/3", "3": "/descobrir" }[passo] ?? "/descobrir";
+  const proximo = PROXIMO[passo] ?? "/descobrir/";
+  const total = Object.keys(PASSOS).length;
 
   return (
     <TelaEsqueleto
-      nome={conteudo.titulo}
-      objetivo={conteudo.objetivo}
-      acoes={
-        <>
-          <Link
-            href={proximo}
-            className="rounded-full bg-acao px-4 py-2 text-sm font-semibold text-sobre-acao transition-opacity hover:opacity-90"
-          >
-            Avançar
-          </Link>
-          <Link
-            href="/descobrir"
-            className="rounded-full border border-tinta px-4 py-2 text-sm font-semibold transition-colors hover:bg-superficie-2"
-          >
-            Pular
-          </Link>
-        </>
+      nome={conteudo.titulo}
+      rodape={
+        /* NO FIM DA TELA, e não no cabeçalho: «Avançar» acima da grade seria o botão de
+           confirmar aparecendo antes daquilo que ele confirma. Os dois continuam
+           presentes em TODOS os passos e os dois marcam que a pessoa foi perguntada. */
+        <OnboardingRodape
+          proximo={proximo}
+          rotuloAvancar={passo === String(total) ? "Ver o meu Descobrir" : "Avançar"}
+        />
       }
     >
-      <EsqueletoBloco altura="3rem" rotulo={`passo ${passo} de 3 · avançar sempre disponível`} />
-      {passo === "1" ? (
-        <OnboardingDisposicao />
-      ) : (
-        <EsqueletoLista rotulos={conteudo.blocos} />
-      )}
+      {/* Era um `EsqueletoBloco` — um retângulo cinza rotulado, que é o vocabulário de uma
+          tela que ainda não existe. Nestes passos a tela já existe, e o placeholder
+          passava a anunciar ausência em cima de conteúdo. Sobrou a informação, que é real. */}
+      <p className="onb-passos">
+        passo {passo} de {total}
+      </p>
 
-      {/* PORTAS REAIS dentro do esqueleto (reformulação 2026-08): o que já existe no
-          produto entra como caminho de verdade; o esqueleto rotulado segue marcando o
-          que ainda não existe (persistir a escolha na sessão). */}
-      {passo === "2" ? (
-        <section className="flex flex-col gap-2">
-          <p className="text-sm font-semibold">
-            Estou de viagem — as {cidadesComAcervo().length} cidades com acervo têm roteiro
-            pronto:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {cidadesComAcervo().map((c) => (
-              <Link
-                key={c.slug}
-                href={`/cidade/${c.slug}/`}
-                className="rounded-full border border-borda-forte px-3 py-1 text-xs font-semibold no-underline"
-              >
-                {c.titulo} <span className="opacity-60">· {c.total}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {passo === "1" ? <OnboardingDisposicao /> : null}
+      {passo === "2" ? <OnboardingLinguagens linguagens={CATALOGO.linguagens} /> : null}
       {passo === "3" ? (
-        <section className="flex flex-col gap-2">
-          <p className="max-w-prose text-sm leading-snug">
-            As 8 dimensões já são filtro de primeira classe na tela de Filtros — marcadas lá,
-            valem para toda a agenda, com o denominador honesto de cada uma.
-          </p>
-          <Link
-            href="/filtros/"
-            className="w-fit rounded-full bg-acao px-4 py-2 text-sm font-semibold text-sobre-acao no-underline transition-opacity hover:opacity-90"
-          >
-            Abrir as 8 dimensões de acessibilidade
-          </Link>
-        </section>
+        <OnboardingSementes
+          grade={ARTISTAS.grade}
+          busca={ARTISTAS.busca}
+          pergunta="Quais artistas já te interessam?"
+          rotuloDaBusca="Procurar artista pelo nome"
+        />
+      ) : null}
+      {passo === "4" ? (
+        <OnboardingSementes
+          grade={OBRAS.grade}
+          busca={OBRAS.busca}
+          pergunta="E quais obras te param?"
+          rotuloDaBusca="Procurar obra pelo título"
+        />
+      ) : null}
+
+      {passo === "5" ? (
+        <>
+          <EsqueletoLista rotulos={conteudo.blocos} />
+
+          {/* PORTAS REAIS dentro do esqueleto: o que já existe no produto entra como
+              caminho de verdade; o esqueleto rotulado segue marcando o que falta. */}
+          <section className="flex flex-col gap-2">
+            <p className="text-sm font-semibold">Estou de viagem</p>
+            <div className="flex flex-wrap gap-2">
+              {cidadesComAcervo().map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/cidade/${c.slug}/`}
+                  className="rounded-full border border-borda-forte px-3 py-1 text-xs font-semibold no-underline"
+                >
+                  {c.titulo}
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-2">
+            <Link
+              href="/filtros/"
+              className="w-fit rounded-full bg-acao px-4 py-2 text-sm font-semibold text-sobre-acao no-underline transition-opacity hover:opacity-90"
+            >
+              Acessibilidade
+            </Link>
+          </section>
+        </>
       ) : null}
     </TelaEsqueleto>
   );

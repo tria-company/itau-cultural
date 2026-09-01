@@ -189,12 +189,20 @@
   min-width: 0;
 }
 
+/* SÓ O ÍCONE (27.08). O rótulo saiu da barra: em quatro abas mais o botão de Apps, no
+   porte do telefone, «Comunidade» e «Recompensas» não cabiam e apareciam truncados —
+   «Comunid…» e «Recompe…» não são nomes, são ruído com reticências. O nome continua no
+   `aria-label`, então o leitor de tela e o atalho de teclado não perderam nada.
+
+   Sem a segunda linha o alvo encolheria, então o padding vertical dobra: 44px de altura
+   de toque é o mínimo, e ele não pode depender de um texto que não existe mais. */
 [data-view="mobile"] .barra-aba {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.25rem;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.75rem;
   border-radius: var(--raio-pilula);
   color: var(--cor-tinta-3);
   transition:
@@ -202,17 +210,13 @@
     color var(--dur-1) var(--ease-padrao);
 }
 
+/* O ícone cresce um degrau: ele passou a ser a única coisa que identifica a aba. */
 [data-view="mobile"] .barra-aba svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
-[data-view="mobile"] .barra-aba span {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
 
 [data-view="mobile"] .barra-aba:hover {
   color: var(--cor-tinta);
@@ -233,8 +237,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  /* Sem o rótulo o botão vira um alvo redondo: largura e altura iguais, para ele ser um
+     círculo de verdade em vez de uma pílula com um ícone no meio. */
   width: 3.5rem;
+  height: 3.5rem;
   border-radius: var(--raio-pilula);
   background: var(--cor-acao);
   color: var(--cor-sobre-acao);
@@ -244,8 +250,8 @@
 }
 
 [data-view="mobile"] .barra-apps svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 [data-view="mobile"] .barra-apps:hover {
@@ -262,7 +268,13 @@
 /* O rodapé que o conteúdo precisa para não terminar debaixo da barra. Mora nesta
  * folha, e não em `base.css`, porque a folga é uma consequência da barra: quem
  * apagar a barra apaga a folga junto, sem deixar um vão órfão no fim de toda
- * tela. Na web não existe barra e a regra não se aplica. */
+ * tela. Na web não existe barra e a regra não se aplica.
+ *
+ * 5rem, e não 6rem: a barra desenhada MEDE 78px, e reservar 96px deixava 18px de
+ * frincha entre o fim do conteúdo e o topo dela. Em telas que só rolam isso não
+ * aparecia; nos Roteiros, onde o campo de escrever gruda no fim do container, a
+ * frincha virava um vão visível entre o campo e os ícones. A reserva agora é a
+ * altura da barra mais um fio. */
 [data-view="mobile"] .moldura-rolagem {
-  padding-bottom: 6rem;
+  padding-bottom: 5rem;
 }

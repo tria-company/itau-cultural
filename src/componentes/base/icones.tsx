@@ -1,11 +1,11 @@
 import { cloneElement, isValidElement } from "react";
 
 /**
- * icones.tsx, o traço único da navegação principal.
+ * icones.tsx — o traço único da navegação principal.
  *
  * Nasceu quando a barra inferior (2026-08-23) passou a precisar dos
  * mesmos cinco ícones que o menu lateral já desenhava. Dois arquivos com o
- * mesmo `<path>` divergem na primeira edição, e o sintoma seria a bússola de
+ * mesmo `<path>` divergem na primeira edição — e o sintoma seria a bússola de
  * Descobrir com um traço na barra e outro no menu, na mesma tela.
  *
  * São ELEMENTOS, não componentes, porque é assim que os itens de navegação
@@ -122,7 +122,7 @@ export const ICONE_PERFIL = (
   </Icone>
 );
 
-/** Os cursores deslizantes dos filtros, a porta de /filtros na busca de Descobrir. */
+/** Os cursores deslizantes dos filtros — a porta de /filtros na busca de Descobrir. */
 export const ICONE_FILTROS = (
   <Icone>
     <path d="M4 7.5h9M17 7.5h3M4 16.5h3M11 16.5h9" {...traco} />
@@ -134,12 +134,26 @@ export const ICONE_FILTROS = (
 /* ---------------------------------------------------------------------------
  * Os três glifos do SELO dos cartazes do hub (referência de 23/08).
  *
- * O selo é o disco no canto de cada cartaz, e ele diz, antes do toque, o que
+ * O selo é o disco no canto de cada cartaz, e ele diz — antes do toque — o que
  * acontece do outro lado. Quem escolhe qual vai em qual cartaz é `apps.ts`, no
  * campo `selo`; aqui mora só o traço.
  * ------------------------------------------------------------------------- */
 
 /** «Entrar»: a seta que não promete nada além de atravessar. */
+/**
+ * Menu lateral — duas linhas de comprimentos diferentes, traço fino.
+ *
+ * Duas e não três: o traço mais curto embaixo é o que distingue este botão de um menu de
+ * navegação cheio, e é o desenho que o aplicativo de conversa consagrou para «abrir a
+ * lista do lado». Três pontinhos diriam só «tem mais alguma coisa».
+ */
+export const ICONE_PAINEL = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+    <path d="M5 10h14" strokeLinecap="round" />
+    <path d="M5 15h9" strokeLinecap="round" />
+  </svg>
+);
+
 export const ICONE_SETA = (
   <Icone>
     <path d="M4.5 12h14M12.8 6.2 18.5 12l-5.7 5.8" {...traco} />
@@ -147,7 +161,7 @@ export const ICONE_SETA = (
 );
 
 /** «Tocar»: o triângulo CHEIO. `ICONE_PLAY` desenha o círculo junto, e dentro do
- *  selo, que já é um disco, ele viraria um segundo anel concêntrico. */
+ *  selo — que já é um disco — ele viraria um segundo anel concêntrico. */
 export const ICONE_TOCAR = (
   <Icone>
     <path
@@ -161,7 +175,7 @@ export const ICONE_TOCAR = (
 );
 
 /** «Ouvir»: a onda do áudio. É o selo do Cast, e não o microfone de
- *  `ICONE_CAST`, o cartaz não convida a gravar, convida a dar play. */
+ *  `ICONE_CAST` — o cartaz não convida a gravar, convida a dar play. */
 export const ICONE_ONDA = (
   <Icone>
     <path d="M4 10.5v3M8 7.2v9.6M12 4.5v15M16 7.2v9.6M20 10.5v3" {...traco} />
@@ -184,31 +198,7 @@ export const ICONE_CONFERIDO = (
   </Icone>
 );
 
-/** As três abas do Studio: a casa, a rede e os pontos. Mesmo traço das outras. */
-export const ICONE_STUDIO_HOME = (
-  <Icone>
-    <path d="M4 10.5 12 4l8 6.5V20H4v-9.5Z" {...traco} />
-    <path d="M9.5 20v-5.5h5V20" {...traco} />
-  </Icone>
-);
-
-export const ICONE_COMUNIDADE = (
-  <Icone>
-    <circle cx="9" cy="9" r="3.2" {...traco} />
-    <path d="M3.5 19c.5-3 2.8-4.7 5.5-4.7s5 1.7 5.5 4.7" {...traco} />
-    <path d="M16 6.6a3 3 0 0 1 0 5.8M17.5 19c-.2-1.6-.8-2.9-1.8-3.8" {...traco} />
-  </Icone>
-);
-
-/** A sacola da loja de pontos: e uma LOJA, e a estrela dizia «favorito». */
-export const ICONE_LOJA = (
-  <Icone>
-    <path d="M5.5 8h13l-1 11.5a1.5 1.5 0 0 1-1.5 1.4H8a1.5 1.5 0 0 1-1.5-1.4L5.5 8Z" {...traco} />
-    <path d="M9 8V6.5a3 3 0 0 1 6 0V8" {...traco} />
-  </Icone>
-);
-
-/** O botão que abre o hub, quatro campos, que é o que o hub mostra. */
+/** O botão que abre o hub — quatro campos, que é o que o hub mostra. */
 export const ICONE_APPS = (
   <Icone>
     <rect x="3.5" y="3.5" width="7" height="7" rx="2" {...traco} />
@@ -218,7 +208,7 @@ export const ICONE_APPS = (
   </Icone>
 );
 
-/** Chevron da faixa de datas em Acontece, o mesmo traço nas duas direções. */
+/** Chevron da faixa de datas em Acontece — o mesmo traço nas duas direções. */
 export const ICONE_CHEVRON_ESQUERDA = (
   <Icone>
     <path d="M15 5.5 8.5 12 15 18.5" {...traco} />
@@ -231,7 +221,7 @@ export const ICONE_CHEVRON_DIREITA = (
   </Icone>
 );
 
-/** Fones, visitas guiadas, áudio de mediação. */
+/** Fones — visitas guiadas, áudio de mediação. */
 export const ICONE_FONES = (
   <Icone>
     <path d="M4.5 13v2.2A1.8 1.8 0 0 0 6.3 17H8v-5.5H6.3A1.8 1.8 0 0 0 4.5 13Z" {...traco} />
@@ -256,7 +246,7 @@ export const ICONE_ALERTA = (
   </Icone>
 );
 
-/** Oficina / ateliê, o lápis da formação prática. */
+/** Oficina / ateliê — o lápis da formação prática. */
 export const ICONE_OFICINA = (
   <Icone>
     <path d="M14.2 4.8 19.2 9.8 9 20H4v-5L14.2 4.8Z" {...traco} />
@@ -264,7 +254,7 @@ export const ICONE_OFICINA = (
   </Icone>
 );
 
-/** Pós-graduação, o selo, distinto do capelo de `ICONE_CURSOS`. */
+/** Pós-graduação — o selo, distinto do capelo de `ICONE_CURSOS`. */
 export const ICONE_POS = (
   <Icone>
     <circle cx="12" cy="9.5" r="5" {...traco} />
@@ -272,7 +262,7 @@ export const ICONE_POS = (
   </Icone>
 );
 
-/** Encontro, duas pessoas, o formato presencial/virtual da Escola IC. */
+/** Encontro — duas pessoas, o formato presencial/virtual da Escola IC. */
 export const ICONE_ENCONTRO = (
   <Icone>
     <circle cx="9" cy="8" r="2.6" {...traco} />
@@ -282,7 +272,7 @@ export const ICONE_ENCONTRO = (
   </Icone>
 );
 
-/** Sai do app, a inscrição da formação vive no site do Itaú Cultural. */
+/** Sai do app — a inscrição da formação vive no site do Itaú Cultural. */
 export const ICONE_EXTERNO = (
   <Icone>
     <path d="M14 5h5v5M19 5 10 14" {...traco} />
@@ -290,14 +280,14 @@ export const ICONE_EXTERNO = (
   </Icone>
 );
 
-/** Enviar o pedido, a seta para cima do compositor de /ia. */
+/** Enviar o pedido — a seta para cima do compositor de /ia. */
 export const ICONE_ENVIAR = (
   <Icone>
     <path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" {...traco} />
   </Icone>
 );
 
-/** Critérios do artefato de pensamento, o traço da ficha, não da busca. */
+/** Critérios do artefato de pensamento — o traço da ficha, não da busca. */
 export const ICONE_FICHA = (
   <Icone>
     <rect x="5" y="3.5" width="14" height="17" rx="2" {...traco} />
@@ -305,7 +295,7 @@ export const ICONE_FICHA = (
   </Icone>
 );
 
-/** Livro aberto, editorial, verbete, publicação. */
+/** Livro aberto — editorial, verbete, publicação. */
 export const ICONE_LIVRO = (
   <Icone>
     <path d="M12 6.5c-1.6-1-3.7-1.5-6.5-1.5H4.5v13H6c2.6 0 4.5.6 6 1.5 1.5-.9 3.4-1.5 6-1.5h1.5v-13H18.5c-2.8 0-4.9.5-6.5 1.5Z" {...traco} />
@@ -313,7 +303,7 @@ export const ICONE_LIVRO = (
   </Icone>
 );
 
-/** Prédio, instituição. */
+/** Prédio — instituição. */
 export const ICONE_PREDIO = (
   <Icone>
     <path d="M5 20.5V7.5l7-3.5 7 3.5v13" {...traco} />
@@ -322,7 +312,7 @@ export const ICONE_PREDIO = (
   </Icone>
 );
 
-/** Quadro, obra. */
+/** Quadro — obra. */
 export const ICONE_OBRA = (
   <Icone>
     <rect x="4" y="5" width="16" height="14" rx="1.5" {...traco} />
@@ -331,7 +321,7 @@ export const ICONE_OBRA = (
   </Icone>
 );
 
-/** Etiqueta, tema. */
+/** Etiqueta — tema. */
 export const ICONE_TAG = (
   <Icone>
     <path d="M4.5 12V6.5H10l8.5 8.5-5.5 5.5L4.5 12Z" {...traco} />
@@ -339,7 +329,7 @@ export const ICONE_TAG = (
   </Icone>
 );
 
-/** Caminho, trilha. */
+/** Caminho — trilha. */
 export const ICONE_TRILHA = (
   <Icone>
     <path d="M5 18c2.2-4 3.2-4 5.2-1.2S13.5 19 16 16s3.2-6 4-8" {...traco} />
@@ -348,28 +338,26 @@ export const ICONE_TRILHA = (
   </Icone>
 );
 
-/** Fala, linguagem. */
+/** Fala — linguagem. */
 export const ICONE_FALA = (
   <Icone>
     <path d="M5 6.5h14v9H12l-4 3.5V15.5H5V6.5Z" {...traco} />
   </Icone>
 );
 
-/** Casa/porta, espaço cultural. */
-export const ICONE_CASA = (
+/** Troféu — os desafios. */
+export const ICONE_TROFEU = (
   <Icone>
-    <path d="M4.5 20.5V10.5L12 4.5l7.5 6v10" {...traco} />
-    <path d="M10 20.5v-6h4v6" {...traco} />
+    <path d="M7.5 4h9v5.2a4.5 4.5 0 0 1-9 0V4Z" {...traco} />
+    <path d="M7.5 5.6H5a2 2 0 0 0 0 4h2.6" {...traco} />
+    <path d="M16.5 5.6H19a2 2 0 0 1 0 4h-2.6" {...traco} />
+    <path d="M12 13.7V17" {...traco} />
+    <path d="M8.5 20h7" {...traco} />
+    <path d="M9.8 17h4.4l.6 3H9.2l.6-3Z" {...traco} />
   </Icone>
 );
 
-/**
- * Coração — reagir. `data-cheio` no <svg> pinta o miolo.
- *
- * Vieram do outro ramo em 2026-08-28, com as telas de Comunidade e Loja: são os dois
- * únicos ícones do porte que faltavam aqui. O resto (`ICONE_FALA`, `ICONE_SALVOS`,
- * `ICONE_ENVIAR`, `ICONE_CHEVRON_ESQUERDA`) já existia com o mesmo nome.
- */
+/** Coração — reagir. `data-cheio` no <svg> pinta o miolo. */
 export const ICONE_CORACAO = (
   <Icone>
     <path
@@ -391,16 +379,37 @@ export const ICONE_CORACAO_CHEIO = (
   </Icone>
 );
 
-/** Lápis — editar aqui mesmo, sem sair da tela. */
-export const ICONE_LAPIS = (
+/** Duas pessoas — a comunidade. */
+export const ICONE_COMUNIDADE = (
   <Icone>
-    <path d="M4.5 19.5h3.2l9.1-9.1-3.2-3.2-9.1 9.1v3.2Z" {...traco} />
-    <path d="M14.9 5.4l1.5-1.5a1.4 1.4 0 0 1 2 0l1.2 1.2a1.4 1.4 0 0 1 0 2l-1.5 1.5" {...traco} />
+    <circle cx="9" cy="8.5" r="3.1" {...traco} />
+    <path d="M3.6 19.4a5.6 5.6 0 0 1 10.8 0" {...traco} />
+    <path d="M15.6 6.1a3.1 3.1 0 0 1 0 5.9" {...traco} />
+    <path d="M17.2 14.5a5.6 5.6 0 0 1 3.2 4.9" {...traco} />
+  </Icone>
+);
+
+/** Presente — a recompensas de resgate. */
+export const ICONE_RECOMPENSAS = (
+  <Icone>
+    <path d="M4 11h16v8.2a.8.8 0 0 1-.8.8H4.8a.8.8 0 0 1-.8-.8V11Z" {...traco} />
+    <path d="M3.4 7.6h17.2v3.4H3.4V7.6Z" {...traco} />
+    <path d="M12 7.6V20" {...traco} />
+    <path d="M12 7.6S10.9 4 8.9 4a2 2 0 0 0 0 3.6H12Z" {...traco} />
+    <path d="M12 7.6S13.1 4 15.1 4a2 2 0 0 1 0 3.6H12Z" {...traco} />
+  </Icone>
+);
+
+/** Casa/porta — espaço cultural. */
+export const ICONE_CASA = (
+  <Icone>
+    <path d="M4.5 20.5V10.5L12 4.5l7.5 6v10" {...traco} />
+    <path d="M10 20.5v-6h4v6" {...traco} />
   </Icone>
 );
 
 /**
- * Ícone da CLASSE da ontologia, o mesmo traço em todo filtrador de seção.
+ * Ícone da CLASSE da ontologia — o mesmo traço em todo filtrador de seção.
  * A chave é o valor cru (`conteudo`, `termo`), nunca o rótulo em português.
  */
 export const ICONE_POR_CLASSE: Record<string, React.ReactNode> = {
@@ -426,3 +435,34 @@ export function iconeDaClasse(classe: string): React.ReactNode {
   return isValidElement(icone) ? cloneElement(icone) : icone;
 }
 
+
+/* ---------------------------------------------------------------------------
+ * OS TRÊS DO PRODUTOR, que só existem deste lado.
+ *
+ * Vieram do trabalho de Studio, Comunidade e Loja, e não estão no ramo de onde veio o
+ * resto desta folha. Ficam no fim para a ordem do arquivo continuar sendo a de lá: quando
+ * a próxima atualização chegar, o único trecho que precisa de atenção é este.
+ * --------------------------------------------------------------------------- */
+/** Lápis — editar aqui mesmo, sem sair da tela. */
+export const ICONE_LAPIS = (
+  <Icone>
+    <path d="M4.5 19.5h3.2l9.1-9.1-3.2-3.2-9.1 9.1v3.2Z" {...traco} />
+    <path d="M14.9 5.4l1.5-1.5a1.4 1.4 0 0 1 2 0l1.2 1.2a1.4 1.4 0 0 1 0 2l-1.5 1.5" {...traco} />
+  </Icone>
+);
+
+/** A sacola da loja de pontos: e uma LOJA, e a estrela dizia «favorito». */
+export const ICONE_LOJA = (
+  <Icone>
+    <path d="M5.5 8h13l-1 11.5a1.5 1.5 0 0 1-1.5 1.4H8a1.5 1.5 0 0 1-1.5-1.4L5.5 8Z" {...traco} />
+    <path d="M9 8V6.5a3 3 0 0 1 6 0V8" {...traco} />
+  </Icone>
+);
+
+/** As três abas do Studio: a casa, a rede e os pontos. Mesmo traço das outras. */
+export const ICONE_STUDIO_HOME = (
+  <Icone>
+    <path d="M4 10.5 12 4l8 6.5V20H4v-9.5Z" {...traco} />
+    <path d="M9.5 20v-5.5h5V20" {...traco} />
+  </Icone>
+);

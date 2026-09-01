@@ -113,12 +113,6 @@ export function Materia({ materia }: { materia: MateriaCompleta }) {
           <h2 className="materia-segue-titulo tipo-titulo-3">
             <Grafismo variacao="barra" className="h-[0.8em] w-auto" />
             Continua nisto
-            {materia.relacionadosTotal > materia.relacionados.length ? (
-              <span className="tipo-legenda text-tinta-2">
-                {" "}
-                · {materia.relacionados.length} de {materia.relacionadosTotal}
-              </span>
-            ) : null}
           </h2>
           <ul className="materia-segue-lista">
             {materia.relacionados.map((item) => (

@@ -5,6 +5,7 @@ import { SelosDeLinguagem } from "@/componentes/selo-linguagem";
 import { Verbete } from "@/componentes/verbete";
 import { porSlug, slugsPorTipo } from "@/dados/grafo";
 import { vinculosDe } from "@/dados/ponte";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 /**
  * Página da obra — tela 15, entregue na reformulação de 2026-08 (Parte 6 do
@@ -20,7 +21,8 @@ import { vinculosDe } from "@/dados/ponte";
 /** Reserva para classe vazia — mesmo contrato da página do artista. */
 export function generateStaticParams() {
   const slugs = slugsPorTipo("obra");
-  return (slugs.length ? slugs : ["sem-entidade"]).map((slug) => ({ slug }));
+  const cortados = limitarSlugs(slugs);
+  return (cortados.length ? cortados : ["sem-entidade"]).map((slug) => ({ slug }));
 }
 
 function Cabecalho({ nome, objetivo }: { nome: string; objetivo: string }) {

@@ -1,5 +1,6 @@
 import { ModoCidade } from "@/componentes/modo-cidade";
 import { cidadesComAcervo, precomputarCidade } from "@/dados/cidade";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 /**
  * `/cidade/[slug]` — o Modo Cidade, AGEN-05 e `docs/telas.md` tela 11.
@@ -21,7 +22,8 @@ import { cidadesComAcervo, precomputarCidade } from "@/dados/cidade";
  * `cidadesComAcervo`, ao lado da contagem que o justifica.
  */
 export function generateStaticParams() {
-  return cidadesComAcervo().map((cidade) => ({ slug: cidade.slug }));
+  const slugs = limitarSlugs(cidadesComAcervo().map((cidade) => cidade.slug));
+  return slugs.map((slug) => ({ slug }));
 }
 
 export default async function PaginaCidade({ params }: { params: Promise<{ slug: string }> }) {

@@ -19,10 +19,19 @@ import {
   ICONE_FICHA,
   ICONE_IA,
   ICONE_MAIS,
+  ICONE_PAINEL,
   ICONE_MAPA,
   ICONE_RELOGIO,
 } from "@/componentes/base/icones";
-import { Grafismo } from "@/componentes/grafismo";
+import {
+  guardarConversa,
+  lerConversas,
+  quandoPorExtenso,
+  removerConversa,
+  semearExemplos,
+  TETO_DE_CONVERSAS,
+  type ConversaGuardada,
+} from "@/lib/ia-historico";
 import {
   RoteirosSalvos,
   type OpcaoDaEntrevista,
@@ -78,6 +87,74 @@ type MensagemAssistente = {
   destino?: DestinoDoRoteiro;
 };
 type Mensagem = MensagemUsuario | MensagemAssistente;
+
+/** Uma conversa guardada, com os tipos deste arquivo. Ver `lib/ia-historico.ts`. */
+type Conversa = ConversaGuardada<Mensagem, Pedido>;
+
+/**
+ * Cinco conversas de DEMONSTRAÇÃO, semeadas só quando o histórico está vazio.
+ *
+ * Elas existem porque uma lista vazia não mostra o que a lista faz — e a tela do histórico
+ * é justamente uma que só se entende cheia. Somem no instante em que existe uma conversa
+ * de verdade, e enquanto estão ali a folha DIZ que são exemplo: histórico cheio sem
+ * ninguém ter conversado é plausível e falso, e o que é nosso se declara.
+ *
+ * As perguntas são sobre o acervo REAL — São Paulo, Belém, teatro, fotografia — porque
+ * exemplo com conteúdo inventado ensina a pessoa a pedir o que o produto não tem.
+ */
+const DIA = 24 * 60 * 60 * 1000;
+
+const EXEMPLOS: readonly { titulo: string; resposta: string; dias: number; pedido: Pedido }[] = [
+  {
+    titulo: "Quatro dias em São Paulo, com música",
+    resposta:
+      "Montei quatro dias em São Paulo puxando pela música: shows, casas de escuta e o que o acervo tem de gravação por perto.",
+    dias: 0,
+    pedido: { gosto: "musica", companhia: null, dias: 4, cidade: "sao-paulo", pediuData: true },
+  },
+  {
+    titulo: "O que ver em Belém num fim de semana?",
+    resposta:
+      "Dois dias em Belém, começando pelos espaços do acervo na cidade e fechando com o que há de artes visuais por lá.",
+    dias: 1,
+    pedido: { gosto: "artes-visuais", companhia: null, dias: 2, cidade: "belem", pediuData: true },
+  },
+  {
+    titulo: "Um roteiro de teatro para levar quem não vai ao teatro",
+    resposta:
+      "Puxei pelo teatro, mas começando pelo que costuma converter quem nunca foi: montagem curta, casa pequena e algo para conversar depois.",
+    dias: 3,
+    pedido: { gosto: "teatro", companhia: "amigos", dias: 1, cidade: "sao-paulo", pediuData: false },
+  },
+  {
+    titulo: "Fotografia no Rio, com criança junto",
+    resposta:
+      "Roteiro de fotografia no Rio pensado para ir com criança: percursos curtos, com parada entre um lugar e outro.",
+    dias: 5,
+    pedido: { gosto: "fotografia", companhia: "familia", dias: 2, cidade: "rio-de-janeiro", pediuData: true },
+  },
+  {
+    titulo: "Tenho uma tarde livre e queria descobrir algo novo",
+    resposta:
+      "Sem cidade e sem gosto fechado, fui pelo que o acervo tem de mais atravessável numa tarde — e deixei uma coisa fora do seu repertório no meio.",
+    dias: 12,
+    pedido: { gosto: null, companhia: null, dias: 1, cidade: null, pediuData: false },
+  },
+];
+
+function exemplosDoHistorico(agora: number): Conversa[] {
+  return EXEMPLOS.map((e, i) => ({
+    id: `exemplo-${i}`,
+    exemplo: true,
+    quando: agora - e.dias * DIA,
+    titulo: e.titulo,
+    mensagens: [
+      { id: `exemplo-${i}-u`, papel: "usuario", texto: e.titulo },
+      { id: `exemplo-${i}-a`, papel: "assistente", texto: e.resposta },
+    ] as Mensagem[],
+    pedido: e.pedido,
+  }));
+}
 
 function ehAssistente(m: Mensagem): m is MensagemAssistente {
   return m.papel === "assistente";
@@ -376,6 +453,11 @@ export function ConversaDaIa({ gostos, companhias, dias, cidades, sugestoes }: P
   const [passo, setPasso] = useState<0 | 1 | 2>(0);
   const [pensando, setPensando] = useState(false);
   const [artefatoVisivel, setArtefatoVisivel] = useState(false);
+  /** As conversas anteriores e a folha que as mostra. Ver `lib/ia-historico.ts`. */
+  const [historico, setHistorico] = useState<Conversa[]>([]);
+  const [historicoAberto, setHistoricoAberto] = useState(false);
+  /** O id da conversa CORRENTE. Criado no primeiro turno e mantido até «Nova conversa». */
+  const idDaConversa = useRef<string | null>(null);
   const timers = useRef<number[]>([]);
   const seq = useRef(0);
   const fim = useRef<HTMLDivElement>(null);
@@ -533,7 +615,58 @@ export function ConversaDaIa({ gostos, companhias, dias, cidades, sugestoes }: P
     seguir(proximo, s.texto);
   }
 
+  // O histórico só pode ser lido no cliente: sob `output: "export"` o HTML sai do build e
+  // ler `localStorage` no primeiro render divergiria da hidratação (o mesmo motivo de
+  // `sessao.tsx` guardar `hidratado`).
+  useEffect(() => {
+    const guardadas = lerConversas<Mensagem, Pedido>();
+    // Semeia os exemplos SÓ no histórico vazio — quem já conversou fica com o dele.
+    setHistorico(guardadas.length ? guardadas : semearExemplos(exemplosDoHistorico(Date.now())));
+  }, []);
+
+  /**
+   * Guarda a conversa a cada turno, e não só no fim.
+   *
+   * Guardar no fim exigiria saber quando o fim acontece — e uma conversa não termina, ela
+   * é abandonada: a pessoa fecha a aba, troca de app, some. O que ela vai procurar depois
+   * é o que estava na tela no último momento em que olhou.
+   */
+  useEffect(() => {
+    if (!mensagens.length) return;
+    const primeira = mensagens.find((m) => m.papel === "usuario");
+    if (!primeira) return;
+    // O ID VEM DA PRIMEIRA MENSAGEM, e não do relógio.
+    //
+    // Com `Date.now()` a mesma conversa ganhava ids diferentes a cada montagem do
+    // componente — em desenvolvimento o React monta duas vezes de propósito — e a lista
+    // aparecia com duas entradas idênticas, mesma pergunta e mesma hora. Derivar do id da
+    // primeira mensagem torna a identidade da conversa uma propriedade dela, não do
+    // instante em que alguém olhou para ela.
+    if (!idDaConversa.current) idDaConversa.current = `c-${primeira.id}`;
+    setHistorico(
+      guardarConversa<Mensagem, Pedido>({
+        id: idDaConversa.current,
+        quando: Date.now(),
+        titulo: primeira.texto.trim().slice(0, 90),
+        mensagens,
+        pedido,
+      }),
+    );
+  }, [mensagens, pedido]);
+
+  function abrirConversa(c: Conversa) {
+    for (const t of timers.current) window.clearTimeout(t);
+    timers.current = [];
+    idDaConversa.current = c.id;
+    setMensagens(c.mensagens);
+    setPedido(c.pedido);
+    setPensando(false);
+    setArtefatoVisivel(true);
+    setHistoricoAberto(false);
+  }
+
   function novaConversa() {
+    idDaConversa.current = null;
     for (const t of timers.current) window.clearTimeout(t);
     timers.current = [];
     setMensagens([]);
@@ -569,22 +702,112 @@ export function ConversaDaIa({ gostos, companhias, dias, cidades, sugestoes }: P
 
   return (
     <div className="ia" data-fase={conversando ? "conversa" : "vazio"}>
+      {/* SEM LOGO E SEM TÍTULO (27.08). A marca já está na barra do topo do app e o nome
+          da tela já está na aba que trouxe a pessoa até aqui — repetir os dois consumia a
+          primeira dobra de uma tela cujo assunto é o campo de escrever. */}
       <header className="ia-topo">
-        <div className="ia-topo-linha">
-          <Grafismo variacao="barra" className="ia-topo-marca" />
-          <h1 className="ia-topo-titulo tipo-destaque">Roteiros</h1>
+        <div className="ia-topo-acoes">
+          {/* O HISTÓRICO É O PRIMEIRO BOTÃO e existe nos dois estados da tela.
+              Antes, «Nova conversa» apagava a anterior sem deixar rastro: não havia onde
+              procurá-la, porque não havia o que procurar. Um botão que só aparecesse
+              durante a conversa seria inútil justamente para quem já saiu dela. */}
+          {historico.length ? (
+            <button
+              type="button"
+              className="ia-historico-botao"
+              aria-expanded={historicoAberto}
+              aria-label={`Conversas anteriores (${historico.length})`}
+              onClick={() => setHistoricoAberto(true)}
+            >
+              {glifo(ICONE_PAINEL, "ia-historico-seta")}
+            </button>
+          ) : null}
+
+          {conversando ? (
+            <button type="button" className="ia-nova" onClick={novaConversa}>
+              {glifo(ICONE_MAIS)} Nova conversa
+            </button>
+          ) : null}
         </div>
-        {conversando ? (
-          <button type="button" className="ia-nova" onClick={novaConversa}>
-            {glifo(ICONE_MAIS)} Nova conversa
-          </button>
-        ) : (
-          <details className="ia-topo-salvos">
-            <summary>Salvos</summary>
+      </header>
+
+      {historicoAberto ? (
+        <>
+          {/* O VÉU FECHA A GAVETA. Sem ele, sair do menu exigiria mirar num botão pequeno
+              — e gaveta que só fecha pelo botão é gaveta que prende. */}
+          <button
+            type="button"
+            className="ia-gaveta-veu"
+            aria-label="Fechar as conversas anteriores"
+            onClick={() => setHistoricoAberto(false)}
+          />
+          <aside className="ia-historico ia-gaveta" aria-label="Conversas anteriores">
+            <div className="ia-gaveta-topo">
+              <span className="ia-gaveta-titulo">Roteiros</span>
+              <button
+                type="button"
+                className="ia-historico-remover"
+                aria-label="Fechar"
+                onClick={() => setHistoricoAberto(false)}
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+          <p className="ia-gaveta-secao">Recentes</p>
+          <ul className="ia-historico-lista">
+            {historico.map((c) => (
+              <li key={c.id} className="ia-historico-item">
+                <button
+                  type="button"
+                  className="ia-historico-abrir"
+                  onClick={() => abrirConversa(c)}
+                >
+                  <span className="ia-historico-titulo">{c.titulo}</span>
+                  <span className="ia-historico-quando tipo-legenda">
+                    {c.exemplo ? (
+                      <span className="ia-historico-selo">exemplo</span>
+                    ) : null}
+                    {quandoPorExtenso(c.quando, Date.now())}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="ia-historico-remover"
+                  aria-label={`Apagar a conversa «${c.titulo}»`}
+                  onClick={() => setHistorico(removerConversa<Mensagem, Pedido>(c.id))}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {/* O teto é DITO, não escondido: lista que corta em silêncio faz a conversa
+              antiga «sumir» sem explicação. */}
+          {historico.some((c) => c.exemplo) ? (
+            <p className="ia-historico-teto tipo-legenda">
+              Estas conversas são exemplo, escritas por nós para mostrar como a lista fica.
+              Elas somem assim que você tiver a sua primeira.
+            </p>
+          ) : null}
+          {historico.length >= TETO_DE_CONVERSAS ? (
+            <p className="ia-historico-teto tipo-legenda">
+              As {TETO_DE_CONVERSAS} conversas mais recentes ficam guardadas aqui, neste
+              aparelho. A mais antiga sai quando uma nova entra.
+            </p>
+          ) : null}
+
+          {/* OS ROTEIROS SALVOS MORAM AQUI (27.08), e não mais no cabeçalho da tela.
+              Conversa e roteiro são as duas coisas que a pessoa guarda desta tela, e
+              estavam em lugares diferentes: a conversa na gaveta, o roteiro num
+              «details» que só aparecia antes de começar a conversar — ou seja, sumia
+              justo depois de você gerar um. */}
+          <details className="ia-gaveta-salvos">
+            <summary className="ia-gaveta-secao">Roteiros salvos</summary>
             <RoteirosSalvos cidades={cidades} gostos={gostos} />
           </details>
-        )}
-      </header>
+          </aside>
+        </>
+      ) : null}
 
       <div className="ia-fio">
         {conversando ? (
@@ -730,11 +953,17 @@ export function ConversaDaIa({ gostos, companhias, dias, cidades, sugestoes }: P
             {glifo(ICONE_ENVIAR)}
           </button>
         </div>
-        <p className="ia-compositor-nota tipo-legenda">
-          {pensando
-            ? "Montando o percurso no acervo…"
-            : "Nenhum modelo é chamado. Enter envia."}
-        </p>
+        {/* A nota só existe ENQUANTO PENSA, e virou feedback em vez de rodapé fixo.
+            O texto parado — «Nenhum modelo é chamado. Enter envia.» — ocupava uma linha
+            embaixo do campo em toda visita e empurrava o campo para longe da barra.
+
+            SAIU DO PRODUTO, e não mudou de lugar: hoje nenhuma tela declara que aqui não
+            se chama modelo nenhum. Foi decisão do cliente em 27.08, e fica registrado
+            aqui porque a informação era verdadeira e continua sendo — quem quiser repor,
+            o lugar natural é a tela vazia, não o rodapé do campo. */}
+        {pensando ? (
+          <p className="ia-compositor-nota tipo-legenda">Montando o percurso no acervo…</p>
+        ) : null}
       </form>
     </div>
   );

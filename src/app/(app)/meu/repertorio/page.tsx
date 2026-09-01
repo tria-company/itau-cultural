@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Grafismo } from "@/componentes/grafismo";
+import { RepertorioDoPerfil } from "@/componentes/repertorio-do-perfil";
 import { TelaRepertorio } from "@/componentes/repertorio";
 import { PERSONAS } from "@/dados/personas";
 import { indiceDeSalvaveis, repertorioDe, type RepertorioDaPersona } from "@/dados/repertorio";
+import { catalogoDeSementes, precomputoDeSementes } from "@/dados/sementes";
 
 export const metadata: Metadata = { title: "Mapa de repertório — Itaú Cultural" };
 
@@ -20,6 +22,12 @@ const repertorios: Record<string, RepertorioDaPersona> = Object.fromEntries(
 
 const indice = indiceDeSalvaveis();
 
+/* A ampliação do perfil PRÓPRIO. `repertorioDe` sabe medir as três personas e mais
+ * ninguém; a métrica de impacto do RFP não pode ficar presa a perfis fictícios. O cálculo
+ * do perfil roda no cliente, sobre as linguagens pré-computadas por semente. */
+const SEMENTES = precomputoDeSementes();
+const LINGUAGENS = catalogoDeSementes().linguagens;
+
 export default function MapaDeRepertorio() {
   return (
     <div className="flex flex-col gap-5 p-5 desk:p-8">
@@ -35,6 +43,8 @@ export default function MapaDeRepertorio() {
           ← Meu perfil
         </Link>
       </header>
+
+      <RepertorioDoPerfil precomputo={SEMENTES} linguagens={LINGUAGENS} />
 
       <TelaRepertorio repertorios={repertorios} indice={indice} />
     </div>

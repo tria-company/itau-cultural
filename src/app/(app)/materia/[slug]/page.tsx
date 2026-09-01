@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Materia } from "@/componentes/materia";
 import { materiaPorSlug, slugsDeMateria } from "@/dados/materias";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 export function generateStaticParams() {
   const slugs = slugsDeMateria();
-  return (slugs.length ? slugs : ["sem-entidade"]).map((slug) => ({ slug }));
+  const cortados = limitarSlugs(slugs);
+  return (cortados.length ? cortados : ["sem-entidade"]).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({

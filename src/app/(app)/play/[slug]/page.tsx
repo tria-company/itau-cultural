@@ -9,6 +9,7 @@ import {
   semelhantesDaMidia,
 } from "@/dados/play";
 import { rotaDaEntidade } from "@/dados/rotas";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 /**
  * A rota de uma mídia — **529 páginas**, o maior acréscimo desta fase (D-92).
@@ -32,7 +33,8 @@ import { rotaDaEntidade } from "@/dados/rotas";
  */
 export function generateStaticParams() {
   const slugs = slugsPorTipo("midia");
-  return (slugs.length ? slugs : ["sem-entidade"]).map((slug) => ({ slug }));
+  const cortados = limitarSlugs(slugs);
+  return (cortados.length ? cortados : ["sem-entidade"]).map((slug) => ({ slug }));
 }
 
 /**

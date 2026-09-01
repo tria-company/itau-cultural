@@ -141,6 +141,16 @@
 @import "../estilos/studio-produtor.css";
 @import "../estilos/pontos.css";
 
+/* Carteira, recompensas e comunidade. */
+@import "../estilos/pontos.css";
+
+/* O onboarding cultural (S8) e as cinco faixas de preferência dentro dos apps.
+ * Depois de tudo que é tela porque ela se SOBREPÕE a elas: a faixa mora dentro
+ * do Play, do Cast, de Cursos, do Museu e do Notícias, e precisa vencer o
+ * vocabulário de cada uma dessas folhas sem que nenhuma delas saiba dela. */
+@import "../estilos/onboarding.css";
+@import "../estilos/entrar.css";
+
 /* ---------------------------------------------------------------------------
  * A base visual (camada base tipográfica, moldura D-03, cartão)
  * vem DEPOIS das folhas de tela, na mesma posição do cascade que essas regras

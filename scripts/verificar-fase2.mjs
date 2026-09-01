@@ -786,13 +786,19 @@ async function cenario1(cdp, base) {
   exigir(serendipidade.length === 1, "D-30 · cartões de serendipidade", serendipidade.length, "exatamente 1");
 
   const curado = feedMaria.filter((c) => c.especial === "curado");
+  /* D-29 INVERTIDO EM 2026-08-25, e o portão inverteu junto em vez de sumir. A nota de
+   * curadoria («Curadoria humana, escrita pela curadoria…») saiu do cartão a pedido: é
+   * informação de bastidor, e o bastidor já a tem — a Redação assina a trilha e declara a
+   * procedência passo a passo. O que este portão prova agora é a AUSÊNCIA da nota no app,
+   * porque a regra antiga voltaria calada se alguém recolocasse a linha. A procedência do
+   * cartão continua provada acima, pelo selo de motivo e por `data-origem-motivo`. */
   exigir(
-    curado.length === 1 && curado[0].assinaturaVisivel && curado[0].assinatura.length > 0,
-    "D-29 · destaque curado com assinatura visível",
+    curado.length === 1 && !curado[0].assinaturaVisivel && curado[0].assinatura.length === 0,
+    "D-29 · destaque curado sem nota de curadoria no app",
     curado.length === 1
-      ? `«${curado[0].titulo}» · assinatura: «${curado[0].assinatura.slice(0, 60)}»`
+      ? `«${curado[0].titulo}» · nota: ${curado[0].assinatura ? `«${curado[0].assinatura.slice(0, 60)}»` : "ausente"}`
       : `${curado.length} destaques`,
-    "1 destaque, assinatura visível e não vazia",
+    "1 destaque, nota de curadoria ausente do cartão",
   );
   resumo.push([
     "DESC-02",

@@ -12,5 +12,5 @@ import { redirect } from "next/navigation";
  * artefato estático — não há servidor para emitir um 307. Confira em `out/index.html`.
  */
 export default function Home() {
-  redirect("/apps");
+  redirect("/descobrir");
 }

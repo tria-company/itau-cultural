@@ -57,6 +57,27 @@ export default function Meu() {
           </span>
           <span className="tipo-legenda font-bold text-acao-tinta">abrir o mapa →</span>
         </Link>
+        <Link href="/desafios" className="cartao no-underline">
+          <span className="tipo-detalhe font-bold">Desafios</span>
+          <span className="tipo-legenda text-tinta-2">
+            As missões da semana, o seu nível e o que falta para o próximo.
+          </span>
+          <span className="tipo-legenda font-bold text-acao-tinta">abrir →</span>
+        </Link>
+        <Link href="/meu/carteira" className="cartao no-underline">
+          <span className="tipo-detalhe font-bold">Carteira</span>
+          <span className="tipo-legenda text-tinta-2">
+            Suas fichas, o extrato de onde cada uma veio e as entregas do que você resgatou.
+          </span>
+          <span className="tipo-legenda font-bold text-acao-tinta">abrir →</span>
+        </Link>
+        <Link href="/meu/conquistas" className="cartao no-underline">
+          <span className="tipo-detalhe font-bold">Conquistas</span>
+          <span className="tipo-legenda text-tinta-2">
+            As metas da semana, os emblemas e a tabela do que dá ficha.
+          </span>
+          <span className="tipo-legenda font-bold text-acao-tinta">ver →</span>
+        </Link>
         <Link href="/salvos" className="cartao no-underline">
           <span className="tipo-detalhe font-bold">Salvos e alertas</span>
           <span className="tipo-legenda text-tinta-2">

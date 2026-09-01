@@ -96,6 +96,9 @@ import {
  */
 
 /** «Todas» não é um recorte — é a ausência dele. */
+/** Quantas fileiras a tela oferece em «Recentes». Seis cabem sem rolagem. */
+const TETO_RECENTES = 6;
+
 const SEM_RECORTE = "";
 
 /**
@@ -315,39 +318,53 @@ export function Cast({
       {/* PEQUENA DE PROPÓSITO: a referência abre com as pílulas e o conteúdo
           logo abaixo. Um cabeçalho alto empurraria a primeira capa para fora da
           dobra. */}
+      {/* TÍTULO E FILTROS NA MESMA LINHA. Antes eram onze pílulas de programa acima e um
+          trilho de linguagens abaixo — duas faixas inteiras de recorte antes da primeira
+          capa. Dois seletores cabem numa linha e respondem as mesmas duas perguntas: o
+          que é, e de que linguagem. */}
       <header className="cast-topo">
         <h1 className="cast-marca tipo-titulo-1">
           <Grafismo variacao="barra" className="h-[0.8em] w-auto text-acao-tinta" />
           Cast
         </h1>
+
+        <div className="cast-filtros">
+          <label className="cast-filtro">
+            <span className="sr-only">Categoria</span>
+            <select
+              className="filtros-select"
+              value={prateleira}
+              onChange={(e) => setPrateleira(e.target.value)}
+              data-filtro-categoria
+            >
+              <option value={SEM_RECORTE}>Categoria</option>
+              {catalogo.prateleiras.map((p) => (
+                <option key={p.valor} value={p.valor}>
+                  {p.rotulo}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="cast-filtro">
+            <span className="sr-only">Linguagem</span>
+            <select
+              className="filtros-select"
+              value={linguagem}
+              onChange={(e) => setLinguagem(e.target.value)}
+              data-filtro-linguagem
+            >
+              <option value={SEM_RECORTE}>Linguagem</option>
+              {linguagens.map((l) => (
+                <option key={l.valor} value={l.valor}>
+                  {l.rotulo}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </header>
 
-      {/* O recorte é por LINGUAGEM e não por tema: medido, 201 dos 336 não
-          declaram tema nenhum, e um filtro que deixa 201 de fora promete um
-          acervo que não existe. SEM CONTAGEM na pílula (25/08): o cliente
-          tirou os números da tela e o chip vale pelo nome do recorte. */}
-      <Estante titulo="Linguagens" rotulo="Recortar os episódios por linguagem artística">
-        <Chip
-          variante="explorar"
-          data-linguagem="todas"
-          selecionado={linguagem === SEM_RECORTE}
-          onClick={() => setLinguagem(SEM_RECORTE)}
-        >
-          Todas
-        </Chip>
-        {linguagens.map((l) => (
-          <Chip
-            key={l.valor}
-            variante="explorar"
-            data-linguagem={l.valor}
-            cor={l.cor}
-            selecionado={linguagem === l.valor}
-            onClick={() => setLinguagem(l.valor === linguagem ? SEM_RECORTE : l.valor)}
-          >
-            {l.rotulo}
-          </Chip>
-        ))}
-      </Estante>
 
       {recortando ? (
         /* COM RECORTE A FILEIRA VIRA GRADE — a mesma troca do Play. Com recorte
@@ -406,9 +423,12 @@ export function Cast({
               acervo: em uma tela a pessoa vê do que o Cast é feito, que é
               justamente o que a parede de 336 capas não contava. */}
           <section className="flex flex-col gap-3">
-            <h2 className="tipo-titulo-3 font-bold">Programas</h2>
+            {/* SEIS, E CHAMADO DE «RECENTES» (27.08). A lista inteira de fileiras era um
+                índice do acervo no meio da tela — útil para quem já conhece o Cast e
+                parede para quem não conhece. Seis cabem sem rolagem e convidam. */}
+            <h2 className="tipo-titulo-3 font-bold">Recentes</h2>
             <ul className="cast-atalhos">
-              {fileiras.map((p) => (
+              {fileiras.slice(0, TETO_RECENTES).map((p) => (
                 <li key={p.valor}>
                   <button
                     type="button"

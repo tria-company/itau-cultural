@@ -42,7 +42,15 @@ export interface MateriaCompleta {
   relacionadosTotal: number;
 }
 
-const TETO_RELACIONADOS = 8;
+/**
+ * Quantas ligações a matéria oferece no fim.
+ *
+ * TRÊS, E NÃO OITO (27.08, pedido do cliente). Oito sugestões no pé de uma leitura é a
+ * parede que faz ninguém clicar em nenhuma: quem terminou de ler quer um próximo passo,
+ * não um menu. O grafo continua alcançando tudo — o que muda é quanto a tela oferece de
+ * uma vez.
+ */
+const TETO_RELACIONADOS = 3;
 
 function familiaDe(classe: "conteudo" | "publicacao", categoria: string): FamiliaMateria {
   if (classe === "publicacao") return "publicacao";

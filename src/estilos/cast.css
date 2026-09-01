@@ -58,8 +58,10 @@
  * ------------------------------------------------------------------------ */
 .cast-topo {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
   padding-block-start: 0.5rem;
 }
 
@@ -488,4 +490,35 @@
     minmax(min(100%, var(--web-piso-poster)), 1fr)
   );
   gap: 1.5rem 1rem;
+}
+
+/* ===========================================================================
+ * Os dois seletores, ao lado da marca.
+ *
+ * A DIREÇÃO MORA NA REGRA DE CIMA, e não aqui. Havia duas definições de `.cast-topo` no
+ * arquivo: a primeira mandava `column` e esta tentava consertar sem tocar na direção —
+ * então a linha continuava quebrando e cada tentativa de ajuste parecia não funcionar.
+ * Uma regra só por seletor; aqui fica apenas o porte dos seletores.
+ * ======================================================================== */
+
+.cast-filtros {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--espaco-pilha) / 2);
+  min-width: 0;
+  margin-inline-start: auto;
+}
+
+.cast-filtro {
+  min-width: 0;
+}
+
+.cast-filtro > .filtros-select {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  padding: calc(var(--espaco-pilha) / 2) var(--espaco-pilha);
+  border-radius: var(--raio-pilula);
+  font-size: var(--tipo-micro);
+  font-weight: 600;
 }

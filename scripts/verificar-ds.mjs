@@ -53,6 +53,7 @@ const FOLHAS_MIGRADAS = [
   "museu.css",
   "noticias.css",
   "observatorio.css",
+  "onboarding.css",
   "play.css",
   "produtor.css",
   "redacao.css",

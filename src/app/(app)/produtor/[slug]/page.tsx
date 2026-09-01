@@ -9,6 +9,7 @@ import {
 import { ocorrenciasDe, porSlug, slugsPorTipo, temporadasDe, vizinhos } from "@/dados/grafo";
 import { rotaDaEntidade, vinculosDe, type GrupoVinculo } from "@/dados/ponte";
 import type { Entidade } from "@/dados/tipos";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 /**
  * Página do produtor — APPX-05, `docs/telas.md` tela 24.
@@ -32,7 +33,8 @@ import type { Entidade } from "@/dados/tipos";
 /** Reserva para classe vazia. Hoje não é emitida — 246 instituições + 113 espaços = 359. */
 export function generateStaticParams() {
   const slugs = [...slugsPorTipo("instituicao"), ...slugsPorTipo("espaco")];
-  return (slugs.length ? slugs : ["sem-entidade"]).map((slug) => ({ slug }));
+  const cortados = limitarSlugs(slugs);
+  return (cortados.length ? cortados : ["sem-entidade"]).map((slug) => ({ slug }));
 }
 
 /** Teto de itens por bloco. O mesmo `LIMITE_PADRAO` que `ponte.ts` usa desde a fase 2. */

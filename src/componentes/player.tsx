@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ICONE_CONFERIDO, ICONE_MAIS, ICONE_TOCAR } from "@/componentes/base/icones";
-import { CtaSpotify, PalcoYoutube } from "@/componentes/palco";
+import { CtaSpotify, PalcoCheio } from "@/componentes/palco";
 import { CHAVE_LISTA_PLAY, useMinhaLista } from "@/componentes/base/minha-lista";
 import { CapaSemImagem } from "@/componentes/capa-sem-imagem";
 import { FichaDeAcessibilidade } from "@/componentes/ficha-acessibilidade";
@@ -136,6 +136,7 @@ export function Player({
   aprofunda: LigacaoNomeada[];
   dataDeReferencia: string;
 }) {
+  const [palcoAberto, setPalcoAberto] = useState(false);
   const [concluidas, setConcluidas] = useState<string[]>([]);
   const [hidratado, setHidratado] = useState(false);
   const minhaLista = useMinhaLista(CHAVE_LISTA_PLAY);
@@ -252,8 +253,44 @@ export function Player({
         </div>
       </header>
 
-      {midia.youtubeId ? (
-        <PalcoYoutube id={midia.youtubeId} titulo={midia.titulo} poster={midia.imagem} />
+      {/* A REPRODUÇÃO ABRE EM CAMADA, e não embutida na página (27.08, pedido do
+          cliente). Embutida, a pessoa assistia com o cabeçalho, a coleção e a barra de
+          abas em volta — atenção disputada, e no telefone o toque errado a um dedo de
+          distância. Em camada o resto fica inerte, e a saída é botão ou Escape.
+
+          O CARTAZ CONTINUA SENDO O GATILHO: capa, véu e o botão de reproduzir. O que
+          mudou é para onde ele leva. E o iframe segue nascendo só depois do clique — o
+          portão de zero-rede mede o carregamento da página, e nada é buscado antes. */}
+      {midia.youtubeId || midia.spotify ? (
+        <>
+          <button
+            type="button"
+            className="palco-yt"
+            data-palco={midia.youtubeId ? "youtube" : "spotify"}
+            onClick={() => setPalcoAberto(true)}
+            aria-label={`Reproduzir ${midia.titulo}`}
+          >
+            {midia.imagem ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={midia.imagem} alt="" className="palco-yt-foto" />
+            ) : (
+              <span className="palco-yt-fundo" aria-hidden />
+            )}
+            <span className="palco-yt-veu" aria-hidden />
+            <span className="palco-yt-play">
+              {ICONE_TOCAR}
+              Reproduzir
+            </span>
+          </button>
+
+          <PalcoCheio
+            aberto={palcoAberto}
+            aoFechar={() => setPalcoAberto(false)}
+            titulo={midia.titulo}
+            youtubeId={midia.youtubeId}
+            spotifyUrl={midia.spotify?.url}
+          />
+        </>
       ) : null}
 
       {/* ------------------------------------------------- a coleção: episódios ou tema

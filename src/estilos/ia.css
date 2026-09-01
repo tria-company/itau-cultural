@@ -666,22 +666,52 @@
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
   margin-inline: calc(var(--espaco-tela) * -1);
-  padding: 0.75rem var(--espaco-tela) 1rem;
-  background: color-mix(in srgb, var(--cor-fundo) 92%, transparent);
-  backdrop-filter: blur(8px);
+  /* O padding de baixo é MÍNIMO de propósito: entre a nota do campo e os ícones da barra
+     havia 42px medidos — 16 deste padding, 18 da frincha do container e 8 do topo da
+     barra. O campo é a última coisa da tela e a barra começa logo abaixo; folga ali é vão,
+     não respiro. */
+  padding: 0.5rem var(--espaco-tela) 0.25rem;
+  /* OPACO, e não translúcido com desfoque. O véu de 92% deixava o texto da
+     conversa aparecer por trás do campo enquanto rolava — e o campo de escrever
+     é a única coisa da tela que precisa estar sempre legível. Desfoque é
+     acabamento; aqui ele custava a leitura. */
+  background: var(--cor-fundo);
 }
 
+/* O DESLOCAMENTO ERA CONTADO DUAS VEZES, e é isso que fazia o campo boiar.
+ *
+ * O container de rolagem da moldura JÁ reserva 6rem no rodapé para a barra
+ * inferior. O compositor pedia mais 6rem de `bottom` por cima disso, e o
+ * resultado medido era um campo assentando a 192px do fundo num viewport de
+ * 844 — com uma faixa morta de 96px embaixo, por onde a conversa rolava
+ * atrás do fundo translúcido. Parecia flutuante porque estava flutuando.
+ *
+ * `bottom: 0` gruda no fim do container, que é exatamente a borda de cima da
+ * barra. Sem offset, sem faixa, sem conteúdo passando por baixo. */
 [data-view="mobile"] .ia-compositor {
-  bottom: 6rem;
+  bottom: 0;
 }
 
-/* No vazio o campo já senta no fim do flex, acima do padding da moldura.
- * O offset de 6rem só vale na conversa, quando o compositor gruda e
- * precisaria cobrir a barra. */
-[data-view="mobile"] .ia[data-fase="vazio"] .ia-compositor {
-  bottom: 0;
+/* O VÃO ENTRE O CAMPO E A BARRA.
+ *
+ * O container reserva 6rem no rodapé, mas a barra desenhada ocupa 78px: sobram 18px de
+ * frincha, e era por ali que a conversa aparecia rolando entre o campo e a barra. Medido,
+ * não estimado.
+ *
+ * O fundo do compositor se estende para baixo por essa faixa em vez de o compositor
+ * ganhar 18px de padding. A diferença importa: o padding empurraria o campo para cima e
+ * mudaria a altura da caixa a cada ajuste da barra, enquanto isto é só tinta — a régua
+ * continua sendo a reserva do container, e 1.5rem cobre a frincha com folga sem depender
+ * de a barra continuar com exatamente esta altura. */
+[data-view="mobile"] .ia-compositor::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 100%;
+  height: 1rem;
+  background: var(--cor-fundo);
 }
 
 [data-view="web"] .ia-compositor {
@@ -1100,4 +1130,267 @@
 
 .ia-ajuste-rotulo {
   color: var(--cor-tinta-3);
+}
+
+/* ---------------------------------------------------------------------------
+ * HISTÓRICO — as conversas anteriores
+ *
+ * Folha que abre embaixo do cabeçalho, e não modal: quem procura uma conversa
+ * antiga está comparando com a que tem na frente, e um modal esconderia
+ * justamente a referência. Some ao escolher uma, porque escolher já é a saída.
+ * ------------------------------------------------------------------------ */
+
+.ia-topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-pilha);
+}
+
+/* Circular e à ESQUERDA do cabeçalho, como manda a referência: é o primeiro
+   alvo do polegar e o lugar consagrado de «abrir a lista». */
+.ia-historico-botao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-padrao),
+    color var(--dur-1) var(--ease-padrao);
+}
+
+.ia-historico-botao[aria-expanded="true"] {
+  border-color: var(--cor-acao);
+  color: var(--cor-acao-tinta);
+  background: var(--cor-acao-lavada);
+}
+
+/* ---------------------------------------------------------------------------
+ * A GAVETA das conversas anteriores.
+ *
+ * Era folha embaixo do cabeçalho e virou menu lateral (27.08). A diferença que
+ * importa: a folha empurrava a conversa para baixo e a lista disputava a tela
+ * com o que a pessoa estava lendo; a gaveta entra por cima, pela borda, e sai
+ * inteira quando fecha.
+ *
+ * NADA DE `position: fixed`, e isto é regra da casa que esta folha declara no
+ * próprio cabeçalho: dentro da moldura do telefone, `fixed` ancora no viewport
+ * do NAVEGADOR e a gaveta escapa para fora do aparelho. Foi o que aconteceu na
+ * primeira tentativa — medido em 1440px, a gaveta abriu em 0→320 enquanto a
+ * moldura ia de 525 a 915.
+ *
+ * Ela é `absolute` contra `.ia` e entra PELA ESQUERDA, deslocando a tela para a
+ * direita — a forma que o aplicativo de conversa consagrou e que a referência
+ * de 27.08 pede. Fica uma faixa da conversa à mostra na borda direita: é o que
+ * diz que a tela continua ali atrás e que dá para voltar tocando nela.
+ *
+ * A altura vem de `--altura-moldura`, declarada em `base.css` junto com a
+ * própria moldura. Copiar `min(844px, 100vh - 4rem)` para cá faria as duas
+ * medidas divergirem na primeira mudança do aparelho desenhado.
+ * ------------------------------------------------------------------------ */
+
+.ia {
+  position: relative;
+}
+
+.ia-historico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao);
+  background: var(--cor-superficie);
+}
+
+.ia-gaveta {
+  position: absolute;
+  inset-block-start: 0;
+  /* ZERO, e não um recuo negativo para «encostar na borda». O recuo de um
+     `--espaco-tela` empurrava a gaveta para fora da moldura, que tem
+     `overflow: hidden` — e o resultado era o título saindo como «oteiros» e a
+     seção como «ECENTES», com a primeira letra comida pela borda do aparelho. */
+  inset-inline-start: 0;
+  z-index: 60;
+  width: 92%;
+  height: var(--altura-moldura, 100%);
+  padding: var(--espaco-tela) var(--espaco-cartao);
+  border-inline-end: 1px solid var(--cor-borda-forte);
+  border-start-end-radius: var(--raio-g);
+  border-end-end-radius: var(--raio-g);
+  box-shadow: var(--sombra-3);
+  overflow-y: auto;
+  animation: ia-gaveta-entra var(--dur-3) var(--ease-padrao);
+}
+
+@keyframes ia-gaveta-entra {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ia-gaveta {
+    animation: none;
+  }
+}
+
+.ia-gaveta-veu {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: var(--altura-moldura, 100%);
+  z-index: 50;
+  border: none;
+  background: color-mix(in srgb, var(--ic-preto) 45%, transparent);
+  cursor: pointer;
+}
+
+.ia-gaveta-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-pilha);
+  padding-block-end: var(--espaco-pilha);
+  border-block-end: 1px solid var(--cor-borda);
+}
+
+.ia-gaveta-titulo {
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+}
+
+/* «Recentes» — o rótulo da lista, no lugar onde a referência o põe: acima das
+   conversas, discreto, para separá-las do cabeçalho sem competir com ele. */
+.ia-gaveta-secao {
+  padding-block-start: var(--espaco-pilha);
+  color: var(--cor-tinta-3);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ia-historico-seta {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ia-historico-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ia-historico-item {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.ia-historico-abrir {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: var(--espaco-pilha);
+  border-radius: var(--raio-p);
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease-padrao);
+}
+
+.ia-historico-abrir:hover {
+  background: var(--cor-superficie-2);
+}
+
+/* Duas linhas e reticências: a pergunta inteira pode ter noventa caracteres, e
+   uma linha só cortaria no meio de «quatro dias em São Paulo com…». */
+.ia-historico-titulo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ia-historico-quando {
+  color: var(--cor-tinta-3);
+}
+
+.ia-historico-remover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  border-radius: var(--raio-p);
+  background: transparent;
+  color: var(--cor-tinta-3);
+  font-size: var(--tipo-titulo-3);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-padrao),
+    color var(--dur-1) var(--ease-padrao);
+}
+
+.ia-historico-remover:hover {
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta);
+}
+
+.ia-historico-teto {
+  color: var(--cor-tinta-3);
+  line-height: 1.4;
+}
+
+/* Selo de procedência na conversa de demonstração. Mesmo papel do selo de
+   linguagem no cartão: dizer de onde aquilo veio, sem tirar espaço do que
+   importa. */
+.ia-historico-selo {
+  display: inline-block;
+  margin-inline-end: 0.5rem;
+  padding-inline: 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  font-size: var(--tipo-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Os roteiros salvos, dentro da gaveta. `details` e não seção aberta: a lista
+   de conversas é o assunto principal do painel, e os roteiros são o segundo —
+   abrir os dois de uma vez faria o painel começar rolado. */
+.ia-gaveta-salvos {
+  padding-block-start: var(--espaco-pilha);
+  border-block-start: 1px solid var(--cor-borda);
+}
+
+.ia-gaveta-salvos summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.ia-gaveta-salvos summary::-webkit-details-marker {
+  display: none;
+}
+
+.ia-gaveta-salvos summary::after {
+  content: "＋";
+  margin-inline-start: 0.5rem;
+}
+
+.ia-gaveta-salvos[open] summary::after {
+  content: "−";
 }

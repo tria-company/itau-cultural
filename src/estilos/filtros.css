@@ -465,3 +465,206 @@
     grid-column: 1;
   }
 }
+
+/* ===========================================================================
+ * ONDE — o primeiro filtro, e o único com campo de escolha em vez de chip.
+ *
+ * Estado e município são listas longas e mutuamente dependentes: 25 estados e 118
+ * municípios em trilho de chips viraria uma parede de rolagem horizontal, e o segundo
+ * campo mudaria de conteúdo a cada toque no primeiro sem que a pessoa visse por quê.
+ * `select` é o controle que o sistema operacional já sabe apresentar em lista longa, e é
+ * ele que traz busca por digitação de graça no telefone.
+ *
+ * Toda medida sai de token: esta folha está na lista de migradas, e literal aqui derruba
+ * `verificar-ds`. O meio-passo vem de `calc()` sobre o token, não de um número novo.
+ * ======================================================================== */
+
+.filtros-resumo {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+.filtros-locais {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaco-pilha);
+}
+
+.filtros-local {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--espaco-pilha) / 2);
+}
+
+.filtros-local-rotulo {
+  font-size: var(--tipo-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.filtros-select {
+  width: 100%;
+  padding: var(--espaco-pilha) var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  cursor: pointer;
+  transition: border-color var(--dur-1) var(--ease-padrao);
+}
+
+.filtros-select:hover:not(:disabled) {
+  border-color: var(--cor-acao);
+}
+
+.filtros-select:focus-visible {
+  outline: 2px solid var(--cor-acao);
+  outline-offset: 2px;
+}
+
+/* Desabilitado diz «escolha um estado» no próprio rótulo da opção, e não só apaga: campo
+   cinza sem explicação é o defeito que a revisão de fluxo existe para pegar. */
+.filtros-select:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+[data-view="web"] {
+  .filtros-locais {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ===========================================================================
+ * A GAVETA — acessibilidade e linguagem, fechadas por padrão.
+ *
+ * `<details>` e não um menu montado à mão: abre e fecha sem JavaScript, sobrevive ao
+ * export estático, o teclado já sabe operar e o leitor de tela anuncia o estado. Um
+ * dropdown escrito do zero custaria foco, Escape e `aria-expanded` para chegar ao mesmo
+ * lugar — e erraria pelo menos um dos três.
+ *
+ * Toda medida sai de token: esta folha está na lista de migradas.
+ * ======================================================================== */
+
+.filtros-gaveta {
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.filtros-gaveta-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-pilha) var(--espaco-cartao);
+  cursor: pointer;
+  list-style: none;
+}
+
+.filtros-gaveta-topo::-webkit-details-marker {
+  display: none;
+}
+
+/* A seta é do CSS e gira com o estado: um glifo no TSX viraria texto para o leitor de
+   tela, que já anuncia aberto/fechado por conta do `<details>`. */
+.filtros-gaveta-topo::after {
+  content: "";
+  width: var(--espaco-pilha);
+  height: var(--espaco-pilha);
+  border-right: 2px solid var(--cor-tinta-3);
+  border-bottom: 2px solid var(--cor-tinta-3);
+  transform: rotate(45deg) translate(-25%, -25%);
+  transition: transform var(--dur-1) var(--ease-padrao);
+}
+
+.filtros-gaveta[open] > .filtros-gaveta-topo::after {
+  transform: rotate(225deg) translate(-25%, -25%);
+}
+
+.filtros-gaveta-topo:focus-visible {
+  outline: 2px solid var(--cor-acao);
+  outline-offset: 2px;
+}
+
+.filtros-gaveta-rotulo {
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  color: var(--cor-tinta);
+}
+
+.filtros-gaveta > .filtros-dimensoes {
+  padding: 0 var(--espaco-cartao) var(--espaco-cartao);
+}
+
+/* A bolinha da linguagem: a cor é dado, e vem do token que o grafo declara. */
+.filtros-marcavel-cor {
+  width: var(--espaco-pilha);
+  height: var(--espaco-pilha);
+  border-radius: var(--raio-pilula);
+  flex: none;
+}
+
+/* O alfinete ao lado de «Onde». O tamanho vem daqui e não do TSX porque `Icone` já
+   carrega a classe padrão de 24px — sobrescrever lá seria passar medida por parâmetro
+   para uma primitiva que existe justamente para não ter uma. */
+.filtros-bloco-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-pilha);
+}
+
+.filtros-bloco-titulo svg {
+  width: var(--espaco-tela);
+  height: var(--espaco-tela);
+  color: var(--cor-acao-tinta);
+}
+
+/* Sem filtro aplicado o resumo não existe; com filtro, ele conta. Um parágrafo vazio
+   ocupando espaço é pior que nenhum. */
+.filtros-resumo:empty {
+  display: none;
+}
+
+/* Título e «limpar tudo» na mesma linha: a ação de desfazer pertence ao cabeçalho que
+   ela desfaz, e empilhada embaixo do título parecia um terceiro assunto. */
+.filtros-topo-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-pilha);
+}
+
+.filtros-limpar {
+  align-self: auto;
+  flex: none;
+}
+
+/* A saída da tela, agora que a prévia saiu. Ação primária, largura cheia: é a única
+   coisa que se faz aqui depois de escolher. */
+.filtros-rodape {
+  display: flex;
+  padding-block-start: var(--espaco-cartao);
+}
+
+/* Centralizado por flex, e não por `text-align`: o portão do design system proíbe
+   `text-align: center` em bloco de texto, e um botão é bloco de texto como qualquer
+   outro — a regra existe para não haver exceção que vire hábito. */
+.filtros-rodape .filtros-ir-buscar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--espaco-cartao);
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--ic-branco);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}

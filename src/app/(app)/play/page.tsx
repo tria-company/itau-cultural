@@ -24,12 +24,23 @@ export const metadata: Metadata = { title: "Play — Itaú Cultural" };
  * É ELA que toca `@/dados/play` — o módulo alcança o grafo de 23 MB e por DP-F
  * nenhum `"use client"` pode importá-lo por valor.
  */
+const CATALOGO = catalogoNoFioStreaming();
+
+/* As categorias que o acervo DECLARA neste recorte. Podcast não entra: ele tem porta
+ * própria em /cast, e oferecê-lo aqui mandaria a pessoa para uma prateleira que esta tela
+ * não mostra. */
+const CATEGORIAS = CATALOGO.categorias.filter((c) => c.valor !== "podcasts");
+
+/* Os dois denominadores são DIFERENTES e a primeira escrita desta tela trocou um pelo
+ * outro: `CATALOGO.total` é o total do RECORTE de streaming, não do acervo. A frase saía
+ * «das 113 mídias do acervo, aqui são 113», que é tautologia com cara de medição. */
+
 export default function PaginaPlay() {
   return (
-    <Play
-      catalogo={catalogoNoFioStreaming()}
-      destaque={destaqueDoStreaming()}
-      dimensoes={dimensoesDoStreaming()}
-    />
+      <Play
+        catalogo={CATALOGO}
+        destaque={destaqueDoStreaming()}
+        dimensoes={dimensoesDoStreaming()}
+      />
   );
 }

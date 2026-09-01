@@ -1,0 +1,735 @@
+/* ===========================================================================
+ * onboarding.css — as telas de semeadura do perfil (S8) e as cinco faixas de
+ * preferência que os apps abrem.
+ *
+ * DUAS FAMÍLIAS, e elas não se misturam de propósito:
+ *
+ * 1. **`.onb-*` — o onboarding.** Tela cheia, uma pergunta por vez, grade de
+ *    escolha grande. É o único lugar do produto onde a pessoa olha uma parede
+ *    de opções sem ter pedido nada — então a carta é grande, o alvo é generoso
+ *    e a contagem do acervo vem colada no rótulo.
+ *
+ * 2. **`.pref-*` — a faixa dentro do app.** Nunca é modal e nunca é porteiro:
+ *    ela mora acima do conteúdo, rola junto com ele e some quando a preferência
+ *    já existe. Pastilha em rolagem horizontal no telefone, linha na web.
+ *
+ * A CARTA DE LINGUAGEM É SÓ O NOME (27.08). A contagem do acervo saiu: ela não
+ * decidia nada para quem escolhe — medido, «culinária» tem 2 registros e ainda
+ * alcança 15 cartões — e virava ruído em cima da única coisa que se lê ali.
+ * `.onb-conta` continua existindo para as pastilhas das faixas dos apps, onde o
+ * número é o próprio tamanho do recorte que se está escolhendo.
+ *
+ * AS DECLARAÇÕES DE AUSÊNCIA SAÍRAM (27.08). Elas diziam o que o acervo não
+ * tem — gênero de filme no Play, autor no Notícias — em texto corrido, com
+ * denominador. Saíram por pedido, junto com as contagens; o vocabulário
+ * `.declaracao` saiu com elas. Quem for repor precisa das duas coisas de volta.
+ *
+ * REGRAS DA CASA: nunca importe esta folha de um componente; o único import de
+ * CSS do projeto é `layout.tsx → globals.css`. Só token, nenhuma medida fora da
+ * grade de 0.25rem, nenhum hex.
+ * ======================================================================== */
+
+/* ---------------------------------------------------------------------------
+ * 1 · A tela do onboarding
+ * ------------------------------------------------------------------------- */
+
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-secao);
+  padding: var(--espaco-tela);
+  padding-bottom: calc(var(--espaco-secao) * 2);
+}
+
+.onb-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+}
+
+.onb-pergunta {
+  font-size: var(--tipo-titulo-1);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.onb-subtitulo {
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+  max-width: 34rem;
+}
+
+/* O contador de passos. É informação, não navegação: quem quiser voltar usa o
+ * histórico, e quem quiser sair usa «pular» — que está sempre visível. */
+.onb-passos {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2 · Grade de escolha
+ * ------------------------------------------------------------------------- */
+
+.onb-grade {
+  display: grid;
+  gap: var(--espaco-pilha);
+  /* COLUNA POR LARGURA MÍNIMA, e não por número fixo de colunas em cada porte.
+   *
+   * Com `repeat(4, 1fr)` num porte largo, a coluna resultante podia ficar mais estreita
+   * que «documentário» ou «arte e tecnologia», e a palavra transbordava a carta — foi o
+   * que aconteceu com audiovisual, patrimônio, arquitetura e documentário. Aqui a coluna
+   * nunca desce de 9rem e o número delas é o que couber: a grade se adapta à palavra em
+   * vez de a palavra ter de caber na grade. */
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+
+@media (min-width: 64rem) {
+  .onb-grade {
+    gap: var(--espaco-cartao);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 3 · Carta de linguagem — um CARTAZ
+ *
+ * A foto é AMOSTRA do acervo daquela linguagem, não ilustração dela: mesmo
+ * princípio dos cartazes do hub de apps. Ela sai de uma entidade que pertence
+ * à linguagem, e não há empréstimo — sem foto própria, o cartaz cai na cor.
+ *
+ * O nome vai POR CIMA, com véu. Sem véu, uma parede de 19 fotografias com
+ * assunto e luz diferentes deixa metade dos nomes ilegível — e o nome é a
+ * única coisa que precisa ser lida aqui.
+ * ------------------------------------------------------------------------- */
+
+.onb-lingua {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  /* Proporção fixa: a parede só lê como grade quando todo cartaz tem a mesma
+     forma. 4:3 dá altura para um nome de duas linhas sem virar retrato. */
+  aspect-ratio: 4 / 3;
+  padding: var(--espaco-cartao);
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  /* A cor da linguagem por baixo: ela aparece enquanto a foto carrega e no
+     lugar dela quando não há foto — nunca um retângulo cinza sem identidade. */
+  background: var(--cor-linguagem, var(--cor-superficie-2));
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  min-width: 0;
+  transition:
+    box-shadow var(--dur-1) var(--ease-padrao),
+    transform var(--dur-1) var(--ease-padrao);
+}
+
+.onb-lingua-foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O VÉU PRECISA GARANTIR CONTRASTE, NÃO SUGERI-LO.
+ *
+ * A primeira versão era um gradiente que ia a 78% de preto na base — e ainda assim
+ * «artes visuais» e «fotografia» ficaram ilegíveis, porque as duas capas são fotografias
+ * CLARAS e o texto é branco. Gradiente resolve o caso médio; aqui o caso médio não é o que
+ * importa, é o pior.
+ *
+ * Então a base ganha preto quase sólido na altura em que o nome mora, e o gradiente só faz
+ * a transição para o topo, onde a foto aparece limpa. O nome fica legível sobre qualquer
+ * capa, clara ou escura, sem depender de quem escolheu a foto. */
+.onb-lingua::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--ic-preto) 92%, transparent) 0%,
+    color-mix(in srgb, var(--ic-preto) 88%, transparent) 30%,
+    color-mix(in srgb, var(--ic-preto) 45%, transparent) 55%,
+    color-mix(in srgb, var(--ic-preto) 15%, transparent) 100%
+  );
+}
+
+.onb-lingua:hover {
+  box-shadow: var(--sombra-2);
+  transform: translateY(-0.25rem);
+}
+
+/* Escolhido: moldura POR DENTRO, para o cartaz não deslocar a grade ao ser
+   marcado. A marca do canto entra junto — cor sozinha não é sinal. */
+.onb-lingua[aria-pressed="true"] {
+  border-color: var(--cor-acao);
+  box-shadow: inset 0 0 0 0.25rem var(--cor-acao);
+}
+
+.onb-rotulo {
+  position: relative;
+  /* ACIMA DO VÉU, e isto é o defeito que a tela teve.
+   *
+   * O véu é o `::after` do botão, e pseudo-elemento vem DEPOIS dos filhos na ordem de
+   * pintura: sem `z-index` aqui, o preto de 92% cobria o texto em vez de ficar atrás
+   * dele, e todos os nomes apareciam apagados. O sintoma parecia problema de contraste e
+   * era de empilhamento — a cor do texto estava certa o tempo todo. */
+  z-index: 1;
+  font-size: var(--tipo-corpo);
+  font-weight: 700;
+  line-height: 1.15;
+  min-width: 0;
+  /* Branco fixo, e não `--cor-tinta`: o texto está sobre fotografia com véu
+     escuro nos dois temas, então ele acompanha o véu, não o tema. */
+  color: var(--ic-branco);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--ic-preto) 50%, transparent);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* Usada nas pastilhas das faixas dos apps. Ver o cabeçalho desta folha. */
+.onb-conta {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * 4 · Carta de rosto — pessoa e obra
+ * ------------------------------------------------------------------------- */
+
+.onb-rosto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-1) var(--ease-padrao),
+    box-shadow var(--dur-1) var(--ease-padrao);
+}
+
+.onb-rosto:hover {
+  border-color: var(--cor-borda-forte);
+  box-shadow: var(--sombra-1);
+}
+
+.onb-rosto[aria-pressed="true"] {
+  border-color: var(--cor-acao);
+  box-shadow: inset 0 0 0 2px var(--cor-acao);
+}
+
+.onb-rosto-foto {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--cor-superficie-2);
+}
+
+.onb-rosto-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Sem foto o lugar da imagem não fica vazio: iniciais grandes sobre superfície.
+ * Só aparece pela BUSCA — a grade não oferece carta sem rosto (PRD §5.3). */
+.onb-iniciais {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: var(--tipo-titulo-1);
+  font-weight: 700;
+  color: var(--cor-tinta-3);
+  letter-spacing: 0.04em;
+}
+
+.onb-rosto-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--espaco-cartao);
+}
+
+.onb-rosto-nome {
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.onb-rosto-classe {
+  font-size: var(--tipo-micro);
+  color: var(--cor-tinta-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* A marca de escolhido, no canto da foto. Ícone e não só borda: quem enxerga
+ * pouco contraste precisa de uma segunda pista além da cor. */
+.onb-marca {
+  position: absolute;
+  inset-block-start: var(--espaco-pilha);
+  inset-inline-end: var(--espaco-pilha);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-size: var(--tipo-legenda);
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+ * 5 · Busca do passo 3
+ * ------------------------------------------------------------------------- */
+
+.onb-busca {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-pilha);
+  padding-block: var(--espaco-pilha);
+  background: var(--cor-fundo);
+}
+
+.onb-busca input {
+  flex: 1;
+  min-height: 2.75rem;
+  padding-inline: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: inherit;
+  font-size: var(--tipo-corpo);
+}
+
+.onb-busca input:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * 6 · As duas saídas, e o rodapé
+ *
+ * «não conheço nenhum destes» e «pular» são a razão de a tela do passo 3 não
+ * virar um teste de erudição. Elas ficam SEMPRE visíveis, nunca atrás de
+ * rolagem, e por isso o rodapé é fixo no telefone.
+ * ------------------------------------------------------------------------- */
+
+.onb-saidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-pilha);
+  align-items: center;
+}
+
+/* NÃO É GRUDENTO. Ele já foi `position: sticky` no fim do bloco — e dentro da moldura do
+ * telefone isso o fazia flutuar POR CIMA da grade, tapando dois cartazes no meio da lista.
+ * O rodapé de uma tela de escolha não precisa acompanhar a rolagem: ele é o passo
+ * seguinte, e o passo seguinte vem depois de ver as opções. */
+.onb-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-pilha);
+  align-items: center;
+  padding-block-start: var(--espaco-cartao);
+}
+
+.onb-avancar {
+  min-height: 2.75rem;
+  padding-inline: var(--espaco-secao);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.onb-pular {
+  min-height: 2.75rem;
+  padding-inline: var(--espaco-cartao);
+  border-radius: var(--raio-pilula);
+  border: 1px solid var(--cor-borda-forte);
+  background: transparent;
+  color: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.onb-texto-acao {
+  min-height: 2.75rem;
+  padding-inline: var(--espaco-pilha);
+  background: none;
+  border: none;
+  color: var(--cor-acao-tinta);
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------------
+ * 7 · A faixa de preferência dentro do app
+ * ------------------------------------------------------------------------- */
+
+.pref {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-pilha);
+  margin-block-end: var(--espaco-secao);
+  padding: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+
+.pref-pergunta {
+  font-size: var(--tipo-destaque);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Pastilhas rolando na horizontal. No telefone a fileira sangra até a borda da
+ * tela — cortar no gutter faz a última pastilha parecer a última que existe. */
+.pref-opcoes {
+  display: flex;
+  gap: var(--espaco-pilha);
+  overflow-x: auto;
+  margin-inline: calc(var(--espaco-cartao) * -1);
+  padding-inline: var(--espaco-cartao);
+  scrollbar-width: none;
+}
+
+.pref-opcoes::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .pref-opcoes {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
+.pref-pastilha {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  padding-inline: var(--espaco-cartao);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-padrao);
+}
+
+.pref-pastilha[aria-pressed="true"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+}
+
+/* A linha discreta que substitui a faixa depois de a preferência existir. */
+.pref-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaco-pilha);
+  margin-block-end: var(--espaco-cartao);
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * 8 · Estados vazios do feed sem semente
+ * ------------------------------------------------------------------------- */
+
+.onb-aviso-feed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-pilha);
+  margin-block-end: var(--espaco-cartao);
+  padding: var(--espaco-cartao);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+/* ===========================================================================
+ * O convite de semeadura — o cartão que aparece enquanto o feed é genérico.
+ *
+ * ELE SOME NA PRIMEIRA SEMENTE, e por isso pode ser bonito sem virar ruído: não é um
+ * aviso permanente, é um convite que se resolve sozinho. A caixa tracejada de antes
+ * dizia a mesma coisa com cara de erro de validação — e o que o feed base tem não é
+ * defeito, é falta de contexto sobre quem chegou.
+ *
+ * O mosaico de seis capas é o argumento visual: o acervo é grande, e a pergunta é qual
+ * parte dele é sua.
+ * ======================================================================== */
+
+.convite-semente {
+  position: relative;
+  display: block;
+  margin-block-end: var(--espaco-cartao);
+  border-radius: var(--raio-g);
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ic-branco);
+  transition: transform var(--dur-1) var(--ease-padrao);
+}
+
+.convite-semente:hover {
+  transform: translateY(-1px);
+}
+
+.convite-semente:focus-visible {
+  outline: 2px solid var(--cor-acao);
+  outline-offset: 2px;
+}
+
+.convite-semente-mosaico {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.convite-semente-mosaico img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O véu não é escurecimento por gosto: sem ele o texto depende das seis fotos que
+   calharem de entrar, e o contraste deixa de ser medido. */
+.convite-semente-veu {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--ic-preto) 92%, transparent),
+    color-mix(in srgb, var(--ic-preto) 72%, transparent) 65%,
+    color-mix(in srgb, var(--ic-preto) 45%, transparent)
+  );
+}
+
+.convite-semente-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--espaco-cartao);
+}
+
+.convite-semente-titulo {
+  font-size: var(--tipo-destaque);
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+
+.convite-semente-texto {
+  max-width: 26ch;
+  font-size: var(--tipo-legenda);
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--ic-branco) 82%, transparent);
+}
+
+/* Parece botão porque É a ação da tela — o cartão inteiro é o link, e o rótulo diz
+   para onde ele leva. */
+.convite-semente-acao {
+  align-self: flex-start;
+  margin-block-start: var(--espaco-pilha);
+  padding: 0.5rem 1rem;
+  border-radius: var(--raio-pilula);
+  background: var(--ic-branco);
+  color: var(--ic-preto);
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+}
+
+[data-view="web"] {
+  .convite-semente-corpo {
+    padding: var(--espaco-secao) var(--espaco-cartao);
+  }
+
+  .convite-semente-titulo {
+    font-size: var(--tipo-titulo-3);
+  }
+}
+
+/* ===========================================================================
+ * O convite em folha, logo depois de entrar.
+ *
+ * `position: absolute` contra a moldura, NUNCA `fixed`: dentro do telefone o `fixed`
+ * escapa da moldura e cola na janela (D-03, e é regra da casa). O ancestral posicionado
+ * é `.moldura`, que já é `relative; overflow: hidden`.
+ * ======================================================================== */
+
+/* CENTRALIZADO, e não ancorado no pé. Colado embaixo ele encostava na barra de abas e
+   parecia parte dela — e a barra é navegação permanente, não conteúdo do convite. No
+   centro, a folha lê como camada por cima da tela, que é o que ela é. */
+.convite-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-tela);
+}
+
+/* O fundo é botão, e não `div` com `onClick`: tocar fora fecha, e quem navega por teclado
+   alcança a mesma saída sem precisar do Escape. */
+.convite-modal-fundo {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: color-mix(in srgb, var(--ic-preto) 65%, transparent);
+  cursor: pointer;
+}
+
+/* MAIS ALTA, para o mosaico existir. Na primeira versão a folha tinha a altura do texto e
+   as seis capas viravam uma tarja fina — o argumento visual («o acervo é grande») não
+   cabia no espaço que sobrava. */
+.convite-modal-folha {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  min-height: 24rem;
+  border-radius: var(--raio-g);
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ic-branco);
+  box-shadow: var(--sombra-3);
+}
+
+.convite-modal-mosaico {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+/* Saturação acima do natural: sob véu escuro as capas desbotavam e o mosaico virava
+   cinza. O ajuste devolve a cor que a foto tem, em vez de inventar outra. */
+.convite-modal-mosaico img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.35) contrast(1.06);
+}
+
+.convite-modal-veu {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* O VÉU ESCURECE ONDE O TEXTO ESTÁ, e some no topo. Antes era escuro de ponta a ponta:
+     garantia contraste e matava o mosaico junto. Assim as capas aparecem em cima, com cor,
+     e o texto embaixo continua com contraste medido. */
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--ic-preto) 28%, transparent) 38%,
+    color-mix(in srgb, var(--ic-preto) 85%, transparent) 66%,
+    color-mix(in srgb, var(--ic-preto) 94%, transparent)
+  );
+}
+
+.convite-modal-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--espaco-pilha) / 2);
+  padding: var(--espaco-secao) var(--espaco-tela) var(--espaco-tela);
+}
+
+.convite-modal-titulo {
+  margin: 0;
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.convite-modal-texto {
+  margin: 0;
+  max-width: 30ch;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--ic-branco) 82%, transparent);
+}
+
+.convite-modal-primario {
+  margin-block-start: var(--espaco-cartao);
+  padding: var(--espaco-cartao);
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--ic-branco);
+  color: var(--ic-preto);
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.convite-modal-primario:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 3px;
+}
+
+/* «Agora não» tem peso de leitura real. Saída apagada é convite que finge ter saída, e o
+   padrão escuro começa exatamente aí. */
+.convite-modal-pular {
+  padding: var(--espaco-pilha);
+  border: 0;
+  background: none;
+  color: var(--ic-branco);
+  font: inherit;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.convite-modal-pular:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 2px;
+}
+
+[data-view="web"] {
+  .convite-modal-folha {
+    max-width: 28rem;
+    min-height: 28rem;
+  }
+}

@@ -14,9 +14,10 @@ import { ANCORA_DO_FEED, Heroi } from "@/componentes/heroi";
 import { montarAgenda } from "@/dados/agenda";
 import { DATA_DE_REFERENCIA } from "@/dados/alerta";
 import { cidadesComAcervo } from "@/dados/cidade";
-import { PRECOMPUTO } from "@/dados/feeds";
+import { LIMITE_FEED, PRECOMPUTO } from "@/dados/feeds";
 import { porSlug, slugsPorTipo, vizinhos } from "@/dados/grafo";
 import { montarIndice } from "@/dados/indice";
+import { precomputoDeSementes } from "@/dados/sementes";
 import { leituras } from "@/dados/leituras";
 
 /**
@@ -54,6 +55,12 @@ const TETO_DE_LINGUAGENS = 10;
 
 /** Quantas leituras a vitrine editorial leva — a dupla mais recente do acervo. */
 const TETO_DE_LEITURAS = 2;
+
+/* As listas por semente do onboarding cultural (S8). Montadas no BUILD, como tudo aqui:
+ * são 847 caminhadas medidas em ~1 segundo, e o que desce ao navegador são 0,88 MB de
+ * índices — nunca o grafo. Quem compõe o feed a partir delas é `feed.tsx`, no cliente,
+ * porque o número de combinações de sementes não cabe em precômputo nenhum. */
+const SEMENTES = precomputoDeSementes();
 
 const agenda = montarAgenda({ hoje: HOJE });
 
@@ -120,6 +127,8 @@ export default function Descobrir() {
           listas={PRECOMPUTO.listas}
           porPersona={PRECOMPUTO.porPersona}
           personaPadrao={PRECOMPUTO.personaPadrao}
+          precomputoSementes={SEMENTES}
+          limite={LIMITE_FEED}
         />
 
         <MapaCultural cidades={CIDADES} />

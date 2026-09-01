@@ -5,6 +5,7 @@ import { SelosDeLinguagem } from "@/componentes/selo-linguagem";
 import { Verbete } from "@/componentes/verbete";
 import { porSlug, slugsPorTipo } from "@/dados/grafo";
 import { papeisDe, vinculosDe, type GrupoVinculo } from "@/dados/ponte";
+import { limitarSlugs } from "@/dados/limite-paginas";
 
 /**
  * Página do artista — DESC-05, `docs/telas.md` tela 14, e METADE DE DESC-08.
@@ -25,7 +26,8 @@ import { papeisDe, vinculosDe, type GrupoVinculo } from "@/dados/ponte";
 /** Reserva para classe vazia. Hoje não é emitida — 792 slugs sem duplicata. */
 export function generateStaticParams() {
   const slugs = [...slugsPorTipo("pessoa"), ...slugsPorTipo("coletivo")];
-  return (slugs.length ? slugs : ["sem-entidade"]).map((slug) => ({ slug }));
+  const cortados = limitarSlugs(slugs);
+  return (cortados.length ? cortados : ["sem-entidade"]).map((slug) => ({ slug }));
 }
 
 function indexar(grupos: GrupoVinculo[]): Map<string, GrupoVinculo> {

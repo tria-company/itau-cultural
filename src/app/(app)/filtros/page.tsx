@@ -9,6 +9,7 @@ import {
 } from "@/dados/filtros";
 import { porSlug, slugsPorTipo, vizinhos } from "@/dados/grafo";
 import { montarIndice } from "@/dados/indice";
+import { estadosParaFiltro } from "@/dados/localizacao";
 
 /**
  * /filtros — os filtros ontológicos (`docs/telas.md` tela 9, APPX-01, D-91, D-90, D-43).
@@ -38,6 +39,7 @@ export default function PaginaFiltros() {
 
   return (
     <Filtros
+      estados={estadosParaFiltro()}
       indice={indice}
       acessibilidade={acessibilidade}
       dimensoes={dimensoesComIndice(acessibilidade)}

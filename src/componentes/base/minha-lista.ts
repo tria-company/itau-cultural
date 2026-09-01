@@ -105,3 +105,52 @@ export function useMinhaLista(chave: string): MinhaLista {
 
   return { slugs, tem, alternar, hidratado, persistida };
 }
+
+// ---------------------------------------------------------------------------
+// Continuar assistindo — o que a pessoa abriu, na ordem em que abriu
+// ---------------------------------------------------------------------------
+
+/**
+ * A chave do histórico do Play.
+ *
+ * NÃO É POSIÇÃO DE REPRODUÇÃO, e a diferença importa. A funcionalidade 26 — «player com
+ * retomada» — está marcada `não sustentada` porque o acervo não guarda em que segundo
+ * alguém parou, e inventar esse número seria fabricar dado. O que esta lista guarda é
+ * outra coisa, e é real: QUAIS itens a pessoa abriu, e em que ordem. É o suficiente para
+ * a fileira existir sem prometer o que não há.
+ */
+export const CHAVE_VISTOS_PLAY = "agenda-cultural:play-vistos";
+
+/** Quantos itens a fileira guarda. Além disso deixa de ser «continuar» e vira arquivo. */
+export const TETO_DE_VISTOS = 12;
+
+export interface Vistos {
+  /** Os slugs, do mais recente para o mais antigo. */
+  readonly slugs: readonly string[];
+  /** Põe o slug no topo. Reabrir algo o traz de volta para a frente. */
+  readonly registrar: (slug: string) => void;
+  readonly hidratado: boolean;
+}
+
+export function useVistos(chave: string): Vistos {
+  const [slugs, setSlugs] = useState<string[]>([]);
+  const [hidratado, setHidratado] = useState(false);
+
+  useEffect(() => {
+    setSlugs(ler(chave));
+    setHidratado(true);
+  }, [chave]);
+
+  const registrar = useCallback(
+    (slug: string) => {
+      setSlugs((atual) => {
+        const proxima = [slug, ...atual.filter((s) => s !== slug)].slice(0, TETO_DE_VISTOS);
+        gravar(chave, proxima);
+        return proxima;
+      });
+    },
+    [chave],
+  );
+
+  return { slugs, registrar, hidratado };
+}

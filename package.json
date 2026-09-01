@@ -11,6 +11,7 @@
     "smoke": "tsx scripts/smoke-grafo.ts",
     "testar-caminhada": "tsx scripts/testar-caminhada.ts",
     "testar-semente-produtor": "tsx scripts/testar-semente-produtor.ts",
+    "medir-sementes": "tsx scripts/medir-sementes.ts",
     "verificar-fase2": "node scripts/verificar-fase2.mjs",
     "verificar-fase3": "node scripts/verificar-fase3.mjs",
     "verificar-fase4": "node scripts/verificar-fase4.mjs",
@@ -24,7 +25,8 @@
     "verificar-gestor": "node scripts/verificar-gestor.mjs",
     "verificar-moderacao": "node scripts/verificar-moderacao.mjs",
     "verificar-pontos": "tsx scripts/verificar-pontos.ts",
-    "verificar-produtor": "node scripts/verificar-produtor.mjs"
+    "verificar-produtor": "node scripts/verificar-produtor.mjs",
+    "verificar-onboarding": "tsx scripts/verificar-onboarding.ts"
   },
   "dependencies": {
     "animejs": "^4.5.0",

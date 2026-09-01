@@ -150,7 +150,7 @@
    "columns": 12,
    "items": 3,
    "subcategories": 23,
-   "columnists": 142
+   "columnists": 143
   },
   "/colunas/ativos-escritos": {
    "columns": 11,
@@ -186,7 +186,7 @@
    "columns": 7,
    "items": 3,
    "subcategories": 23,
-   "columnists": 142
+   "columnists": 143
   },
   "/colunas/encontro-com-espectadores": {
    "columns": 20,
@@ -282,15 +282,15 @@
    "columns": 23,
    "items": 3,
    "subcategories": 23,
-   "columnists": 142
+   "columnists": 143
   },
   "/noticias/institucional": {
-   "noticias": 1833,
+   "noticias": 1834,
    "items": 3,
    "subcategories": 2
   },
   "/noticias/pesquisas": {
-   "noticias": 1833,
+   "noticias": 1834,
    "items": 3,
    "subcategories": 2
   },

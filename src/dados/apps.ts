@@ -130,6 +130,52 @@ export interface Atalho {
 
 export const GRUPOS_APPS: readonly GrupoApps[] = [
   {
+    id: "repertorio",
+    rotulo: "Seu repertório",
+    ritmo: "trio",
+    apps: [
+      {
+        id: "comunidade",
+        rotulo: "Comunidade",
+        descricao: "O feed do Itaú Cultural e as comunidades dos produtores",
+        href: "/comunidade",
+        capa: {
+          arquivo: "/hub/comunidade.jpg",
+          alt: "Seis pessoas jovens sentadas em roda conversando num espaço cultural de paredes descascadas, cobertas de cartazes onde se lê «juntos ideias conectam pessoas transformam» e «cultura diálogo colaboração criatividade pertencimento». Ao fundo, outras mesas ocupadas e uma estante de livros.",
+          credito: "Ilustração gerada para o protótipo",
+          origem: "Peça de interface, fora do acervo do Itaú Cultural",
+        },
+        selo: "entrar",
+      },
+      {
+        id: "desafios",
+        rotulo: "Desafios",
+        descricao: "As missões da semana e o seu nível",
+        href: "/desafios",
+        capa: {
+          arquivo: "/hub/desafios.jpg",
+          alt: "Parede coberta de cartões de papel colados com fita, cada um marcado «missão» e trazendo um ícone e uma pontuação: um alvo com flecha para «participe de um evento, +150 pontos», um balão de fala para «comente em uma publicação, +50 pontos», duas silhuetas para «convide um amigo, +200 pontos».",
+          credito: "Ilustração gerada para o protótipo",
+          origem: "Peça de interface, fora do acervo do Itaú Cultural",
+        },
+        selo: "entrar",
+      },
+      {
+        id: "loja",
+        rotulo: "Recompensas",
+        descricao: "O que suas fichas abrem",
+        href: "/recompensas",
+        capa: {
+          arquivo: "/hub/loja.jpg",
+          alt: "Vitrine iluminada com caixas de presente empilhadas, um livro de arte, um fone de ouvido, um frasco de perfume e uma nécessaire de couro. Sobre vários deles pousam moedas douradas luminosas com uma estrela no centro.",
+          credito: "Ilustração gerada para o protótipo",
+          origem: "Peça de interface, fora do acervo do Itaú Cultural",
+        },
+        selo: "entrar",
+      },
+    ],
+  },
+  {
     id: "assistir",
     rotulo: "Assistir e ouvir",
     ritmo: "duo",
@@ -324,6 +370,9 @@ export const GRUPOS_APPS: readonly GrupoApps[] = [
 
 /** Sua conta: o que você guardou e quem você é. Sem capa, de propósito. */
 export const ATALHOS_CONTA: readonly Atalho[] = [
+  { href: "/comunidade/marketplace", rotulo: "Comunidades", descricao: "Produtores e organizações, por estado" },
+  { href: "/comunidade/guardadas", rotulo: "Guardadas", descricao: "As publicações que você guardou" },
+  { href: "/meu/carteira", rotulo: "Carteira", descricao: "Saldo, extrato e entregas" },
   { href: "/salvos", rotulo: "Salvos", descricao: "O que você guardou e os alertas" },
   { href: "/meu/repertorio", rotulo: "Meu repertório", descricao: "As linguagens que você atravessou" },
   { href: "/meu", rotulo: "Perfil", descricao: "Persona, disposições e preferências" },

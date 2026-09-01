@@ -1,0 +1,39 @@
+# O que o `next build` NÃO precisa. Sem este arquivo o CLI sobe 3,1 GB: as sete
+# pastas `.next*` das sessões paralelas somam 4,2 GB sozinhas.
+#
+# TODO PADRÃO É ANCORADO NA RAIZ (`/`). Sem a barra, `dados` casa também com
+# `src/dados` e o grafo inteiro some do envio — o build morre em
+# «Can't resolve '@/dados/admin'» e o erro não diz que foi este arquivo.
+
+/.git
+/.next
+/.next-*
+/out
+/node_modules
+
+# Origem do gerador. O grafo que o build lê é `src/dados/gerado/`, versionado.
+#
+# `/dados/bruto/materias` FICA (28.08), e o resto sai. `corpos.ts` lê aquela pasta NO
+# BUILD para montar o corpo de cada matéria — cortá-la inteira fazia a Vercel construir
+# 2.362 páginas de notícia sem texto, enquanto o build local saía completo. O sintoma era
+# o pior possível: local certo, produção errada, e nada no log dizendo por quê.
+/dados/bruto/enciclopedia
+/dados/bruto/secoes
+/dados/bruto/subcategorias
+/dados/amostra
+/dados/inventario
+/dados/normalizado
+/dados/taxonomia
+/dados/imagens
+/dados/*.py
+
+# Processo, não produto. `/scripts` NÃO entra nesta lista: `src/dados/geo.ts`
+# importa `../../scripts/dados/centroides.json` por caminho relativo, e cortar a
+# pasta derruba o build com «Can't resolve». São 872 KB — medido, não estimado.
+/docs
+/verificacao
+/.planning
+/referencias
+/capturas
+*.log
+tsconfig.tsbuildinfo

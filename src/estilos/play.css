@@ -1009,3 +1009,150 @@
   inline-size: 10rem;
 }
 
+
+/* ===========================================================================
+ * Os três seletores, FLUTUANDO SOBRE O DESTAQUE — a forma da referência.
+ *
+ * Numa barra própria acima da foto eles custavam uma faixa inteira antes da primeira
+ * imagem: a peça de destaque é o que a tela tem de mais forte, e empurrá-la para baixo
+ * por causa do recorte inverte a ordem. Sobre a foto, o recorte fica à mão sem tomar
+ * altura de ninguém — e o véu do destaque já garante o contraste.
+ * ======================================================================== */
+
+.play {
+  position: relative;
+}
+
+.play-filtros {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-pilha);
+  padding: var(--espaco-cartao) var(--espaco-tela);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.play-filtros::-webkit-scrollbar {
+  display: none;
+}
+
+.play-filtro {
+  flex: none;
+  min-width: 0;
+}
+
+/* Vidro escuro sobre a foto: a borda clara devolve o contorno que o fundo variável
+   tirava, e o desfoque impede que um trecho claro da imagem apague o rótulo. */
+.play-filtro > .filtros-select {
+  width: auto;
+  min-width: 0;
+  padding: calc(var(--espaco-pilha) / 2) var(--espaco-pilha);
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 30%, transparent);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 55%, transparent);
+  color: var(--ic-branco);
+  font-size: var(--tipo-micro);
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.play-filtro > .filtros-select option {
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+}
+
+/* ===========================================================================
+ * PALCO CHEIO — a reprodução em camada.
+ *
+ * `position: absolute` contra a moldura, NUNCA `fixed`: dentro do telefone o `fixed`
+ * escapa da moldura e cola na janela (D-03). O ancestral posicionado é `.moldura`, que já
+ * é `relative; overflow: hidden`.
+ *
+ * FUNDO OPACO, e não translúcido. A camada existe para isolar: deixar as capas
+ * aparecendo por trás devolveria a distração que ela veio tirar.
+ * ======================================================================== */
+
+.palco-cheio {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--ic-preto);
+  color: var(--ic-branco);
+}
+
+.palco-cheio-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-cartao);
+  padding: var(--espaco-cartao) var(--espaco-tela);
+  flex: none;
+}
+
+.palco-cheio-titulo {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palco-cheio-fechar {
+  flex: none;
+  padding: calc(var(--espaco-pilha) / 2) var(--espaco-cartao);
+  border: 1px solid color-mix(in srgb, var(--ic-branco) 35%, transparent);
+  border-radius: var(--raio-pilula);
+  background: none;
+  color: var(--ic-branco);
+  font: inherit;
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.palco-cheio-fechar:focus-visible {
+  outline: 2px solid var(--ic-branco);
+  outline-offset: 2px;
+}
+
+/* O quadro centraliza e respeita a proporção: vídeo em 16:9, áudio na altura que o
+   incorporador do Spotify pede. Esticar qualquer um dos dois cortaria conteúdo. */
+.palco-cheio-quadro {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--espaco-tela) var(--espaco-secao);
+  min-height: 0;
+}
+
+.palco-cheio-frame {
+  width: 100%;
+  border: 0;
+  border-radius: var(--raio-m);
+}
+
+.palco-cheio-quadro[data-formato="video"] .palco-cheio-frame {
+  aspect-ratio: 16 / 9;
+}
+
+/* ALTURA DO CARD COMPACTO DO SPOTIFY, e não a do card cheio. O incorporador desenha o
+   conteúdo em cerca de 9,5rem e preenche o resto do quadro com o fundo dele — no card
+   cheio isso virava uma faixa clara embaixo do player, dentro da nossa camada preta. */
+.palco-cheio-quadro[data-formato="audio"] .palco-cheio-frame {
+  height: 9.5rem;
+  max-width: 34rem;
+}
+
+/* O áudio ocupa pouca altura: centralizado, fica no meio da camada em vez de boiar no
+   topo com um vazio embaixo. */
+.palco-cheio-quadro[data-formato="audio"] {
+  align-items: center;
+}
