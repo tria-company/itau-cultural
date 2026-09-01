@@ -137,10 +137,23 @@ export function AdminLista({
       <ul className="adm-linhas">
         {visiveis.map((l) => (
           <li key={l.id} className="adm-item" data-item={l.id}>
+            {/* A CAPA SÓ APARECE ONDE ELA EXISTE NA TELA DA COISA. A loja tem foto nos 18
+                itens; das comunidades, só a oficial tem. As outras 22 não têm capa em lugar
+                nenhum do produto, e inventar uma aqui seria escolher um rosto para
+                representar coletivos reais. `next/image` está fora do projeto por decisão
+                registrada; sob `output: export` ele exigiria loader e não traria nada. */}
+            {l.imagem ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="adm-item-capa" src={l.imagem} alt={l.alt ?? ""} loading="lazy" />
+            ) : null}
             <div className="adm-item-cima">
               <span className="adm-item-nome">
                 {l.rota ? <Link href={l.rota}>{l.titulo}</Link> : l.titulo}
+                {l.selo ? <em className="adm-item-selo">{l.selo}</em> : null}
               </span>
+              {l.descricao ? (
+                <span className="adm-item-descricao">{l.descricao}</span>
+              ) : null}
               <span className="adm-item-contexto">{l.contexto}</span>
             </div>
             <ControlesDeAdmin

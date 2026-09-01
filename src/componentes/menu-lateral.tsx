@@ -129,14 +129,23 @@ const BASTIDOR: ItemDeBastidor[] = [
   { href: "/roteiro", rotulo: "Roteiro guiado", superficie: "/roteiro", soWeb: true },
 ];
 
-function ItemDeMenu({ item, caminho }: { item: Item; caminho: string }) {
+function ItemDeMenu({
+  item,
+  caminho,
+  destacado = false,
+}: {
+  item: Item;
+  caminho: string;
+  /** O item da casa do papel, alçado ao topo do menu. */
+  destacado?: boolean;
+}) {
   const ativo = caminho === item.href || caminho.startsWith(`${item.href}/`);
   return (
     <li>
       <Link
         href={item.href}
         aria-current={caminho === item.href ? "page" : undefined}
-        className="menu-item tipo-detalhe"
+        className={destacado ? "menu-item menu-item-casa tipo-detalhe" : "menu-item tipo-detalhe"}
       >
         {item.icone ? <IconeVivo ativo={ativo}>{item.icone}</IconeVivo> : null}
         <span>{item.rotulo}</span>
@@ -178,9 +187,25 @@ export function MenuLateral() {
   // ANTES DE HIDRATAR, O GRUPO É O DO PÚBLICO — vazio. O HTML do build não sabe qual papel
   // o navegador guardou, e renderizar a lista cheia para depois encolhê-la faria o menu
   // piscar itens que aquele perfil não usa. É a mesma disciplina de `SelecaoPersona`.
+  // A ORDEM É A DO PAPEL, e não a da lista. `BASTIDOR` está na ordem em que as superfícies
+  // nasceram; `superficies` está na ordem de importância PARA AQUELE PERFIL, e a primeira
+  // é a casa dele. Quem entra como Administração via a própria superfície em último, depois
+  // de quatro que ele quase não usa. Ordenar por `superficies` põe a casa na frente sem
+  // inventar dado novo, e é inócuo para os outros perfis: todos eles têm uma só superfície.
+  const ordemDoPapel = DESCRICAO_DO_PAPEL[papel].superficies;
   const doPapel = papelHidratado
-    ? BASTIDOR.filter((b) => DESCRICAO_DO_PAPEL[papel].superficies.includes(b.superficie))
+    ? BASTIDOR.filter((b) => ordemDoPapel.includes(b.superficie)).sort(
+        (a, b) => ordemDoPapel.indexOf(a.superficie) - ordemDoPapel.indexOf(b.superficie),
+      )
     : [];
+
+  // A CASA DO PAPEL SOBE AO TOPO, acima de Descobrir, quando o papel governa mais de uma
+  // superfície. Quem entra como Administração administra o produto inteiro: a superfície
+  // dele não é um item no fim de uma lista de bastidor, é a porta de entrada. Só o
+  // administrador tem mais de uma superfície, então nenhum outro perfil muda de lugar, e o
+  // Produtor em particular continua exatamente onde estava.
+  const casa = ordemDoPapel.length > 1 ? doPapel[0] : undefined;
+  const noBastidor = casa ? doPapel.slice(1) : doPapel;
 
   return (
     <div className="menu-lateral">
@@ -190,6 +215,12 @@ export function MenuLateral() {
         </div>
 
         <div className="menu-grupos">
+          {casa ? (
+            <ul className="menu-casa">
+              <ItemDeMenu item={casa} caminho={caminho} destacado />
+            </ul>
+          ) : null}
+
           <ul>
             {PRINCIPAIS.map((item) => (
               <ItemDeMenu key={item.href} item={item} caminho={caminho} />
@@ -209,11 +240,11 @@ export function MenuLateral() {
               O item «só web» continua escondido na visão app, porque a rota dele se declara
               superfície de desktop e um atalho para um aviso é um beco anunciado. O Studio
               NÃO é «só web» desde o perfil Produtor: ele aparece nas duas visões. */}
-          {doPapel.length > 0 ? (
+          {noBastidor.length > 0 ? (
             <div>
               <p className="menu-rotulo-grupo tipo-micro">Bastidor</p>
               <ul>
-                {doPapel.map((item) => (
+                {noBastidor.map((item) => (
                   <div key={item.href} className={item.soWeb ? "hidden desk:block" : undefined}>
                     <ItemDeMenu item={item} caminho={caminho} />
                   </div>

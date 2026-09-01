@@ -67,7 +67,10 @@ const ROTA_DA_SUPERFICIE = {
   "/moderacao": "/moderacao/fila/",
   "/redacao": "/redacao/trilha/",
   "/observatorio": "/observatorio/",
-  "/admin": "/admin/papeis/",
+  // A PORTA DA ADMINISTRAÇÃO MUDOU. Era `/admin/papeis/`, uma das dez telas de governança
+  // que foram apagadas; com ela apagada, esta sonda batia em 404 e o portão morria no meio,
+  // sem chegar aos nove gates seguintes. A porta agora é a raiz, que é o painel.
+  "/admin": "/admin/",
   "/roteiro": "/roteiro/",
 };
 
@@ -76,10 +79,15 @@ const SUPERFICIES = [
     rota: ROTA_DA_SUPERFICIE[sup.prefixo],
     regra: sup.regra,
     nome: sup.nome,
+    // A MARCA DA CASCA. A metade «visível no app» procurava sempre
+    // `[data-superficie="studio"]`, porque quando ela foi escrita o Studio era a única
+    // superfície mobile-first. A Administração virou a segunda, e o portão reprovava uma
+    // tela que abre certo, só porque a casca dela não se chama Studio.
+    marca: sup.prefixo.replace("/", ""),
   })),
   // Uma segunda rota do Studio: a raiz é o painel, e uma ficha é outra árvore. Medir só a
   // raiz deixaria passar uma ficha que some no telefone.
-  { rota: "/studio/publicar/", regra: "visivel-no-app", nome: "Studio · identidade" },
+  { rota: "/studio/publicar/", regra: "visivel-no-app", nome: "Studio · identidade", marca: "studio" },
 ];
 
 let falhas = 0;
@@ -135,14 +143,14 @@ async function gateDaInversao(cdp, base) {
       naPagina(`
         const aviso = todos('h1').find((h) => /superfície de desktop/i.test(h.textContent || ''));
         const envelope = document.querySelector('[data-superficie="so-web"]');
-        const studio = document.querySelector('[data-superficie="studio"]');
+        const casca = document.querySelector('[data-superficie="${s.marca}"]');
         return {
           view: document.querySelector('[data-view]')?.getAttribute('data-view') ?? null,
           avisoVisivel: visivel(aviso),
           temEnvelopeSoWeb: Boolean(envelope),
           envelopeVisivel: visivel(envelope),
-          temStudio: Boolean(studio),
-          studioVisivel: visivel(studio),
+          temCasca: Boolean(casca),
+          cascaVisivel: visivel(casca),
         };
       `),
     );
@@ -158,9 +166,9 @@ async function gateDaInversao(cdp, base) {
       // A METADE NOVA. Sem ela, um `app:hidden` esquecido no Studio deixaria a superfície
       // inteira invisível no telefone e o portão daria verde.
       exigir(
-        medida.temStudio && medida.studioVisivel && !medida.avisoVisivel,
+        medida.temCasca && medida.cascaVisivel && !medida.avisoVisivel,
         `${s.nome} é mobile-first e ABRE na visão app`,
-        `casca do Studio: ${medida.temStudio} · visível: ${medida.studioVisivel} · aviso de desktop: ${medida.avisoVisivel}`,
+        `casca «${s.marca}»: ${medida.temCasca} · visível: ${medida.cascaVisivel} · aviso de desktop: ${medida.avisoVisivel}`,
         "casca visível, sem aviso de superfície de desktop",
       );
     }

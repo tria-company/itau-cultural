@@ -28,7 +28,7 @@ export function CascaDoAdmin({ children }: { children: React.ReactNode }) {
   const caminho = (usePathname() ?? "").replace(/\/$/, "");
 
   return (
-    <div className="adm-casca" data-admin-casca>
+    <div className="adm-casca" data-admin-casca data-superficie="admin">
       <header className="adm-cabecalho">
         <div className="adm-cabecalho-cima">
           <p className="adm-cabecalho-marca">Administração</p>

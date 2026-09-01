@@ -489,6 +489,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  justify-content: flex-start;
   min-width: 0;
   padding: 1.25rem;
   border: 1px solid var(--cor-borda);
@@ -500,17 +501,20 @@
  *
  * O `font-size` em px é unidade de usuário do `viewBox`, e não medida de tela:
  * rem aqui não escalaria com o desenho, e o número do centro sairia do furo. */
+/* A ROSCA EM CIMA, A LEGENDA EMBAIXO, e o conjunto centrado. Lado a lado, a rosca ficava
+   pequena para caber ao lado de três linhas de legenda, e sobrava metade do cartão vazia
+   embaixo das duas. Empilhado, o desenho usa a largura que o cartão tem. */
 .adm-rosca {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .adm-rosca-desenho {
   flex: none;
-  width: 8.5rem;
-  height: 8.5rem;
+  width: min(13rem, 100%);
+  height: auto;
 }
 
 .adm-rosca-trilho {
@@ -539,13 +543,12 @@
 
 .adm-legenda {
   display: flex;
-  flex: 1;
+  width: 100%;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.625rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  min-width: 9rem;
 }
 
 .adm-legenda li {
@@ -715,37 +718,10 @@
   gap: 1.25rem;
 }
 
-.adm-cartao-largo .msp-desenho {
-  max-width: none;
-}
-
-[data-view="web"] .adm-cartao-largo .msp {
-  display: grid;
-  grid-template-columns: minmax(0, 1.9fr) minmax(15rem, 1fr);
-  align-items: start;
-  gap: 1.25rem 1.5rem;
-}
-
-[data-view="web"] .adm-cartao-largo .msp-quadro {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-/* A leitura acompanha o mapa inteiro na coluna da direita, e é o que enche o cartão: sem
-   isto o desenho trava em 44rem, centraliza, e sobra vazio dos dois lados. */
-[data-view="web"] .adm-cartao-largo .msp-leitura-caixa {
-  grid-column: 2;
-  grid-row: 1 / span 3;
-}
-
-[data-view="web"] .adm-cartao-largo .msp-leitura {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-[data-view="web"] .adm-cartao-largo .msp-fonte {
-  grid-column: 1;
-  grid-row: 3;
+/* O MAPA TRAZ O PRÓPRIO PAINEL, sobreposto ao palco como no original, então o
+   cartão não precisa mais dividir a largura com uma coluna de leitura. */
+.adm-cartao-largo .msp-palco {
+  width: 100%;
 }
 
 /* ---- Faixa 4: as portas ---- */
@@ -840,6 +816,39 @@
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-m);
   background: var(--cor-superficie);
+}
+
+/* A CAPA DA LINHA tem a razão de um cartão e não estica: a linha é uma lista, e uma foto
+   que cresce com o nome faria cada linha ter uma altura diferente. */
+.adm-item-capa {
+  flex: none;
+  width: 4rem;
+  height: 3rem;
+  border-radius: var(--raio-p);
+  object-fit: cover;
+  background: var(--cor-superficie-2);
+}
+
+.adm-item-selo {
+  margin-inline-start: 0.5rem;
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+  font-size: var(--tipo-legenda);
+  font-style: normal;
+  font-weight: 600;
+  color: var(--cor-tinta-3);
+  vertical-align: middle;
+}
+
+.adm-item-descricao {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .adm-item-cima {
@@ -947,261 +956,840 @@
 }
 
 /* ---------------------------------------------------------------------------
- * O MAPA DE SÃO PAULO, em três camadas.
+ * O MAPA DE SÃO PAULO, porte fiel do mapa enviado.
  *
- * A BASE FICOU NEUTRA. Ela era laranja, e laranja embaixo de rosa e ciano dá três
- * matizes brigando pela mesma leitura. Agora a base é tinta lavada e a cor está
- * onde ela informa: no ponto. A intensidade continua vindo do componente, que a
- * calcula por raiz quadrada da taxa por 10 mil habitantes. Nenhum município tem
- * cor escrita aqui: se o dado mudar, o mapa muda junto.
+ * ELE É DE TEMA ÚNICO, de propósito, e é a única peça do projeto que é. O mapa
+ * de origem é um objeto escuro com um painel claro flutuando por cima; inverter
+ * isso no tema claro não daria «o mesmo mapa no claro», daria outro mapa. A
+ * regra da casa continua valendo em volta dele: o cartão que o abriga acompanha
+ * o tema, e é só o palco que se mantém escuro nas duas.
  *
- * AS DUAS CORES DOS PONTOS SÃO AS DO MAPA DE ORIGEM, e caem na paleta da casa sem
- * um hex novo: `--ic-rosa` para museu, teatro, cinema e galeria; `--ic-azul` para
- * biblioteca e centro cultural.
+ * NENHUM HEX NOVO. Os valores do original são os da marca, e todos existem como
+ * `--ic-*`; o `#111111` do fundo vira uma mistura de preto com branco a 93%, que
+ * é o mesmo tom que `--cor-superficie` já usa no escuro.
+ *
+ * LARANJA É MUSEU. A legenda do original tem uma classe `--pink` que pinta
+ * laranja; quem lê o nome erra a cor. O rosa é do coroplético.
+ *
+ * NA VISÃO DE APP O PAINEL DESCE. Sobreposto ele cobriria o mapa inteiro num
+ * aparelho de 370px, e o botão de fechar viraria obrigação em vez de escolha.
  * --------------------------------------------------------------------------- */
 
 .msp {
+  /* O fundo do mapa. O original tem dois: `#111111` no body e `#1a1a1a` no `#map`.
+     O que se vê atrás dos polígonos é o segundo. */
+  --msp-fundo: color-mix(in srgb, var(--ic-preto) 90%, var(--ic-branco));
+  /* O painel e a legenda, `rgba(255,255,255,0.96)`. */
+  --msp-papel: color-mix(in srgb, transparent 4%, var(--ic-branco));
+  --msp-tinta: var(--ic-preto);
+  --msp-tinta-fraca: color-mix(in srgb, var(--ic-preto) 64%, var(--ic-branco));
+  --msp-borda: color-mix(in srgb, var(--ic-preto) 12%, transparent);
+  --msp-borda-fraca: color-mix(in srgb, var(--ic-preto) 8%, transparent);
+
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
 }
 
-.msp-quadro {
+/* ---- O palco: o mapa, e tudo que flutua sobre ele ---- */
+.msp-palco {
+  position: relative;
+  /* O original usa mira sobre o mapa, e mão fechada durante o arrasto. */
+  cursor: crosshair;
+  touch-action: none;
   min-width: 0;
   border-radius: var(--raio-m);
-  background: var(--cor-superficie-2);
-  padding: 0.5rem;
+  background: var(--msp-fundo);
+  overflow: hidden;
+  /* A razão do desenho, 600 por 371, para o palco ter altura sem medida fixa. */
+  aspect-ratio: 600 / 371;
 }
 
-.msp-desenho {
-  display: block;
+.msp-palco[data-arrastando="sim"] {
+  cursor: grabbing;
+}
+
+.msp-desenho,
+.msp-tela {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  max-width: 44rem;
-  margin-inline: auto;
+  height: 100%;
+  display: block;
 }
 
-/* ---- Camada 1: a taxa ---- */
+/* O canvas não recebe ponteiro: quem responde ao cursor é o polígono do SVG. */
+.msp-tela {
+  pointer-events: none;
+}
+
 .msp-municipio {
-  stroke: var(--cor-superficie);
-  stroke-width: 0.4;
-  fill: color-mix(
-    in srgb,
-    var(--cor-tinta-crua) calc(4% + var(--intensidade, 0) * 30%),
-    var(--cor-papel-cru)
-  );
+  transition: fill 0.18s ease;
 }
 
-/* Um equipamento não é meio caminho para zero: fica quase liso, mas AINDA preenchido. */
-.msp-municipio[data-faixa="minimo"] {
-  fill: color-mix(in srgb, var(--cor-tinta-crua) 4%, var(--cor-papel-cru));
-  stroke: var(--cor-borda-forte);
+.msp-municipio:hover {
+  fill: color-mix(in srgb, var(--ic-branco) 18%, transparent);
 }
 
-/* Zero é vazado, e não um tom mais claro: a diferença entre um e zero é qualitativa. */
-.msp-municipio[data-faixa="vazio"] {
-  fill: url(#msp-hachura);
-  stroke: var(--cor-borda-forte);
-  stroke-dasharray: 2 1.5;
-}
-
-/* O DESERTO É OUTRA PERGUNTA, e por isso é outra marca. «Sem equipamento» é sobre o
-   município; «deserto» é sobre a distância até o mais próximo, que pode estar do outro
-   lado da divisa. Os dois se sobrepõem em quase todo lugar, e onde não se sobrepõem
-   está o que o mapa tem de mais duro para dizer. */
-.msp-municipio[data-deserto="sim"] {
-  stroke: var(--cor-acao);
-  stroke-width: 0.5;
-  stroke-opacity: 0.5;
-}
-
-.msp-hachura-traco {
-  stroke: var(--cor-borda-forte);
-  stroke-width: 0.75;
-}
-
-/* ---- Camada 2: os equipamentos ----
- *
- * O `r` MORA AQUI, e não no atributo: repetido 2.503 vezes ele seria o maior custo da
- * camada no HTML do build, e é a mesma medida para todos os pontos. */
-.msp-camada-pontos circle {
-  r: 1.5;
-  fill-opacity: 0.72;
-  stroke: none;
-}
-
-.msp-camada-pontos g[data-grupo="0"] circle {
-  fill: var(--ic-rosa);
-}
-
-.msp-camada-pontos g[data-grupo="1"] circle {
-  fill: var(--ic-azul);
-}
-
-/* ---- A leitura ao lado ---- */
-.msp-leitura-caixa {
+/* ---- O painel ---- */
+.msp-painel {
+  position: absolute;
+  z-index: 3;
+  top: 1rem;
+  left: 1rem;
+  bottom: 1rem;
+  width: min(22.5rem, calc(100% - 2rem));
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  min-width: 0;
+  gap: 1rem;
+  padding: 1.25rem 1.125rem 0.875rem;
+  border: 1px solid var(--msp-borda-fraca);
+  border-radius: 0.5rem;
+  background: var(--msp-papel);
+  color: var(--msp-tinta);
+  box-shadow: 0 16px 48px color-mix(in srgb, var(--ic-preto) 22%, transparent);
+  overflow-y: auto;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
 }
 
-.msp-numeros {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
+.msp-painel[data-aberto="nao"] {
+  transform: translateX(calc(-100% - 1.25rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.msp-sobrancelha {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ic-laranja);
 }
 
-.msp-numeros li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: 0;
+.msp-painel-titulo {
+  margin: 0.25rem 0 0;
+  font-size: 1.5rem;
+  line-height: 1.05;
+  font-weight: 700;
+  color: var(--msp-tinta);
 }
 
-.msp-numero-valor {
-  font-size: var(--tipo-titulo-3);
+.msp-painel-guia {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--msp-tinta-fraca);
+}
+
+/* ---- O cartão de acesso cultural ---- */
+.msp-acesso {
+  padding: 0.875rem;
+  border: 1px solid var(--msp-borda-fraca);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ic-laranja) 6%, var(--ic-branco));
+}
+
+.msp-acesso-rotulo {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--msp-tinta-fraca);
+}
+
+.msp-acesso-media {
+  margin: 0.25rem 0 0;
+  font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+  color: var(--msp-tinta);
 }
 
-.msp-numero-rotulo {
-  font-size: var(--tipo-legenda);
-  color: var(--cor-tinta-3);
-  text-wrap: balance;
+.msp-acesso-media em {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--msp-tinta-fraca);
 }
 
-.msp-legenda {
+.msp-acesso-veredicto {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--msp-tinta-fraca);
+}
+
+.msp-acesso-lista {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin: 0;
+  margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
 }
 
-.msp-legenda li {
-  display: grid;
-  grid-template-columns: 0.625rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: var(--tipo-legenda);
-  color: var(--cor-tinta-2);
-}
-
-.msp-legenda em {
-  font-style: normal;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--cor-tinta);
-}
-
-.msp-amostra {
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: var(--raio-pilula);
-}
-
-.msp-amostra[data-amostra="museu"] {
-  background: var(--ic-rosa);
-}
-
-.msp-amostra[data-amostra="biblioteca"] {
-  background: var(--ic-azul);
-}
-
-.msp-amostra[data-amostra="vazio"] {
-  border-radius: 0.125rem;
-  border: 1px dashed var(--cor-borda-forte);
-  background: var(--cor-superficie-2);
-}
-
-.msp-escala {
+.msp-acesso-lista li {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: var(--tipo-legenda);
-  color: var(--cor-tinta-3);
-}
-
-.msp-escala-barra {
-  flex: 1;
-  height: 0.375rem;
-  border-radius: var(--raio-pilula);
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--cor-tinta-crua) 4%, var(--cor-papel-cru)),
-    color-mix(in srgb, var(--cor-tinta-crua) 34%, var(--cor-papel-cru))
-  );
-}
-
-.msp-ranking {
-  display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 0.5rem;
   min-width: 0;
 }
 
-.msp-ranking-titulo {
-  margin: 0;
-  font-size: var(--tipo-legenda);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--cor-tinta-3);
-}
-
-.msp-ranking-lista {
+.msp-acesso-quem {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: posicao;
+  min-width: 0;
 }
 
-.msp-ranking-lista li {
-  display: grid;
-  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-size: var(--tipo-legenda);
-  counter-increment: posicao;
-}
-
-.msp-ranking-lista li::before {
-  content: counter(posicao);
-  color: var(--cor-tinta-3);
-  font-variant-numeric: tabular-nums;
-}
-
-.msp-ranking-nome {
-  color: var(--cor-tinta-2);
+.msp-acesso-nome {
+  font-size: 0.75rem;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.msp-ranking-taxa {
-  font-weight: 600;
+.msp-acesso-meta {
+  font-size: 0.6875rem;
+  color: var(--msp-tinta-fraca);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msp-acesso-km {
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.msp-leitura {
-  margin: 0;
-  font-size: var(--tipo-detalhe);
-  color: var(--cor-tinta-2);
-  max-width: 62ch;
+/* ---- Os chips de filtro ---- */
+.msp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
 }
 
-.msp-fonte {
+.msp-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--msp-borda);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 3%, transparent);
+  color: var(--msp-tinta-fraca);
+  font-size: 0.78125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.msp-chip:hover {
+  color: var(--msp-tinta);
+}
+
+.msp-chip:focus-visible {
+  outline: 2px solid var(--ic-laranja);
+  outline-offset: 2px;
+}
+
+/* As duas cores acesas são as do mapa: laranja para museu, ciano para biblioteca. */
+.msp-chip[data-ativo="sim"] {
+  color: var(--msp-tinta);
+  border-color: color-mix(in srgb, var(--ic-preto) 34%, transparent);
+}
+
+.msp-chip[data-chip="museu_teatro"][data-ativo="sim"] {
+  color: var(--ic-laranja);
+  border-color: color-mix(in srgb, var(--ic-laranja) 70%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ic-laranja) 12%, transparent);
+}
+
+.msp-chip[data-chip="biblioteca_centro"][data-ativo="sim"] {
+  color: color-mix(in srgb, var(--ic-azul) 78%, var(--ic-preto));
+  border-color: color-mix(in srgb, var(--ic-azul) 70%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ic-azul) 12%, transparent);
+}
+
+/* ---- As chaves de camada ---- */
+.msp-camadas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.msp-chave {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.msp-chave input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.msp-chave-trilho {
+  position: relative;
+  flex: none;
+  width: 2.125rem;
+  height: 1.25rem;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--ic-preto) 12%, transparent);
+  transition: background 0.2s;
+}
+
+.msp-chave-trilho::after {
+  content: "";
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--ic-branco);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--ic-preto) 20%, transparent);
+  transition: transform 0.2s;
+}
+
+.msp-chave input:checked + .msp-chave-trilho {
+  background: var(--ic-laranja);
+}
+
+.msp-chave input:checked + .msp-chave-trilho::after {
+  transform: translateX(0.875rem);
+}
+
+.msp-chave input:focus-visible + .msp-chave-trilho {
+  outline: 2px solid var(--ic-laranja);
+  outline-offset: 2px;
+}
+
+.msp-chave-rotulo {
+  font-size: 0.75rem;
+  color: var(--msp-tinta-fraca);
+}
+
+.msp-chave input:checked ~ .msp-chave-rotulo {
+  color: var(--msp-tinta);
+  font-weight: 600;
+}
+
+/* ---- As três estatísticas ---- */
+.msp-estatisticas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--msp-borda-fraca);
+}
+
+.msp-estatisticas div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--raio-p);
+  background: color-mix(in srgb, var(--ic-preto) 3%, var(--ic-branco));
+}
+
+.msp-estatistica-valor {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.msp-estatistica-rotulo {
+  font-size: 0.6875rem;
+  color: var(--msp-tinta-fraca);
+}
+
+/* ---- O ranking ---- */
+.msp-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-height: 0;
+}
+
+.msp-ranking-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.msp-ranking-topo h4 {
   margin: 0;
-  font-size: var(--tipo-legenda);
-  color: var(--cor-tinta-3);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--msp-tinta-fraca);
+}
+
+.msp-ranking-topo span {
+  font-size: 0.6875rem;
+  color: var(--msp-tinta-fraca);
+}
+
+.msp-ranking-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.msp-ranking-item {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.375rem;
+  border: 0;
+  border-radius: var(--raio-p);
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.msp-ranking-item:hover {
+  background: color-mix(in srgb, var(--ic-preto) 5%, transparent);
+}
+
+.msp-ranking-item:focus-visible {
+  outline: 2px solid var(--ic-laranja);
+  outline-offset: -2px;
+}
+
+.msp-ranking-item[data-selecionado="sim"] {
+  background: color-mix(in srgb, var(--ic-laranja) 14%, transparent);
+}
+
+.msp-ranking-pos {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ic-laranja);
+}
+
+.msp-ranking-corpo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.msp-ranking-nome {
+  font-size: 0.75rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msp-ranking-meta {
+  font-size: 0.6875rem;
+  color: var(--msp-tinta-fraca);
+}
+
+.msp-ranking-nota {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.msp-painel-pe {
+  margin: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--msp-borda-fraca);
+  font-size: 0.625rem;
+  line-height: 1.4;
+  color: var(--msp-tinta-fraca);
+}
+
+/* ---- O botão que abre e fecha o painel ---- */
+.msp-painel-chave {
+  position: absolute;
+  z-index: 4;
+  top: 1rem;
+  left: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--msp-borda-fraca);
+  border-radius: 0.5rem;
+  background: var(--msp-papel);
+  color: var(--msp-tinta);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ic-preto) 20%, transparent);
+}
+
+/* Com o painel aberto o botão encosta no canto de cima dele, e não no do mapa. */
+.msp-painel[data-aberto="sim"] ~ .msp-painel-chave {
+  left: auto;
+  right: calc(100% - min(22.5rem, calc(100% - 2rem)) - 1rem + 0.5rem);
+  top: 1.25rem;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.msp-painel-chave:focus-visible {
+  outline: 2px solid var(--ic-laranja);
+  outline-offset: 2px;
+}
+
+/* ---- A dica que segue o cursor ---- */
+.msp-dica {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  max-width: 16rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid color-mix(in srgb, var(--ic-preto) 10%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, transparent 3%, var(--ic-branco));
+  color: var(--ic-preto);
+  font-size: 0.78125rem;
+  line-height: 1.4;
+  pointer-events: none;
+  transform: translate(0.875rem, 0.875rem);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--ic-preto) 18%, transparent);
+}
+
+.msp-dica span {
+  color: var(--msp-tinta-fraca);
+  font-size: 0.6875rem;
+}
+
+/* ---- A legenda ---- */
+.msp-legenda {
+  position: absolute;
+  z-index: 3;
+  right: 1rem;
+  bottom: 6.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--msp-borda-fraca);
+  border-radius: 0.5rem;
+  background: var(--msp-papel);
+  color: var(--msp-tinta-fraca);
+  font-size: 0.75rem;
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--ic-preto) 15%, transparent);
+}
+
+.msp-legenda-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.msp-amostra {
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+}
+
+.msp-amostra[data-amostra="museu"] {
+  background: var(--ic-laranja);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ic-laranja) 45%, transparent);
+}
+
+.msp-amostra[data-amostra="biblioteca"] {
+  background: var(--ic-azul);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ic-azul) 45%, transparent);
+}
+
+/* A amostra do deserto é a hachura do original, laranja sobre rosa lavado. */
+.msp-amostra[data-amostra="deserto"] {
+  width: 0.875rem;
+  height: 0.625rem;
+  border-radius: 0.125rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--ic-laranja) 55%, transparent),
+    color-mix(in srgb, var(--ic-laranja) 55%, transparent) 3px,
+    color-mix(in srgb, var(--ic-rosa) 20%, transparent) 3px,
+    color-mix(in srgb, var(--ic-rosa) 20%, transparent) 6px
+  );
+}
+
+.msp-legenda-escala {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+}
+
+/* A rampa do coroplético: rosa clarinho a rosa da marca, como `taxaColor`. */
+.msp-escala-barra {
+  flex: 1;
+  min-width: 3.75rem;
+  height: 0.375rem;
+  border-radius: var(--raio-pilula);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ic-rosa) 12%, var(--ic-branco)),
+    var(--ic-rosa)
+  );
+}
+
+/* ---- A linha do tempo ---- */
+/* A LINHA DO TEMPO CENTRALIZA NO QUE SOBRA, e não no palco inteiro. No original o
+   mapa é a janela toda e um painel de 360px à esquerda ainda deixa o centro livre;
+   dentro de um cartão, centralizar no palco enfia metade dela debaixo do painel. */
+.msp-tempo {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 1.75rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: min(35rem, calc(100% - 3rem));
+  padding: 0.75rem 1rem 0.625rem;
+  border: 1px solid var(--msp-borda-fraca);
+  border-radius: 0.625rem;
+  background: var(--msp-papel);
+  color: var(--msp-tinta);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--ic-preto) 18%, transparent);
+}
+
+.msp-painel[data-aberto="sim"] ~ .msp-tempo {
+  left: calc(50% + min(22.5rem, 100% - 2rem) / 2);
+  width: min(35rem, calc(100% - min(22.5rem, 100% - 2rem) - 3rem));
+}
+
+.msp-tempo-play {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ic-laranja);
+  color: var(--ic-preto);
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.msp-tempo-play:focus-visible {
+  outline: 2px solid var(--ic-laranja);
+  outline-offset: 2px;
+}
+
+.msp-tempo-corpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.msp-tempo-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.msp-tempo-ano {
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.msp-tempo-meta {
+  font-size: 0.6875rem;
+  color: var(--msp-tinta-fraca);
+  font-variant-numeric: tabular-nums;
+}
+
+.msp-tempo-mais {
+  color: color-mix(in srgb, var(--ic-verde) 72%, var(--ic-preto));
+  font-weight: 600;
+}
+
+.msp-tempo-menos {
+  color: var(--ic-rosa);
+  font-weight: 600;
+}
+
+.msp-tempo-regua {
+  width: 100%;
+  margin: 0.25rem 0 0;
+  accent-color: var(--ic-laranja);
+}
+
+.msp-tempo-marcas {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5625rem;
+  color: var(--msp-tinta-fraca);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- A leitura, fora do palco ---- */
+.msp-leitura {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * A VISÃO DE APP: o que flutuava desce.
+ *
+ * Painel, legenda e linha do tempo são sobreposições de 360, 200 e 560px. Num
+ * aparelho de 370px úteis, os três cobririam o mapa inteiro e a pessoa teria de
+ * fechar cada um para ver o que veio ver. Empilhados embaixo, o mapa fica
+ * inteiro e nada some.
+ * --------------------------------------------------------------------------- */
+[data-view="mobile"] .msp-palco {
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: auto;
+  background: none;
+  overflow: visible;
+}
+
+[data-view="mobile"] .msp-desenho,
+[data-view="mobile"] .msp-tela {
+  position: absolute;
+  inset: auto;
+}
+
+/* O mapa vira o primeiro bloco da pilha, com a razão dele e o fundo dele. */
+[data-view="mobile"] .msp-palco::before {
+  content: "";
+  display: block;
+  width: 100%;
+  aspect-ratio: 600 / 371;
+  border-radius: var(--raio-m);
+  background: var(--msp-fundo);
+}
+
+[data-view="mobile"] .msp-desenho,
+[data-view="mobile"] .msp-tela {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 600 / 371;
+}
+
+[data-view="mobile"] .msp-painel,
+[data-view="mobile"] .msp-legenda,
+[data-view="mobile"] .msp-tempo {
+  position: static;
+  inset: auto;
+  width: 100%;
+  max-width: none;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+  margin-top: 0.75rem;
+  overflow: visible;
+  box-shadow: none;
+}
+
+[data-view="mobile"] .msp-painel[data-aberto="nao"] {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-view="mobile"] .msp-painel-chave {
+  display: none;
+}
+
+[data-view="mobile"] .msp-dica {
+  max-width: calc(100% - 2rem);
+}
+
+/* ---------------------------------------------------------------------------
+ * A TELA MAPA, quando ela oferece os dois.
+ *
+ * O mapa de equipamentos abre a tela; a lente do acervo responde quando o
+ * endereço traz recorte. O seletor mora aqui, e não em `mapa.css`, porque a
+ * peça que ele acende é a do Admin.
+ * ------------------------------------------------------------------------- */
+
+.mapa-da-tela {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.mapa-da-tela-seletor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: var(--espaco-tela) var(--espaco-tela) 0;
+}
+
+.mapa-da-tela-seletor button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--cor-tinta-2);
+  font-size: var(--tipo-detalhe);
+  cursor: pointer;
+}
+
+.mapa-da-tela-seletor button:hover {
+  color: var(--cor-tinta);
+}
+
+.mapa-da-tela-seletor button:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.mapa-da-tela-seletor button[data-ativo="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+  font-weight: 600;
+}
+
+.mapa-da-tela-corpo {
+  padding: 0 var(--espaco-tela) var(--espaco-tela);
+  min-width: 0;
 }

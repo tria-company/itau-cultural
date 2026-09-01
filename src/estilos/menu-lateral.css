@@ -94,3 +94,41 @@
   height: 100dvh;
   border-right: 1px solid var(--cor-borda);
 }
+
+/* ---------------------------------------------------------------------------
+ * A CASA DO PAPEL, no topo do menu.
+ *
+ * QUEM ENTRA COMO ADMINISTRAÇÃO administra o produto inteiro, e a superfície
+ * dele não é um item no fim de uma lista de bastidor: é a porta de entrada. Ela
+ * sobe para cima de Descobrir e ganha peso, porque a hierarquia do menu tem que
+ * dizer de quem é aquele aplicativo naquele momento.
+ *
+ * SÓ O ADMINISTRADOR TEM MAIS DE UMA SUPERFÍCIE, e a regra em `menu-lateral.tsx`
+ * é essa: nenhum outro perfil muda de lugar, e o Produtor em particular continua
+ * exatamente onde estava.
+ * ------------------------------------------------------------------------- */
+
+.menu-casa {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.menu-item-casa {
+  font-weight: 600;
+  color: var(--cor-acao-tinta);
+  background: var(--cor-acao-lavada);
+  border: 1px solid color-mix(in srgb, var(--cor-acao) 45%, transparent);
+}
+
+.menu-item-casa:hover {
+  border-color: var(--cor-acao);
+  background: color-mix(in srgb, var(--cor-acao) 16%, transparent);
+}
+
+/* Na própria superfície ela fica cheia: é o item aceso mais forte do menu. */
+.menu-item-casa[aria-current="page"] {
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  border-color: var(--cor-acao);
+}

@@ -1,4 +1,5 @@
-import { Mapa, type DadosDoMapa } from "@/componentes/mapa";
+import { MapaDaTela } from "@/componentes/mapa-da-tela";
+import type { DadosDoMapa } from "@/componentes/mapa";
 import type { DadosDesertos } from "@/componentes/desertos";
 import {
   CONTORNO_BRASIL,
@@ -86,5 +87,8 @@ export default function PaginaMapa() {
     perto: dadosDePerto(),
   };
 
-  return <Mapa dados={dados} />;
+  // O MAPA DE EQUIPAMENTOS É O QUE ABRE ESTA TELA. A lente do acervo continua respondendo
+  // quando o endereço traz recorte, que é como Acontece e Buscar chegam aqui; quem escolhe
+  // é `MapaDaTela`, e o porquê está escrito lá.
+  return <MapaDaTela dados={dados} />;
 }

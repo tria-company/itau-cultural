@@ -1,4 +1,5 @@
 import { COMUNIDADES, PUBLICACOES } from "./comunidade";
+import { capaSemeada } from "./comunidade-capas";
 import { PUBLICACOES_DO_ACERVO } from "./comunidade-feed";
 import { contagens, porSlug, slugsPorTipo } from "./grafo";
 import { montarDesertos, CONTORNO_DO_BRASIL } from "./observatorio";
@@ -35,6 +36,22 @@ export interface Linha {
   contexto: string;
   /** A rota pública, quando existe, para o administrador abrir o item. */
   rota: string;
+  /**
+   * A capa, quando a coisa tem uma NA TELA DELA. Caminho local, nunca externo.
+   *
+   * ELA NÃO É INVENTADA AQUI. A loja tem foto em todos os 18 itens, e a lista mostra a
+   * mesma. As comunidades têm UMA capa semeada, a oficial, e as outras 22 não têm capa em
+   * lugar nenhum do produto: `comunidade-capas.ts` declara que escolher uma foto para
+   * representar coletivos e instituições reais é a linha que este produto não cruza, a
+   * mesma razão de não autorar elenco. A lista respeita isso e mostra o que a tela delas
+   * mostra: o selo de UF e a descrição.
+   */
+  imagem?: string;
+  alt?: string;
+  /** O selo de estado, como no cartão do marketplace de comunidades. */
+  selo?: string;
+  /** A linha sob o nome, quando a tela da coisa também a mostra. */
+  descricao?: string;
 }
 
 export interface DescricaoDaCoisa {
@@ -70,12 +87,21 @@ const CLASSE: Partial<Record<Coisa, string>> = {
   espacos: "espaco",
 };
 
+/**
+ * Onde cada classe vive no app público.
+ *
+ * INSTITUIÇÃO NÃO MORA EM `/artista/`. `(app)/artista/[slug]` emite
+ * `slugsPorTipo("pessoa") + slugsPorTipo("coletivo")`, e mais nada: são 792 endereços, 575
+ * pessoas e 217 coletivos. As 246 instituições e os 113 espaços estão em `/produtor/`. A
+ * linha errada mandava as 246 linhas de instituição para 404, e o defeito era silencioso
+ * porque o link só quebra quando alguém clica.
+ */
 const ROTA_DA_CLASSE: Record<string, string> = {
   pessoa: "/artista/",
   coletivo: "/artista/",
-  instituicao: "/artista/",
+  instituicao: "/produtor/",
   evento: "/evento/",
-  espaco: "",
+  espaco: "/produtor/",
 };
 
 /** O teto por lista. O corte é DECLARADO na tela, nunca silencioso. */
@@ -83,12 +109,22 @@ export const TETO_DA_LISTA = 300;
 
 export function linhasDe(coisa: Coisa): { linhas: Linha[]; total: number } {
   if (coisa === "comunidades") {
-    const linhas = COMUNIDADES.map((c) => ({
-      id: c.id,
-      titulo: c.nome,
-      contexto: `${c.assinantes.toLocaleString("pt-BR")} pessoas`,
-      rota: `/comunidade/${c.id}/`,
-    }));
+    // A LINHA MOSTRA O QUE O CARTÃO DELA MOSTRA. No marketplace o cartão é selo de UF,
+    // nome, descrição e assinantes; só a comunidade oficial tem capa, e as outras 22 não
+    // têm em lugar nenhum do produto, por decisão declarada em `comunidade-capas.ts`.
+    const linhas = COMUNIDADES.map((c) => {
+      const capa = capaSemeada(c.id);
+      return {
+        id: c.id,
+        titulo: c.nome,
+        contexto: `${c.assinantes.toLocaleString("pt-BR")} pessoas`,
+        rota: `/comunidade/${c.id}/`,
+        imagem: capa?.imagem,
+        alt: capa?.imagemAlt,
+        selo: c.uf,
+        descricao: capa?.chamada || c.descricao,
+      };
+    });
     return { linhas, total: linhas.length };
   }
 
@@ -110,6 +146,8 @@ export function linhasDe(coisa: Coisa): { linhas: Linha[]; total: number } {
       titulo: r.titulo,
       contexto: `${r.custo} fichas`,
       rota: "/meu/carteira/",
+      imagem: r.imagem,
+      alt: r.imagemAlt,
     }));
     return { linhas, total: linhas.length };
   }
