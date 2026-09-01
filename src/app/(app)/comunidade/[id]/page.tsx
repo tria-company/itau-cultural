@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { Grafismo } from "@/componentes/grafismo";
 import { Comunidade } from "@/componentes/comunidade";
+import { ItemComAdmin } from "@/componentes/item-com-admin";
+import { DATA_DE_REFERENCIA } from "@/dados/alerta";
 import { COMUNIDADES, comunidadePorId } from "@/dados/comunidade";
 
 export function generateStaticParams() {
@@ -21,7 +23,13 @@ export default async function PaginaDeComunidade({ params }: { params: Promise<{
         </div>
       </header>
 
-      <Comunidade comunidadeId={id} />
+      <ItemComAdmin
+        alvo={{ tipo: "comunidade", id, titulo: comunidade.nome }}
+        carimbo={DATA_DE_REFERENCIA}
+        volta="/comunidade/"
+      >
+        <Comunidade comunidadeId={id} />
+      </ItemComAdmin>
     </div>
   );
 }

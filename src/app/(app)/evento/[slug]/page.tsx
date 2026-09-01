@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ItemComAdmin } from "@/componentes/item-com-admin";
 import { CapaDeCartao } from "@/componentes/capa-sem-imagem";
 import { FichaDeAcessibilidade } from "@/componentes/ficha-acessibilidade";
 import { Grafismo } from "@/componentes/grafismo";
@@ -180,146 +181,152 @@ export default async function PaginaEvento({ params }: { params: Promise<{ slug:
 
   return (
     <div className="ev-tela web-duas-colunas flex flex-col gap-6 p-5 desk:p-8">
-      {/* 1 — imagem, título e selos de linguagem -------------------------- */}
-      <header className="ev-cabecalho flex flex-col gap-3">
-        <CapaDeCartao
-          titulo={entidade.titulo}
-          classe={entidade.classe}
-          linguagens={entidade.linguagens}
-          imagem={entidade.imagem}
-          creditoImagem={entidade.creditoImagem}
-          className="h-36 w-full rounded-xl"
-        />
-        <h1 className="text-2xl leading-tight font-bold">{entidade.titulo}</h1>
-        <p className="text-[0.65rem] tracking-widest text-tinta-3 uppercase">
-          evento · procedência {entidade.procedencia}
-        </p>
-        {entidade.linguagens.length ? (
-          <SelosDeLinguagem ids={entidade.linguagens} />
-        ) : (
-          <p className="text-xs text-tinta-3">
-            Nenhuma linguagem artística declarada para este evento no acervo.
-          </p>
-        )}
-      </header>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* AS DUAS COLUNAS DA VISÃO WEB (D-80, tela 27), E A MESMA PILHA DA     */}
-      {/* FASE 2 NA VISÃO APP.                                                */}
-      {/*                                                                     */}
-      {/* A ORDEM DO DOM É UMA SÓ e quem reordena é o layout, nunca um ramo em */}
-      {/* JavaScript (D-79/D-05). Em `[data-view="mobile"]`, `web-evento.css`  */}
-      {/* dissolve estes dois invólucros com `display: contents` e devolve os  */}
-      {/* onze blocos à ordem exata da fase 2 com quatro valores de `order`.   */}
-      {/* Em `[data-view="web"]` eles são as duas colunas da grade, e o lateral */}
-      {/* cola pelo `.web-coluna-fixa` de `web.css`.                          */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="ev-principal flex flex-col gap-6">
-      {/* 2 e 4 — A CONTAGEM NO TOPO E AS OCORRÊNCIAS ABAIXO (D-42). O evento
-             aparece uma vez só; as sessões são registros próprios dentro dele. */}
-      <ListaDeOcorrencias
-        ocorrencias={ocorrencias}
-        temporadas={temporadasExibiveis}
-        dataDeReferencia={DATA_DE_REFERENCIA}
-      />
-
-      {/* A entrada para a escolha de sessão (AGEN-02, D-56). Só aparece quando o evento
-          TEM sessão: `/evento/[slug]/sessoes` é exportada apenas para os 129 eventos com
-          ocorrência datada, e oferecer o link nos outros 171 seria link para uma página
-          que o `generateStaticParams` não emitiu — 404 na demonstração ao vivo. */}
-      {ocorrencias.length ? (
-        <Link
-          href={`/evento/${entidade.slug}/sessoes/`}
-          className="w-fit rounded-full bg-acao px-4 py-2 text-sm font-semibold text-sobre-acao no-underline transition-opacity hover:opacity-90"
-        >
-          Escolher e salvar uma sessão
-        </Link>
-      ) : null}
-
-      {/* A PONTE DE VENDA (reformulação 2026-08): quando o evento tem link de ingresso,
-          o botão leva direto à plataforma. O acervo NÃO publica esse dado (0 de 300 —
-          medido); nos dois eventos de demonstração o link é AUTORADO e rotulado como
-          tal, no estatuto da trilha do Cenário 1 (D-37). O `<a>` externo é clique da
-          pessoa, não requisição do protótipo — zero rede em runtime continua valendo. */}
-      {ingresso ? (
-        <div className="flex flex-col gap-1">
-          <a
-            href={ingresso.url}
-            target="_blank"
-            rel="noreferrer"
-            className="w-fit rounded-full border-2 border-acao px-4 py-2 text-sm font-bold text-acao-tinta no-underline transition-colors hover:bg-acao hover:text-sobre-acao"
-          >
-            Ingressos na {ingresso.plataforma} ↗
-          </a>
-          <p className="text-xs italic leading-snug text-tinta-2">{ingresso.rotulo}.</p>
-        </div>
-      ) : null}
-
-      {/* 3 — o verbete, embutido, com crédito e link de procedência (D-39) */}
-      <Verbete entidade={entidade} />
-
-      {/* 6 — a ficha das 8 dimensões (D-43). No DOM ela fecha a coluna
-             principal; na visão app o `order` a devolve para depois de «onde
-             acontece», que é o lugar exato em que a fase 2 a deixou. */}
-      <div className="ev-ficha-acesso">
-        <FichaDeAcessibilidade
-          acessibilidade={entidade.acessibilidade}
-          declaraDimensoes={declaraAcessibilidade}
-          fonteDaDeclaracao={vemDoCms ? "agenda do Itaú Cultural" : "Enciclopédia Itaú Cultural"}
-        />
-      </div>
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* O PAINEL LATERAL DE D-80 — «aprofunda isto» ao lado, e não no pé.    */}
-      {/*                                                                     */}
-      {/* Ele carrega os vínculos de `vinculosDe` E o conteúdo editorial, que  */}
-      {/* é o que faz as DUAS páginas muito diferentes que saem deste arquivo  */}
-      {/* terem lateral com conteúdo: o evento da Enciclopédia enche o painel  */}
-      {/* por «quem atua» e «quem realiza», o do CMS o enche por «aprofunda».  */}
-      {/* Onde nenhum dos dois vem, o bloco declara a ausência em vez de sumir */}
-      {/* e deixar meia tela vazia.                                           */}
-      {/* ------------------------------------------------------------------ */}
-      <aside
-        data-painel-aprofunda={blocosDoPainel}
-        className="ev-lateral web-painel web-coluna-fixa flex flex-col gap-4"
+      <ItemComAdmin
+        alvo={{ tipo: "evento", id: entidade.slug, titulo: entidade.titulo }}
+        carimbo={DATA_DE_REFERENCIA}
+        volta="/acontece/"
       >
-        {/* 5 — QUEM REALIZA E QUEM ATUA, COM PAPEL. A volta da ponte: daqui se
-               chega ao verbete do artista, e o vínculo está nomeado. */}
-        {quemRealiza ? <BlocoPonte grupo={quemRealiza} /> : null}
-        {quemAtua ? <BlocoPonte grupo={quemAtua} /> : null}
-
-        {/* onde acontece — espaço e território, quando o registro os traz */}
-        {onde ? <BlocoPonte grupo={onde} rotulo="Onde acontece" /> : null}
-
-        {/* 7 — APROFUNDA ISTO. É o bloco que funciona também nos eventos do CMS,
-               que não têm agente: o evento datado da trilha tem 40 arestas
-               `aprofunda`, e é por elas que ele cruza para o acervo. */}
-        <section className="ev-aprofunda flex flex-col gap-4">
-          <h2 className="web-painel-titulo text-sm font-bold tracking-wide text-tinta-2 uppercase">
-            Aprofunda isto
-          </h2>
-          {aprofunda ? <BlocoPonte grupo={aprofunda} /> : null}
-          {contextualiza ? <BlocoPonte grupo={contextualiza} /> : null}
-          {semelhante ? <BlocoPonte grupo={semelhante} /> : null}
-        </section>
-
-        {/* 8 — SE NÃO PUDER IR. Tela 12 pede conteúdo do Play; o Play é fase 5.
-               O bloco não some: mostra a mídia que o grafo tem e declara o que
-               ainda não existe. */}
-        <section className="ev-se-nao-puder flex flex-col gap-4">
-          <h2 className="web-painel-titulo text-sm font-bold tracking-wide text-tinta-2 uppercase">
-            Se não puder ir
-          </h2>
-          {falaSobre ? <BlocoPonte grupo={falaSobre} /> : null}
-          <BlocoAusenciaDeclarada
-            chave="play"
-            rotulo="Catálogo do Play"
-            frase="O que está acima é o que o acervo liga a este evento por ligação de mídia."
+        {/* 1 — imagem, título e selos de linguagem -------------------------- */}
+        <header className="ev-cabecalho flex flex-col gap-3">
+          <CapaDeCartao
+            titulo={entidade.titulo}
+            classe={entidade.classe}
+            linguagens={entidade.linguagens}
+            imagem={entidade.imagem}
+            creditoImagem={entidade.creditoImagem}
+            className="h-36 w-full rounded-xl"
           />
-        </section>
-      </aside>
+          <h1 className="text-2xl leading-tight font-bold">{entidade.titulo}</h1>
+          <p className="text-[0.65rem] tracking-widest text-tinta-3 uppercase">
+            evento · procedência {entidade.procedencia}
+          </p>
+          {entidade.linguagens.length ? (
+            <SelosDeLinguagem ids={entidade.linguagens} />
+          ) : (
+            <p className="text-xs text-tinta-3">
+              Nenhuma linguagem artística declarada para este evento no acervo.
+            </p>
+          )}
+        </header>
 
+        {/* ------------------------------------------------------------------ */}
+        {/* AS DUAS COLUNAS DA VISÃO WEB (D-80, tela 27), E A MESMA PILHA DA     */}
+        {/* FASE 2 NA VISÃO APP.                                                */}
+        {/*                                                                     */}
+        {/* A ORDEM DO DOM É UMA SÓ e quem reordena é o layout, nunca um ramo em */}
+        {/* JavaScript (D-79/D-05). Em `[data-view="mobile"]`, `web-evento.css`  */}
+        {/* dissolve estes dois invólucros com `display: contents` e devolve os  */}
+        {/* onze blocos à ordem exata da fase 2 com quatro valores de `order`.   */}
+        {/* Em `[data-view="web"]` eles são as duas colunas da grade, e o lateral */}
+        {/* cola pelo `.web-coluna-fixa` de `web.css`.                          */}
+        {/* ------------------------------------------------------------------ */}
+        <div className="ev-principal flex flex-col gap-6">
+        {/* 2 e 4 — A CONTAGEM NO TOPO E AS OCORRÊNCIAS ABAIXO (D-42). O evento
+               aparece uma vez só; as sessões são registros próprios dentro dele. */}
+        <ListaDeOcorrencias
+          ocorrencias={ocorrencias}
+          temporadas={temporadasExibiveis}
+          dataDeReferencia={DATA_DE_REFERENCIA}
+        />
+
+        {/* A entrada para a escolha de sessão (AGEN-02, D-56). Só aparece quando o evento
+            TEM sessão: `/evento/[slug]/sessoes` é exportada apenas para os 129 eventos com
+            ocorrência datada, e oferecer o link nos outros 171 seria link para uma página
+            que o `generateStaticParams` não emitiu — 404 na demonstração ao vivo. */}
+        {ocorrencias.length ? (
+          <Link
+            href={`/evento/${entidade.slug}/sessoes/`}
+            className="w-fit rounded-full bg-acao px-4 py-2 text-sm font-semibold text-sobre-acao no-underline transition-opacity hover:opacity-90"
+          >
+            Escolher e salvar uma sessão
+          </Link>
+        ) : null}
+
+        {/* A PONTE DE VENDA (reformulação 2026-08): quando o evento tem link de ingresso,
+            o botão leva direto à plataforma. O acervo NÃO publica esse dado (0 de 300 —
+            medido); nos dois eventos de demonstração o link é AUTORADO e rotulado como
+            tal, no estatuto da trilha do Cenário 1 (D-37). O `<a>` externo é clique da
+            pessoa, não requisição do protótipo — zero rede em runtime continua valendo. */}
+        {ingresso ? (
+          <div className="flex flex-col gap-1">
+            <a
+              href={ingresso.url}
+              target="_blank"
+              rel="noreferrer"
+              className="w-fit rounded-full border-2 border-acao px-4 py-2 text-sm font-bold text-acao-tinta no-underline transition-colors hover:bg-acao hover:text-sobre-acao"
+            >
+              Ingressos na {ingresso.plataforma} ↗
+            </a>
+            <p className="text-xs italic leading-snug text-tinta-2">{ingresso.rotulo}.</p>
+          </div>
+        ) : null}
+
+        {/* 3 — o verbete, embutido, com crédito e link de procedência (D-39) */}
+        <Verbete entidade={entidade} />
+
+        {/* 6 — a ficha das 8 dimensões (D-43). No DOM ela fecha a coluna
+               principal; na visão app o `order` a devolve para depois de «onde
+               acontece», que é o lugar exato em que a fase 2 a deixou. */}
+        <div className="ev-ficha-acesso">
+          <FichaDeAcessibilidade
+            acessibilidade={entidade.acessibilidade}
+            declaraDimensoes={declaraAcessibilidade}
+            fonteDaDeclaracao={vemDoCms ? "agenda do Itaú Cultural" : "Enciclopédia Itaú Cultural"}
+          />
+        </div>
+        </div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* O PAINEL LATERAL DE D-80 — «aprofunda isto» ao lado, e não no pé.    */}
+        {/*                                                                     */}
+        {/* Ele carrega os vínculos de `vinculosDe` E o conteúdo editorial, que  */}
+        {/* é o que faz as DUAS páginas muito diferentes que saem deste arquivo  */}
+        {/* terem lateral com conteúdo: o evento da Enciclopédia enche o painel  */}
+        {/* por «quem atua» e «quem realiza», o do CMS o enche por «aprofunda».  */}
+        {/* Onde nenhum dos dois vem, o bloco declara a ausência em vez de sumir */}
+        {/* e deixar meia tela vazia.                                           */}
+        {/* ------------------------------------------------------------------ */}
+        <aside
+          data-painel-aprofunda={blocosDoPainel}
+          className="ev-lateral web-painel web-coluna-fixa flex flex-col gap-4"
+        >
+          {/* 5 — QUEM REALIZA E QUEM ATUA, COM PAPEL. A volta da ponte: daqui se
+                 chega ao verbete do artista, e o vínculo está nomeado. */}
+          {quemRealiza ? <BlocoPonte grupo={quemRealiza} /> : null}
+          {quemAtua ? <BlocoPonte grupo={quemAtua} /> : null}
+
+          {/* onde acontece — espaço e território, quando o registro os traz */}
+          {onde ? <BlocoPonte grupo={onde} rotulo="Onde acontece" /> : null}
+
+          {/* 7 — APROFUNDA ISTO. É o bloco que funciona também nos eventos do CMS,
+                 que não têm agente: o evento datado da trilha tem 40 arestas
+                 `aprofunda`, e é por elas que ele cruza para o acervo. */}
+          <section className="ev-aprofunda flex flex-col gap-4">
+            <h2 className="web-painel-titulo text-sm font-bold tracking-wide text-tinta-2 uppercase">
+              Aprofunda isto
+            </h2>
+            {aprofunda ? <BlocoPonte grupo={aprofunda} /> : null}
+            {contextualiza ? <BlocoPonte grupo={contextualiza} /> : null}
+            {semelhante ? <BlocoPonte grupo={semelhante} /> : null}
+          </section>
+
+          {/* 8 — SE NÃO PUDER IR. Tela 12 pede conteúdo do Play; o Play é fase 5.
+                 O bloco não some: mostra a mídia que o grafo tem e declara o que
+                 ainda não existe. */}
+          <section className="ev-se-nao-puder flex flex-col gap-4">
+            <h2 className="web-painel-titulo text-sm font-bold tracking-wide text-tinta-2 uppercase">
+              Se não puder ir
+            </h2>
+            {falaSobre ? <BlocoPonte grupo={falaSobre} /> : null}
+            <BlocoAusenciaDeclarada
+              chave="play"
+              rotulo="Catálogo do Play"
+              frase="O que está acima é o que o acervo liga a este evento por ligação de mídia."
+            />
+          </section>
+        </aside>
+
+      </ItemComAdmin>
     </div>
   );
 }

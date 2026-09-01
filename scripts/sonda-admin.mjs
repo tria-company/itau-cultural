@@ -113,7 +113,7 @@ try {
   await cdp.clicar(`document.querySelector('[data-confirmar="suspender"]')`);
   const depois = await cdp.avaliar(
     naPagina(`return {
-      suspenso: !!document.querySelector('[data-publicacao-suspensa]'),
+      suspenso: !!document.querySelector('[data-item-suspenso]'),
       selo: !!document.querySelector('[data-estado="suspenso"]'),
     };`),
   );
@@ -131,7 +131,7 @@ try {
       const j = bruto ? JSON.parse(bruto) : {};
       const r = (j.registro || [])[0] || {};
       return {
-        suspenso: !!document.querySelector('[data-publicacao-suspensa]'),
+        suspenso: !!document.querySelector('[data-item-suspenso]'),
         linhas: (j.registro || []).length,
         acao: r.acao || '', autor: r.autor || '', motivo: r.motivo || '', carimbo: r.carimbo || '',
       };`),
