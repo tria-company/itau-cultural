@@ -101,15 +101,26 @@ export const DESCRICAO_DO_PAPEL: Record<Papel, DescricaoDoPapel> = {
     superficies: ["/observatorio"],
     soWeb: true,
   },
+  /**
+   * O ADMINISTRADOR USA O MESMO APLICATIVO, e é isso que o define.
+   *
+   * Ele não tem console próprio. Abre `/descobrir` como qualquer pessoa, navega pelas mesmas
+   * telas, e em cima de cada item ganha o que pode fazer com ele: editar, mover, suspender e
+   * apagar. Quem não é administrador não vê nada disso, e o aplicativo é idêntico.
+   *
+   * `soWeb` É FALSO, e a mudança tem consequência. Enquanto ele era console de governança,
+   * era mesa de trabalho. Agora é o produto, e o produto abre no telefone: o administrador
+   * precisa poder agir onde as pessoas estão.
+   */
   admin: {
     papel: "admin",
     rotulo: "Administração",
     resumo:
-      "Governança da plataforma: parâmetros do motor, territórios, vocabulário, titulares " +
-      "e a trilha de auditoria.",
-    chegada: "/admin/papeis/",
+      "O mesmo aplicativo, com poder de editar, mover, suspender e apagar qualquer coisa " +
+      "que esteja nele.",
+    chegada: "/descobrir/",
     superficies: ["/admin", "/moderacao", "/observatorio", "/studio", "/redacao", "/roteiro"],
-    soWeb: true,
+    soWeb: false,
   },
 };
 

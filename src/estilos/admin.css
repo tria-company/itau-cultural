@@ -256,3 +256,135 @@
 .admin-trilha .studio-linha {
   grid-template-columns: 14rem 1fr 16rem 16rem;
 }
+
+/* ---------------------------------------------------------------------------
+ * A TIRA DO ADMINISTRADOR, que aparece em cima do item dentro do aplicativo.
+ *
+ * Ela não é uma tela. O administrador abre a publicação, o evento ou a comunidade como
+ * qualquer pessoa, e esta faixa entra por cima. Quem não é administrador não a vê, e o
+ * aplicativo é idêntico ao de todo mundo.
+ * --------------------------------------------------------------------------- */
+
+.adm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-acao);
+  border-radius: var(--raio-m);
+  background: var(--cor-acao-lavada);
+}
+
+.adm-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adm-marca {
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-acao-tinta);
+}
+
+.adm-estado {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  font-size: var(--tipo-legenda);
+}
+
+/* ALVO DE TOQUE DE 44px, que é a medida da casa para controle em visão de app. */
+.adm-botao {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+  font-size: var(--tipo-detalhe);
+  cursor: pointer;
+}
+
+.adm-botao:hover:not(:disabled) {
+  border-color: var(--cor-acao);
+  color: var(--cor-acao-tinta);
+}
+
+.adm-botao:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.adm-botao:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.adm-botao[data-aberta="sim"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+}
+
+.adm-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.adm-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+.adm-campo input,
+.adm-campo select {
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+  font-size: var(--tipo-detalhe);
+}
+
+.adm-falta {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+.adm-aviso {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 2px solid var(--cor-acao);
+  background: var(--cor-superficie-2);
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+.adm-apagado {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+  color: var(--cor-tinta-2);
+}
+
+.adm-apagado p {
+  margin: 0;
+}
+
