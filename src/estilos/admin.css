@@ -993,20 +993,28 @@
 }
 
 /* ---- O palco: o mapa, e tudo que flutua sobre ele ---- */
+/* O PALCO NÃO TEM ALTURA PRÓPRIA: quem a dá é a caixa do desenho. Assim o mesmo
+   bloco serve às duas visões, com o painel flutuando por cima na web e descendo
+   para baixo no telefone, sem que o palco precise mudar de natureza. */
 .msp-palco {
   position: relative;
-  /* O original usa mira sobre o mapa, e mão fechada durante o arrasto. */
-  cursor: crosshair;
-  touch-action: none;
   min-width: 0;
+}
+
+/* A CAIXA DO DESENHO: a razão, o chão escuro e o ponteiro moram aqui. */
+.msp-mapa {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 600 / 371;
   border-radius: var(--raio-m);
   background: var(--msp-fundo);
   overflow: hidden;
-  /* A razão do desenho, 600 por 371, para o palco ter altura sem medida fixa. */
-  aspect-ratio: 600 / 371;
+  /* O original usa mira sobre o mapa, e mão fechada durante o arrasto. */
+  cursor: crosshair;
+  touch-action: none;
 }
 
-.msp-palco[data-arrastando="sim"] {
+.msp-mapa[data-arrastando="sim"] {
   cursor: grabbing;
 }
 
@@ -1679,34 +1687,6 @@
 [data-view="mobile"] .msp-palco {
   display: flex;
   flex-direction: column;
-  aspect-ratio: auto;
-  background: none;
-  overflow: visible;
-}
-
-[data-view="mobile"] .msp-desenho,
-[data-view="mobile"] .msp-tela {
-  position: absolute;
-  inset: auto;
-}
-
-/* O mapa vira o primeiro bloco da pilha, com a razão dele e o fundo dele. */
-[data-view="mobile"] .msp-palco::before {
-  content: "";
-  display: block;
-  width: 100%;
-  aspect-ratio: 600 / 371;
-  border-radius: var(--raio-m);
-  background: var(--msp-fundo);
-}
-
-[data-view="mobile"] .msp-desenho,
-[data-view="mobile"] .msp-tela {
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 600 / 371;
 }
 
 [data-view="mobile"] .msp-painel,

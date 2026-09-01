@@ -138,8 +138,9 @@ try {
     "0",
   );
 
-  // O mapa continua sendo desenho, e não requisição.
-  await cdp.navegar(`${base}/admin/`);
+  // O MAPA MUDOU DE ENDEREÇO. Ele saiu do painel do Admin e foi para a tela Mapa, que é
+  // onde se procura um mapa; a aferição segue a peça, e não a rota antiga.
+  await cdp.navegar(`${base}/mapa/`);
   const mapa = await cdp.avaliar(
     naPagina(`return {
       municipios: document.querySelectorAll('[data-municipio]').length,

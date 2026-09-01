@@ -520,24 +520,29 @@ export function MapaSP() {
 
   return (
     <div className="msp" data-mapa-sp>
-      <div
-        className="msp-palco"
-        ref={moldura}
-        data-arrastando={arraste.current ? "sim" : undefined}
-        onMouseMove={noPonteiro}
-        onMouseDown={(e) => {
-          arraste.current = { x: e.clientX, y: e.clientY, cx: vista.cx, cy: vista.cy };
-        }}
-        onMouseUp={() => {
-          arraste.current = null;
-        }}
-        onDoubleClick={() => definirVista({ z: 1, cx: LARGURA_SP / 2, cy: ALTURA_SP / 2 })}
-        onMouseLeave={() => {
-          arraste.current = null;
-          definirDica(null);
-          definirPerto(null);
-        }}
-      >
+      <div className="msp-palco">
+        {/* O DESENHO TEM CAIXA PRÓPRIA, e é ela que carrega a razão 600 por 371, o chão
+            escuro e o ponteiro. Sem esta caixa, na visão de app o palco virava uma coluna e
+            o SVG ficava sem altura: o mapa saía vazio. É também o retângulo contra o qual a
+            conta do cursor é feita, que na web coincide com o palco e no telefone não. */}
+        <div
+          className="msp-mapa"
+          ref={moldura}
+          data-arrastando={arraste.current ? "sim" : undefined}
+          onMouseMove={noPonteiro}
+          onMouseDown={(e) => {
+            arraste.current = { x: e.clientX, y: e.clientY, cx: vista.cx, cy: vista.cy };
+          }}
+          onMouseUp={() => {
+            arraste.current = null;
+          }}
+          onDoubleClick={() => definirVista({ z: 1, cx: LARGURA_SP / 2, cy: ALTURA_SP / 2 })}
+          onMouseLeave={() => {
+            arraste.current = null;
+            definirDica(null);
+            definirPerto(null);
+          }}
+        >
         <svg
           viewBox={`${janela.x} ${janela.y} ${janela.w} ${janela.h}`}
           role="img"
@@ -557,13 +562,14 @@ export function MapaSP() {
         <canvas ref={telaDeCima} className="msp-tela msp-tela-cima" aria-hidden="true" />
 
         {dica && (
-          <div className="msp-dica" style={{ left: dica.x, top: dica.y }} role="presentation">
-            <strong>{dica.linhas[0]}</strong>
-            {dica.linhas.slice(1).map((l) => (
-              <span key={l}>{l}</span>
-            ))}
-          </div>
-        )}
+            <div className="msp-dica" style={{ left: dica.x, top: dica.y }} role="presentation">
+              <strong>{dica.linhas[0]}</strong>
+              {dica.linhas.slice(1).map((l) => (
+                <span key={l}>{l}</span>
+              ))}
+            </div>
+          )}
+        </div>
 
         <aside className="msp-painel" data-aberto={painelAberto ? "sim" : "nao"}>
           <header className="msp-painel-topo">

@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ControlesDeAdmin } from "@/componentes/admin-controles";
 import { usePoderDeAdmin } from "@/componentes/admin-estado";
+import { CapaSemImagem } from "@/componentes/capa-sem-imagem";
 import type { DescricaoDaCoisa, Linha } from "@/dados/admin-area";
+import type { ClasseEntidade } from "@/dados/tipos";
 
 /**
  * admin-lista.tsx, achar e agir em massa.
@@ -145,6 +147,14 @@ export function AdminLista({
             {l.imagem ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img className="adm-item-capa" src={l.imagem} alt={l.alt ?? ""} loading="lazy" />
+            ) : l.classe ? (
+              <CapaSemImagem
+                className="adm-item-capa"
+                titulo={l.titulo}
+                classe={l.classe as ClasseEntidade}
+                linguagens={l.linguagens ?? []}
+                compacta
+              />
             ) : null}
             <div className="adm-item-cima">
               <span className="adm-item-nome">

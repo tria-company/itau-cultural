@@ -50,6 +50,16 @@ export interface Linha {
   alt?: string;
   /** O selo de estado, como no cartão do marketplace de comunidades. */
   selo?: string;
+  /**
+   * A classe e as linguagens, para a capa gerada quando não há foto.
+   *
+   * NÃO É PLACEHOLDER. `capa-sem-imagem.tsx` é a aparência DOMINANTE do produto: 1.019 das
+   * 7.810 entidades têm imagem local, e cerca de 78% dos cartões do app caem nela. Campo de
+   * cor da linguagem, o `\` do manual como textura, e o nome da classe. A lista do admin
+   * usa a mesma, porque é a capa que a tela da coisa mostra.
+   */
+  classe?: string;
+  linguagens?: string[];
   /** A linha sob o nome, quando a tela da coisa também a mostra. */
   descricao?: string;
 }
@@ -123,6 +133,8 @@ export function linhasDe(coisa: Coisa): { linhas: Linha[]; total: number } {
         alt: capa?.imagemAlt,
         selo: c.uf,
         descricao: capa?.chamada || c.descricao,
+        classe: c.natureza,
+        linguagens: [...c.linguagens],
       };
     });
     return { linhas, total: linhas.length };

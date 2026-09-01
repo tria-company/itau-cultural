@@ -26,21 +26,10 @@ export function AdminPainel({
   painel,
   area,
   carimbo,
-  mapa,
 }: {
   painel: PainelDaPlataforma;
   area: DescricaoDaCoisa[];
   carimbo: string;
-  /**
-   * O MAPA VEM DO SERVIDOR JA RESOLVIDO. Sao 645 caminhos e 2.503 pontos: passa-los como
-   * dado obrigaria o navegador a projetar de novo o que o build ja projetou. Aqui ele e
-   * marcacao pronta, e nenhuma requisicao de rede acontece por causa dele.
-   *
-   * O NAVEGADOR AINDA MONTA OS NOS, porque este componente e de cliente e devolve `null`
-   * ate saber se quem abriu e administrador. O custo que fica e de montagem, nao de rede
-   * nem de calculo.
-   */
-  mapa: React.ReactNode;
 }) {
   const poder = usePoderDeAdmin(carimbo);
 
@@ -93,12 +82,6 @@ export function AdminPainel({
           </div>
         </section>
       </div>
-
-      {/* 3. Até onde ela chega. */}
-      <section className="adm-cartao adm-cartao-largo" data-cartao="mapa">
-        <h2 className="adm-titulo">Equipamentos culturais por município</h2>
-        {mapa}
-      </section>
 
       {/* 4. O que fazer com ela. */}
       <section className="adm-secao" data-cartao="portas">
