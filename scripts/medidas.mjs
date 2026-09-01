@@ -81,6 +81,11 @@ export const SUPERFICIES_DE_BASTIDOR = [
   { prefixo: "/moderacao", regra: "so-web", nome: "Moderação" },
   { prefixo: "/redacao", regra: "so-web", nome: "Redação" },
   { prefixo: "/observatorio", regra: "so-web", nome: "Observatório" },
-  { prefixo: "/admin", regra: "so-web", nome: "Administração" },
+  // O ADMIN VIROU MOBILE-FIRST em 01/09/2026, e é a segunda inversão de D-67 depois do
+  // Studio. Ele deixou de ser console de governança e virou o próprio aplicativo, com poder
+  // em cima de cada item; o aplicativo abre no telefone, e esconder o Admin ali o esconderia
+  // justamente na visão em que as pessoas usam o produto. A inversão é estreita: as outras
+  // quatro superfícies continuam sendo mesa de trabalho.
+  { prefixo: "/admin", regra: "visivel-no-app", nome: "Administração" },
   { prefixo: "/roteiro", regra: "so-web", nome: "roteiro guiado" },
 ];

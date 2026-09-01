@@ -35,11 +35,15 @@ export function ControlesDeAdmin({
   /** Os destinos possíveis de `mover`, quando o tipo aceita. */
   destinos = [],
   aoAgir,
+  compacto = false,
 }: {
   alvo: Alvo;
   carimbo: string;
   destinos?: readonly { id: string; nome: string }[];
   aoAgir?: (acao: Acao) => void;
+  /** Numa lista a tira perde a moldura e a marca: são dezenas por tela, e a moldura
+   *  repetida vira ruído. Em cima de um item ela precisa se destacar do conteúdo. */
+  compacto?: boolean;
 }) {
   const poder = usePoderDeAdmin(carimbo);
   const [aberta, definirAberta] = useState<Acao | null>(null);
@@ -76,9 +80,13 @@ export function ControlesDeAdmin({
   const falta = aberta ? oQueFalta(aberta, motivo, destino) : [];
 
   return (
-    <aside className="adm" data-admin-controles={alvo.id} data-tipo={alvo.tipo}>
+    <aside
+      className={compacto ? "adm adm-compacto" : "adm"}
+      data-admin-controles={alvo.id}
+      data-tipo={alvo.tipo}
+    >
       <div className="adm-linha">
-        <span className="adm-marca">Admin</span>
+        {!compacto && <span className="adm-marca">Admin</span>}
         {apagado ? (
           <span className="adm-estado" data-estado="apagado">
             Apagado

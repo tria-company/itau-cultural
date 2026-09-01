@@ -1,0 +1,181 @@
+/**
+ * sonda-admin-telefone.mjs, o Admin no telefone.
+ *
+ * O QUE ELA MEDE, e nenhum portão estático mede: se o conteúdo aparece na visão de app, se
+ * nada transborda para o lado dentro dos 370px úteis da moldura, e se todo controle tem os
+ * 44px de alvo de toque que a casa exige.
+ *
+ * TRANSBORDO HORIZONTAL É O DEFEITO TÍPICO de tabela em grade com trilho em `rem`: a coluna
+ * não encolhe, o excedente sai da moldura, e nenhum `tsc` vê isso.
+ *
+ * Rode com `node scripts/sonda-admin-telefone.mjs`, com `out/` já construído.
+ * Se travar sem imprimir nada, mate os Chrome com `--headless=new` órfãos.
+ */
+
+import { abrirNavegador, naPagina } from "./navegador.mjs";
+import { servir } from "./servir-out.mjs";
+
+const ROTAS = [
+  "",
+  "pessoas",
+  "coletivos",
+  "instituicoes",
+  "eventos",
+  "espacos",
+  "comunidades",
+  "publicacoes",
+  "loja",
+];
+
+/** A área útil dentro da moldura de 390px: 390 menos os dois bezéis de 10. */
+const UTEIS = 370;
+/** O alvo mínimo de toque, em px. */
+const ALVO = 44;
+
+let verdes = 0;
+const falhas = [];
+
+function exigir(condicao, nome, medida, esperado) {
+  if (condicao) {
+    verdes += 1;
+    console.log(`  ok   ${nome}: ${medida}`);
+    return;
+  }
+  console.log(`  FALHA ${nome}: medido ${medida} · esperado ${esperado}`);
+  falhas.push(nome);
+}
+
+const servidor = await servir();
+const base = servidor.url;
+let cdp;
+
+try {
+  cdp = await abrirNavegador();
+  console.log("\nsonda-admin-telefone, o Admin em 390x844\n");
+
+  await cdp.navegar(`${base}/admin/`);
+  await cdp.avaliar(
+    `localStorage.setItem('agenda-cultural:papel', 'admin');
+     localStorage.setItem('agenda-cultural:visao', 'mobile');
+     localStorage.removeItem('admin.acoes.v1');`,
+  );
+
+  console.log("  rota                 conteúdo   transbordo   alvos curtos");
+  console.log("  ---------------------------------------------------------");
+
+  let semConteudo = 0;
+  let transbordos = 0;
+  let alvosCurtos = 0;
+
+  for (const rota of ROTAS) {
+    await cdp.navegar(`${base}/admin/${rota}${rota ? "/" : ""}`);
+    const m = await cdp.avaliar(
+      naPagina(`
+        const raiz = document.querySelector('[data-admin-painel], [data-admin-lista]');
+        if (!raiz) return { chars: 0, transborda: 0, curtos: 0, largura: 0 };
+
+        // TRANSBORDO: qualquer elemento cuja largura de rolagem passe da largura visível.
+        // Medir só o body deixaria passar uma tabela que rola dentro de um pai escondido.
+        // ROLAR DENTRO DO PRÓPRIO CONTÊINER É PERMITIDO, e é a regra da casa para conteúdo
+        // largo. O defeito é o excedente que SAI sem rolagem: esse é o que corta conteúdo em
+        // silêncio. Um elemento cujo pai rola também não conta, porque ele já está contido.
+        let transborda = 0;
+        for (const el of raiz.querySelectorAll('*')) {
+          if (el.clientWidth === 0) continue;
+          if (el.scrollWidth <= el.clientWidth + 1) continue;
+          const meu = getComputedStyle(el).overflowX;
+          if (meu === 'auto' || meu === 'scroll') continue;
+          let contido = false;
+          for (let p = el.parentElement; p && p !== raiz.parentElement; p = p.parentElement) {
+            const o = getComputedStyle(p).overflowX;
+            if (o === 'auto' || o === 'scroll') { contido = true; break; }
+          }
+          if (!contido) transborda += 1;
+        }
+
+        // ALVO DE TOQUE: botão, link de porta e campo. Texto corrido não conta.
+        let curtos = 0;
+        for (const el of raiz.querySelectorAll('button, .adm-porta, input, select')) {
+          const r = el.getBoundingClientRect();
+          if (r.height > 0 && r.height < ${ALVO} - 0.5) curtos += 1;
+        }
+
+        return {
+          chars: (raiz.innerText || '').trim().length,
+          transborda,
+          curtos,
+          largura: Math.round(raiz.getBoundingClientRect().width),
+        };
+      `),
+    );
+
+    if (m.chars < 200) semConteudo += 1;
+    transbordos += m.transborda;
+    alvosCurtos += m.curtos;
+    console.log(
+      `  /admin/${rota.padEnd(13)}${String(m.chars).padStart(8)}${String(m.transborda).padStart(12)}${String(m.curtos).padStart(14)}`,
+    );
+  }
+
+  console.log("  ---------------------------------------------------------");
+
+  exigir(
+    semConteudo === 0,
+    "as 9 telas do Admin APARECEM na visão de app",
+    `sem conteúdo: ${semConteudo} de ${ROTAS.length}`,
+    "0 vazias",
+  );
+  exigir(
+    transbordos === 0,
+    `nada transborda dentro dos ${UTEIS}px úteis`,
+    `elementos transbordando: ${transbordos}`,
+    "0",
+  );
+  exigir(
+    alvosCurtos === 0,
+    `todo controle tem ${ALVO}px de alvo de toque`,
+    `controles abaixo de ${ALVO}px: ${alvosCurtos}`,
+    "0",
+  );
+
+  // O mapa continua sendo desenho, e não requisição.
+  await cdp.navegar(`${base}/admin/`);
+  const mapa = await cdp.avaliar(
+    naPagina(`return {
+      municipios: document.querySelectorAll('[data-municipio]').length,
+      vazios: document.querySelectorAll('[data-municipio][data-faixa="vazio"]').length,
+      externas: performance.getEntriesByType('resource')
+        .map(e => e.name)
+        .filter(u => !u.startsWith(location.origin) && !u.startsWith('data:') && !u.startsWith('blob:')).length,
+    };`),
+  );
+  exigir(
+    mapa.municipios === 645,
+    "o mapa desenha os 645 municípios",
+    `municípios: ${mapa.municipios}`,
+    "645",
+  );
+  exigir(
+    mapa.vazios === 312,
+    "e os 312 sem nenhum equipamento aparecem vazados",
+    `vazados: ${mapa.vazios}`,
+    "312",
+  );
+  exigir(
+    mapa.externas === 0,
+    "o mapa não faz requisição para fora",
+    `requisições externas: ${mapa.externas}`,
+    "0",
+  );
+
+  console.log(
+    falhas.length === 0
+      ? `\n  ${verdes} gates verdes, 0 falhas.\n`
+      : `\n  ${verdes} verdes · ${falhas.length} FALHA(S): ${falhas.join(" · ")}\n`,
+  );
+} finally {
+  await cdp?.fechar?.();
+  await servidor.fechar?.();
+}
+
+process.exitCode = falhas.length === 0 ? 0 : 1;
