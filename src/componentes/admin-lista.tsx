@@ -170,6 +170,12 @@ export function AdminLista({
               alvo={{ tipo: descricao.tipo, id: l.id, titulo: l.titulo }}
               carimbo={carimbo}
               destinos={destinos}
+              edicao={{
+                coisa: descricao.coisa,
+                resumo: l.descricao ?? "",
+                linguagens: l.linguagens ?? [],
+                rota: l.rota,
+              }}
               compacto
             />
           </li>

@@ -22,12 +22,15 @@ export function ItemComAdmin({
   destinos = [],
   /** Para onde voltar depois de apagar. */
   volta,
+  /** O que o «editar» precisa para levar à ficha do Studio desta tela. */
+  edicao,
   children,
 }: {
   alvo: Alvo;
   carimbo: string;
   destinos?: readonly { id: string; nome: string }[];
   volta: string;
+  edicao?: React.ComponentProps<typeof ControlesDeAdmin>["edicao"];
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -52,6 +55,7 @@ export function ItemComAdmin({
         alvo={alvo}
         carimbo={carimbo}
         destinos={destinos}
+        edicao={edicao}
         aoAgir={(acao) => {
           if (acao === "apagar") router.push(volta);
         }}

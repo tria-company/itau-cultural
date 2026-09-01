@@ -19,10 +19,24 @@ export const ROTULO_DA_ACAO: Record<Acao, string> = {
 };
 
 /** O que o administrador alcança. O tipo dita que controles a tira oferece. */
-export const ALVOS = ["publicacao", "comentario", "comunidade", "evento", "pessoa"] as const;
+export const ALVOS = [
+  "publicacao",
+  "comentario",
+  "comunidade",
+  "evento",
+  "pessoa",
+  /**
+   * O ITEM GENÉRICO: mídia do Play, episódio do Cast, objeto do Museu, matéria, obra.
+   *
+   * Cinco telas com a mesma necessidade não pedem cinco tipos. O que o tipo decide é o
+   * conjunto de verbos e o rótulo da frase; para todas elas os dois são iguais.
+   */
+  "item",
+] as const;
 export type TipoDeAlvo = (typeof ALVOS)[number];
 
 export const ROTULO_DO_ALVO: Record<TipoDeAlvo, string> = {
+  item: "item",
   publicacao: "publicação",
   comentario: "comentário",
   comunidade: "comunidade",

@@ -1,3 +1,4 @@
+import { ItemComAdmin } from "@/componentes/item-com-admin";
 import { Player } from "@/componentes/player";
 import { DATA_DE_REFERENCIA } from "@/dados/alerta";
 import { slugsPorTipo, vizinhos } from "@/dados/grafo";
@@ -116,7 +117,22 @@ export default async function PaginaDaMidia({ params }: { params: Promise<{ slug
   const corpo = corpoPorSlug(item.slug);
   const spotify = corpo?.spotify;
 
+  /**
+   * O PODER DO ADMINISTRADOR EM CIMA DA MÍDIA. Para quem não é administrador o invólucro é
+   * transparente e o HTML desta página não muda; para quem é, ele traz o menu de três
+   * pontinhos, e o «editar» dele leva à ficha de Play que alimenta esta tela.
+   */
   return (
+    <ItemComAdmin
+      alvo={{ tipo: "item", id: `midia:${item.slug}`, titulo: item.titulo }}
+      carimbo={DATA_DE_REFERENCIA}
+      volta="/play/"
+      edicao={{
+        pauta: "play",
+        resumo: item.resumo,
+        rota: `/play/${item.slug}/`,
+      }}
+    >
     <Player
       midia={{
         slug: item.slug,
@@ -167,5 +183,6 @@ export default async function PaginaDaMidia({ params }: { params: Promise<{ slug
       aprofunda={aprofunda}
       dataDeReferencia={DATA_DE_REFERENCIA}
     />
+    </ItemComAdmin>
   );
 }

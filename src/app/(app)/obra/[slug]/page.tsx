@@ -1,3 +1,5 @@
+import { ItemComAdmin } from "@/componentes/item-com-admin";
+import { DATA_DE_REFERENCIA } from "@/dados/alerta";
 import { CapaDeCartao } from "@/componentes/capa-sem-imagem";
 import { Grafismo } from "@/componentes/grafismo";
 import { BlocoPonte } from "@/componentes/ponte";
@@ -55,6 +57,16 @@ export default async function PaginaObra({ params }: { params: Promise<{ slug: s
   const grupos = vinculosDe(entidade.id);
 
   return (
+    <ItemComAdmin
+      alvo={{ tipo: "item", id: `obra:${entidade.slug}`, titulo: entidade.titulo }}
+      carimbo={DATA_DE_REFERENCIA}
+      volta="/museu/"
+      edicao={{
+        pauta: "museu",
+        linguagens: entidade.linguagens,
+        rota: `/obra/${entidade.slug}/`,
+      }}
+    >
     <div className="flex flex-col gap-6 p-5 desk:p-8">
       <header className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
@@ -109,5 +121,6 @@ export default async function PaginaObra({ params }: { params: Promise<{ slug: s
       </section>
 
     </div>
+    </ItemComAdmin>
   );
 }

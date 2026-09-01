@@ -1,3 +1,5 @@
+import { ItemComAdmin } from "@/componentes/item-com-admin";
+import { DATA_DE_REFERENCIA } from "@/dados/alerta";
 import type { Metadata } from "next";
 import { Materia } from "@/componentes/materia";
 import { materiaPorSlug, slugsDeMateria } from "@/dados/materias";
@@ -38,5 +40,14 @@ export default async function PaginaMateria({ params }: { params: Promise<{ slug
     );
   }
 
-  return <Materia materia={materia} />;
+  return (
+    <ItemComAdmin
+      alvo={{ tipo: "item", id: `materia:${materia.slug}`, titulo: materia.titulo }}
+      carimbo={DATA_DE_REFERENCIA}
+      volta="/noticias/"
+      edicao={{ pauta: "editorial", rota: `/materia/${materia.slug}/` }}
+    >
+      <Materia materia={materia} />
+    </ItemComAdmin>
+  );
 }

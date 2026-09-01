@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { ExposicaoPermanenteFicha } from "@/componentes/exposicao-permanente";
+import { ItemComAdmin } from "@/componentes/item-com-admin";
+import { DATA_DE_REFERENCIA } from "@/dados/alerta";
 import { EXPOSICOES_PERMANENTES, exposicaoPorSlug } from "@/dados/exposicoes-permanentes";
 import { relacionadosDaExposicao } from "@/dados/museu";
 
@@ -40,5 +42,14 @@ export default async function PaginaDaExposicao({
     );
   }
 
-  return <ExposicaoPermanenteFicha expo={expo} relacionados={relacionadosDaExposicao(expo.slug)} />;
+  return (
+    <ItemComAdmin
+      alvo={{ tipo: "item", id: `expo:${expo.slug}`, titulo: expo.titulo }}
+      carimbo={DATA_DE_REFERENCIA}
+      volta="/museu/"
+      edicao={{ pauta: "museu", rota: `/museu/${expo.slug}/` }}
+    >
+      <ExposicaoPermanenteFicha expo={expo} relacionados={relacionadosDaExposicao(expo.slug)} />
+    </ItemComAdmin>
+  );
 }

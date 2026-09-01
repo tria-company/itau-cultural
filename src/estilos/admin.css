@@ -1773,3 +1773,135 @@
   padding: 0 var(--espaco-tela) var(--espaco-tela);
   min-width: 0;
 }
+
+/* ---------------------------------------------------------------------------
+ * O GATILHO DE TRÊS PONTINHOS, e a ponte para o Studio.
+ *
+ * A TIRA ERA UMA FAIXA. Em cima de um item ela tomava a largura da tela para
+ * oferecer um menu, e no evento virava uma banda laranja vazia com «ADMIN» de
+ * um lado e «Ações» do outro. O gesto é o mesmo e cabe num botão redondo.
+ * ------------------------------------------------------------------------- */
+
+/* O BOTÃO É REDONDO E DISCRETO. Ele fica em cima do conteúdo da tela, não do
+   quadro do administrador: um retângulo com borda forte competia com o título do
+   item logo abaixo. Redondo, do tamanho do alvo de toque, e com a cor da ação
+   só quando a mão chega nele. */
+.adm-gatilho {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  border-color: var(--cor-borda);
+  color: var(--cor-tinta-2);
+  box-shadow: var(--sombra-1);
+}
+
+.adm-gatilho:hover:not(:disabled) {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+.adm-gatilho[aria-expanded="true"] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+}
+
+/* Os três pontos, feitos de sombra: um elemento, três marcas, nenhuma imagem e
+   nenhum caractere, que dependeria da fonte instalada para ficar alinhado. */
+.adm-gatilho-pontos {
+  display: block;
+  width: 0.1875rem;
+  height: 0.1875rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow:
+    0 -0.375rem 0 currentColor,
+    0 0.375rem 0 currentColor;
+}
+
+/* Em cima de um item a tira não é mais faixa: é o botão, encostado à direita. */
+.adm:not(.adm-compacto) {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.adm:not(.adm-compacto) > .adm-linha {
+  justify-content: flex-end;
+}
+
+.adm-compacto .adm-gatilho {
+  box-shadow: none;
+}
+
+.adm-sem-ficha {
+  margin: 0;
+  max-width: 32rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+/* ---- A tela da ponte ---- */
+.adm-ponte {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 34rem;
+  padding: 1.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+
+.adm-ponte-passo {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-acao-tinta);
+}
+
+.adm-ponte-titulo {
+  margin: 0;
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.adm-ponte-onde {
+  margin: 0;
+  font-size: var(--tipo-detalhe);
+  color: var(--cor-tinta-2);
+}
+
+/* A ADOÇÃO É DECLARADA. Criar registro é gravar no armazém do produtor, e um
+   gesto do admin que aparece calado na lista de outro perfil é o que ninguém
+   entende três telas depois. */
+.adm-ponte-aviso {
+  margin: 0.25rem 0 0.5rem;
+  font-size: var(--tipo-detalhe);
+  line-height: 1.5;
+  color: var(--cor-tinta-2);
+}
+
+.adm-ponte[data-ponte="adotou"] .adm-ponte-aviso {
+  padding: 0.75rem 0.875rem;
+  border-inline-start: 3px solid var(--cor-acao);
+  border-radius: var(--raio-p);
+  background: var(--cor-acao-lavada);
+}
