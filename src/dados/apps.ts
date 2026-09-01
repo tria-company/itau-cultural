@@ -428,7 +428,7 @@ export const ATALHOS_BASTIDOR: readonly AtalhoDeBastidor[] = [
     soWeb: true,
   },
   {
-    href: "/admin/papeis",
+    href: "/admin",
     rotulo: "Administração",
     descricao: "Governança: motor, território, vocabulário e auditoria",
     superficie: "/admin",

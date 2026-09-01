@@ -165,16 +165,26 @@ export interface Fatia {
   cor: string;
 }
 
+/**
+ * Uma cobertura do acervo, de 0 a 100.
+ *
+ * O DETALHE NAO E ENFEITE: «68%» sozinho nao diz de quantos, e a casa exige denominador.
+ */
+export interface Medida {
+  id: string;
+  porcento: number;
+  rotulo: string;
+  detalhe: string;
+}
+
 export interface PainelDaPlataforma {
   numeros: Numero[];
   /** De onde veio cada coisa do acervo. */
   procedencia: Fatia[];
   /** As classes com mais peso, para a barra. */
   porClasse: { rotulo: string; valor: number }[];
-  /** Quanto do acervo declara acessibilidade, medido. */
-  acessibilidade: { porcento: number; rotulo: string };
-  /** Quanto tem imagem própria. */
-  imagem: { porcento: number; rotulo: string };
+  /** O quanto o acervo cobre cada coisa. Toda medida traz o denominador. */
+  cobertura: Medida[];
   desertos: ReturnType<typeof montarDesertos>;
   viewBox: string;
   contorno: string;
@@ -201,6 +211,31 @@ function porcento(parte: number, todo: number): number {
   return todo === 0 ? 0 : Math.round((parte / todo) * 100);
 }
 
+/**
+ * O nome de cada classe da ontologia, no plural.
+ *
+ * ELE NÃO SAI DE `cidade.ts` nem de `filtros.ts`, que já têm mapas parecidos, porque os
+ * dois são parciais e nenhum cobre as quatorze: falta `ocorrencia`, `midia`, `termo` e
+ * `temporada`, que são justamente as que o acervo tem mais. Importar um mapa que devolve a
+ * chave crua em metade dos casos seria pior que declarar as quatorze aqui.
+ */
+const PLURAL_DA_CLASSE: Record<string, string> = {
+  pessoa: "Pessoas",
+  coletivo: "Coletivos",
+  instituicao: "Instituições",
+  espaco: "Espaços",
+  obra: "Obras",
+  termo: "Termos",
+  programa: "Programas",
+  evento: "Eventos",
+  temporada: "Temporadas",
+  ocorrencia: "Ocorrências",
+  conteudo: "Conteúdos",
+  midia: "Mídias",
+  publicacao: "Publicações",
+  formacao: "Formações",
+};
+
 export function oPainel(): PainelDaPlataforma {
   const c = contagens();
   const totalDeNos = META.totais.entidades;
@@ -209,7 +244,6 @@ export function oPainel(): PainelDaPlataforma {
   const publicacoes = PUBLICACOES.length + PUBLICACOES_DO_ACERVO.length;
   const ficha = META.fichaDeAcessibilidade;
   const declaram = typeof ficha?.declaram === "number" ? ficha.declaram : 0;
-  const imagens = META.cobertura.imagens.presentes;
   const comImagem = META.cobertura.entidadesComImagemLocal;
 
   const numeros: Numero[] = [
@@ -219,19 +253,11 @@ export function oPainel(): PainelDaPlataforma {
     { id: "pessoas", rotulo: "Pessoas", valor: comSeparador(c.porClasse.pessoa ?? 0), de: "" },
     { id: "comunidades", rotulo: "Comunidades", valor: comSeparador(comunidades), de: "" },
     { id: "publicacoes", rotulo: "Publicações", valor: comSeparador(publicacoes), de: "" },
-    {
-      id: "coordenada",
-      rotulo: "Com lugar no mapa",
-      valor: comSeparador(META.cobertura.coordenadas.comCoordenada),
-      de: comSeparador(totalDeNos),
-    },
-    {
-      id: "imagem",
-      rotulo: "Com imagem",
-      valor: comSeparador(comImagem),
-      de: comSeparador(totalDeNos),
-    },
   ];
+  // SEIS, E NAO OITO. Os dois que sairam eram «472 de 7.810» e «5.912 de 7.810»: parte de um
+  // todo, que e exatamente o que um medidor mostra melhor que um numero solto. Eles nao
+  // sumiram, desceram para a faixa de cobertura, com o denominador que a casa exige. O que
+  // fica aqui e contagem pura, e seis caixas iguais fecham a grade sem sobra.
 
   const procedencia: Fatia[] = Object.entries(META.porProcedencia).map(([k, v]) => ({
     rotulo: ROTULO_DA_PROCEDENCIA_CURTO[k] ?? k,
@@ -239,10 +265,12 @@ export function oPainel(): PainelDaPlataforma {
     cor: COR_DA_PROCEDENCIA[k] ?? "var(--cor-tinta-3)",
   }));
 
-  // CINCO, E NÃO OITO. Medido em 390px: com oito barras cada rótulo fica com 31px e as
-  // palavras transbordam a barra. O corte está declarado na tela.
+  // CINCO, E NÃO AS QUATORZE. Cinco barras cabem sem apertar em 370px, e o corte está
+  // declarado na tela. O RÓTULO É O DA CASA, e não a chave: «midia» e «ocorrencia» são
+  // nomes de campo, e um painel que mostra nome de campo está mostrando o banco em vez do
+  // acervo.
   const porClasse = Object.entries(c.porClasse)
-    .map(([k, v]) => ({ rotulo: k, valor: v as number }))
+    .map(([k, v]) => ({ rotulo: PLURAL_DA_CLASSE[k] ?? k, valor: v as number }))
     .sort((a, b) => b.valor - a.valor)
     .slice(0, 5);
 
@@ -250,14 +278,28 @@ export function oPainel(): PainelDaPlataforma {
     numeros,
     procedencia,
     porClasse,
-    acessibilidade: {
-      porcento: porcento(declaram, totalDeNos),
-      rotulo: `${comSeparador(declaram)} de ${comSeparador(totalDeNos)} declaram acessibilidade`,
-    },
-    imagem: {
-      porcento: porcento(imagens, imagens),
-      rotulo: `${comSeparador(imagens)} imagens no disco, nenhuma faltando`,
-    },
+    // TRES MEDIDAS, E AS TRES VARIAM. A anterior media `imagens / imagens`, que da 100%
+    // por construcao: um medidor cheio que nao podia esvaziar nao media nada.
+    cobertura: [
+      {
+        id: "acessibilidade",
+        porcento: porcento(declaram, totalDeNos),
+        rotulo: "Declaram acessibilidade",
+        detalhe: `${comSeparador(declaram)} de ${comSeparador(totalDeNos)}`,
+      },
+      {
+        id: "imagem",
+        porcento: porcento(comImagem, totalDeNos),
+        rotulo: "Têm imagem própria",
+        detalhe: `${comSeparador(comImagem)} de ${comSeparador(totalDeNos)}`,
+      },
+      {
+        id: "coordenada",
+        porcento: porcento(META.cobertura.coordenadas.comCoordenada, totalDeNos),
+        rotulo: "Têm lugar no mapa",
+        detalhe: `${comSeparador(META.cobertura.coordenadas.comCoordenada)} de ${comSeparador(totalDeNos)}`,
+      },
+    ],
     desertos: montarDesertos(),
     viewBox: LIMITES.viewBox,
     contorno: CONTORNO_DO_BRASIL.d,

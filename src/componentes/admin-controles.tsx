@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { usePoderDeAdmin, type Alvo } from "@/componentes/admin-estado";
 import {
   ROTULO_DA_ACAO,
@@ -11,14 +11,19 @@ import {
 } from "@/dados/admin-acoes";
 
 /**
- * admin-controles.tsx, o que o administrador pode fazer com o item que está na tela.
+ * admin-controles.tsx, o que o administrador pode fazer com o item que esta na tela.
  *
- * ELE USA O MESMO APLICATIVO. Não existe console de governança: o administrador abre a
- * publicação, o evento ou a comunidade como qualquer pessoa, e ganha esta tira em cima do
- * item. Quem não é administrador não a vê, e a tela é idêntica à de todo mundo.
+ * ELE USA O MESMO APLICATIVO. Nao existe console de governanca: o administrador abre a
+ * publicacao, o evento ou a comunidade como qualquer pessoa, e ganha esta tira em cima do
+ * item. Quem nao e administrador nao a ve, e a tela e identica a de todo mundo.
  *
- * A TIRA É CURTA DE PROPÓSITO. Cinco verbos e um campo. Nada de explicação: quem chegou
- * aqui sabe o que suspender significa.
+ * AGORA E UM MENU, e nao mais uma fileira de botoes. A fileira funcionava em cima de um
+ * item, onde ela aparece uma vez; numa lista de trezentas linhas ela aparecia trezentas
+ * vezes, quatro verbos por linha, e o que o olho via era ruido em vez de conteudo. O
+ * gatilho e um so, o verbo esta a um toque, e a linha volta a ser sobre a coisa listada.
+ *
+ * ELE FECHA POR FORA E PELO ESC, que e o minimo que um menu sobreposto deve. Sem isso,
+ * abrir o segundo deixaria o primeiro aberto atras dele.
  */
 
 const ACOES_POR_TIPO: Record<string, Acao[]> = {
@@ -26,13 +31,16 @@ const ACOES_POR_TIPO: Record<string, Acao[]> = {
   comentario: ["suspender", "apagar"],
   comunidade: ["editar", "suspender", "apagar"],
   evento: ["editar", "mover", "suspender", "apagar"],
-  pessoa: ["suspender"],
+  pessoa: ["editar", "suspender"],
 };
+
+/** Os verbos que tiram algo do ar ganham tratamento visual proprio no menu. */
+const GRAVES: readonly Acao[] = ["suspender", "apagar"];
 
 export function ControlesDeAdmin({
   alvo,
   carimbo,
-  /** Os destinos possíveis de `mover`, quando o tipo aceita. */
+  /** Os destinos possiveis de `mover`, quando o tipo aceita. */
   destinos = [],
   aoAgir,
   compacto = false,
@@ -41,14 +49,35 @@ export function ControlesDeAdmin({
   carimbo: string;
   destinos?: readonly { id: string; nome: string }[];
   aoAgir?: (acao: Acao) => void;
-  /** Numa lista a tira perde a moldura e a marca: são dezenas por tela, e a moldura
-   *  repetida vira ruído. Em cima de um item ela precisa se destacar do conteúdo. */
+  /** Numa lista a tira perde a moldura e a marca: sao dezenas por tela, e a moldura
+   *  repetida vira ruido. Em cima de um item ela precisa se destacar do conteudo. */
   compacto?: boolean;
 }) {
   const poder = usePoderDeAdmin(carimbo);
+  const [menu, definirMenu] = useState(false);
   const [aberta, definirAberta] = useState<Acao | null>(null);
   const [motivo, definirMotivo] = useState("");
   const [destino, definirDestino] = useState("");
+  const caixa = useRef<HTMLDivElement>(null);
+  const idDoMenu = useId();
+
+  useEffect(() => {
+    if (!menu) return;
+
+    function noDocumento(e: MouseEvent) {
+      if (caixa.current && !caixa.current.contains(e.target as Node)) definirMenu(false);
+    }
+    function naTecla(e: KeyboardEvent) {
+      if (e.key === "Escape") definirMenu(false);
+    }
+
+    document.addEventListener("mousedown", noDocumento);
+    document.addEventListener("keydown", naTecla);
+    return () => {
+      document.removeEventListener("mousedown", noDocumento);
+      document.removeEventListener("keydown", naTecla);
+    };
+  }, [menu]);
 
   if (!poder.ehAdmin) return null;
 
@@ -66,13 +95,14 @@ export function ControlesDeAdmin({
     aoAgir?.(acao);
   }
 
-  function abrir(acao: Acao) {
-    // Reativar não tira nada do ar e não pede nada. Vai direto.
+  function escolher(acao: Acao) {
+    definirMenu(false);
+    // Reativar nao tira nada do ar e nao pede nada. Vai direto.
     if (acao === "reativar") {
       agir(acao);
       return;
     }
-    definirAberta(aberta === acao ? null : acao);
+    definirAberta(acao);
     definirMotivo("");
     definirDestino("");
   }
@@ -96,19 +126,42 @@ export function ControlesDeAdmin({
             Suspenso
           </span>
         ) : null}
-        {!apagado &&
-          disponiveis.map((a) => (
+
+        {!apagado && (
+          <div className="adm-menu-caixa" ref={caixa}>
             <button
-              key={a}
               type="button"
-              className="adm-botao"
-              data-acao={a}
-              data-aberta={aberta === a ? "sim" : "nao"}
-              onClick={() => abrir(a)}
+              className="adm-botao adm-gatilho"
+              data-menu-de={alvo.id}
+              aria-haspopup="menu"
+              aria-expanded={menu}
+              aria-controls={menu ? idDoMenu : undefined}
+              onClick={() => definirMenu((a) => !a)}
             >
-              {ROTULO_DA_ACAO[a]}
+              Ações
+              <span className="adm-gatilho-seta" aria-hidden="true" />
             </button>
-          ))}
+
+            {menu && (
+              <ul className="adm-menu" id={idDoMenu} role="menu" data-menu-aberto={alvo.id}>
+                {disponiveis.map((a) => (
+                  <li key={a} role="none">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="adm-menu-item"
+                      data-acao={a}
+                      data-grave={GRAVES.includes(a) ? "sim" : "nao"}
+                      onClick={() => escolher(a)}
+                    >
+                      {ROTULO_DA_ACAO[a]}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
 
       {aberta && (
@@ -156,7 +209,7 @@ export function ControlesDeAdmin({
           <div className="adm-linha">
             <button
               type="button"
-              className="adm-botao"
+              className="adm-botao adm-botao-forte"
               data-confirmar={aberta}
               disabled={falta.length > 0}
               onClick={() => agir(aberta)}

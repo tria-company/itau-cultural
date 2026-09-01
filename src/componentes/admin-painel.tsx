@@ -2,22 +2,25 @@
 
 import Link from "next/link";
 import { usePoderDeAdmin } from "@/componentes/admin-estado";
-import { BarrasVerticais, LegendaDaRosca, Medidor, Rosca } from "@/componentes/base/graficos";
+import { BarrasDoAdmin, MedidorDoAdmin, RoscaDoAdmin } from "@/componentes/admin-graficos";
 import { ROTULO_DA_ACAO, ROTULO_DO_ALVO } from "@/dados/admin-acoes";
 import type { DescricaoDaCoisa, PainelDaPlataforma } from "@/dados/admin-area";
 
 /**
- * admin-painel.tsx, como a plataforma está e onde ela chega.
+ * admin-painel.tsx, como a plataforma esta e onde ela chega.
  *
- * A MESMA GRAMÁTICA DO PAINEL DO PRODUTOR, com o recorte trocado: lá são os registros de
- * quem produz, aqui é a plataforma inteira. Rosca, barras e medidor vêm de `base/graficos`,
- * para as duas superfícies não desenharem a mesma coisa de jeitos diferentes.
+ * A TELA TEM QUATRO FAIXAS, e a ordem e a da pergunta: quanta coisa existe, de que ela e
+ * feita, ate onde ela chega, e o que fazer com ela. Antes era uma pilha de cartoes de
+ * tamanhos diferentes sem essa ordem, e ler exigia adivinhar o que era resumo e o que era
+ * detalhe.
  *
- * TODO NÚMERO COM DENOMINADOR quando ele é parte de um todo. «472 com lugar no mapa» sozinho
- * não diz nada; «472 de 7.810» diz.
+ * TODO NUMERO COM DENOMINADOR quando ele e parte de um todo. As seis caixas de cima sao
+ * contagem pura; o que e parte de um todo desceu para os medidores, onde o denominador
+ * cabe embaixo em vez de quebrar a linha do titulo.
  *
- * O MAPA É O DIAGNÓSTICO, e não enfeite: 312 dos 645 municípios de São Paulo não têm nenhum
- * equipamento cultural mapeado, quase metade do estado. Ele chega pronto do servidor.
+ * O MAPA E O DIAGNOSTICO, e nao enfeite: 312 dos 645 municipios de Sao Paulo nao tem
+ * nenhum equipamento cultural mapeado, quase metade do estado. Ele chega pronto do
+ * servidor e ocupa a faixa inteira, porque a leitura dele depende do tamanho.
  */
 export function AdminPainel({
   painel,
@@ -29,8 +32,13 @@ export function AdminPainel({
   area: DescricaoDaCoisa[];
   carimbo: string;
   /**
-   * O MAPA CHEGA PRONTO, do servidor. São 645 caminhos e 167 KB: passá-los como dado
-   * obrigaria o navegador a remontar o que o build já desenhou. Aqui ele é marcação.
+   * O MAPA VEM DO SERVIDOR JA RESOLVIDO. Sao 645 caminhos e 2.503 pontos: passa-los como
+   * dado obrigaria o navegador a projetar de novo o que o build ja projetou. Aqui ele e
+   * marcacao pronta, e nenhuma requisicao de rede acontece por causa dele.
+   *
+   * O NAVEGADOR AINDA MONTA OS NOS, porque este componente e de cliente e devolve `null`
+   * ate saber se quem abriu e administrador. O custo que fica e de montagem, nao de rede
+   * nem de calculo.
    */
   mapa: React.ReactNode;
 }) {
@@ -46,59 +54,54 @@ export function AdminPainel({
     );
   }
 
+  const totalDaProcedencia = painel.procedencia.reduce((a, f) => a + f.valor, 0);
+
   return (
     <div className="adm-painel" data-admin-painel>
-      {/* Os números da plataforma. */}
+      {/* 1. Quanta coisa existe. */}
       <ul className="adm-numeros" data-numeros={painel.numeros.length}>
         {painel.numeros.map((n) => (
           <li key={n.id} className="adm-numero" data-numero={n.id}>
             <span className="adm-numero-valor">{n.valor}</span>
-            <span className="adm-numero-rotulo">
-              {n.rotulo}
-              {n.de ? <em className="adm-numero-de"> de {n.de}</em> : null}
-            </span>
+            <span className="adm-numero-rotulo">{n.rotulo}</span>
           </li>
         ))}
       </ul>
 
+      {/* 2. De que ela é feita. */}
       <div className="adm-cartoes">
         <section className="adm-cartao" data-cartao="procedencia">
           <h2 className="adm-titulo">De onde veio o acervo</h2>
-          <div className="adm-rosca">
-            <Rosca
-              fatias={painel.procedencia}
-              centroValor={String(painel.procedencia.reduce((a, f) => a + f.valor, 0))}
-              centroRotulo="entidades"
-            />
-            <LegendaDaRosca fatias={painel.procedencia} />
-          </div>
+          <RoscaDoAdmin
+            fatias={painel.procedencia}
+            centro={totalDaProcedencia.toLocaleString("pt-BR")}
+            rotuloDoCentro="entidades"
+          />
         </section>
 
         <section className="adm-cartao" data-cartao="classes">
           <h2 className="adm-titulo">O que o acervo tem mais</h2>
-          <BarrasVerticais barras={painel.porClasse} />
+          <BarrasDoAdmin barras={painel.porClasse} />
         </section>
 
         <section className="adm-cartao" data-cartao="cobertura">
           <h2 className="adm-titulo">Cobertura</h2>
           <div className="adm-medidores">
-            <Medidor
-              porcento={painel.acessibilidade.porcento}
-              rotulo={painel.acessibilidade.rotulo}
-            />
-            <Medidor porcento={painel.imagem.porcento} rotulo={painel.imagem.rotulo} />
+            {painel.cobertura.map((m) => (
+              <MedidorDoAdmin key={m.id} medida={m} />
+            ))}
           </div>
         </section>
       </div>
 
-      {/* O mapa de uso. */}
+      {/* 3. Até onde ela chega. */}
       <section className="adm-cartao adm-cartao-largo" data-cartao="mapa">
         <h2 className="adm-titulo">Equipamentos culturais por município</h2>
         {mapa}
       </section>
 
-      {/* As portas para administrar. */}
-      <section data-cartao="portas">
+      {/* 4. O que fazer com ela. */}
+      <section className="adm-secao" data-cartao="portas">
         <h2 className="adm-titulo">Administrar</h2>
         <ul className="adm-grade" data-coisas={area.length}>
           {area.map((c) => (
@@ -112,8 +115,7 @@ export function AdminPainel({
         </ul>
       </section>
 
-      {/* O que ele fez. */}
-      <section className="adm-feito" data-registro={poder.registro.length}>
+      <section className="adm-secao adm-feito" data-registro={poder.registro.length}>
         <h2 className="adm-titulo">O que você fez</h2>
         {poder.registro.length === 0 ? (
           <p className="adm-vazio">Nada ainda.</p>
@@ -122,7 +124,9 @@ export function AdminPainel({
             <ul className="adm-registro">
               {poder.registro.slice(0, 8).map((r, i) => (
                 <li key={`${r.alvo}-${i}`} data-linha-do-registro={r.acao}>
-                  <span className="adm-registro-acao">{ROTULO_DA_ACAO[r.acao]}</span>
+                  <span className="adm-registro-acao" data-acao-feita={r.acao}>
+                    {ROTULO_DA_ACAO[r.acao]}
+                  </span>
                   <span className="adm-registro-alvo">
                     {ROTULO_DO_ALVO[r.tipo]}: {r.titulo}
                   </span>

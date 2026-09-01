@@ -1,261 +1,32 @@
 /* ---------------------------------------------------------------------------
- * admin.css — a superfície de Admin (funcionalidades 87 a 100, mais a 169).
+ * admin.css, a superfície de Administração.
  *
- * DE QUEM É: S1 · Admin, onda 2. Nasceu na tarefa 1, sozinha no commit, porque
- * `globals.css` é o único arquivo que as seis sessões tocariam e a linha do
- * `@import` precisa entrar antes de qualquer tela.
+ * O QUE ELA É HOJE. O administrador usa o MESMO aplicativo de todo mundo e ganha
+ * poder por cima dos itens: editar, mover, suspender, reativar e apagar. Não há
+ * console de governança. Esta folha veste três coisas, e só elas: a tira de
+ * ações que entra em cima de um item, o painel da plataforma, e as listas onde
+ * ele acha o que não está vendo.
  *
- * O QUE ELA COBRE, E SÓ ISSO. O bloco de parâmetro: o valor à esquerda e a
- * medição que o justifica à direita, sempre visível. É o inverso do painel de
- * administração comum, onde o número aparece sozinho — e o inverso é o ponto da
- * sessão. Um botão que muda um número sem dizer o que o número custa é o oposto
- * do que esta proposta defende.
+ * O CONSOLE SAIU DAQUI. Doze famílias `.admin-*` vestiam dez telas de governança
+ * que foram apagadas, e continuavam ocupando 223 linhas sem um só uso em TSX.
  *
- * O QUE ELA NÃO COBRE, DE PROPÓSITO. Superfície, cabeçalho, painel, tabela
- * densa, pastilha de contagem, valor monoespaçado, botões e a caixa de
- * declaração honesta já existem em `studio.css`, e as duas colunas, a coluna
- * fixa e o denominador em `web.css`. As telas do Admin consomem aquelas classes
- * em vez de ganharem cópias com outro prefixo — é o reuso da casa, o mesmo que
- * `moderacao.css` declara no seu topo.
+ * ELA NÃO É MAIS SÓ WEB. A Administração abre no telefone, e `medidas.mjs` a
+ * declara `visivel-no-app`. Toda regra de layout aqui tem as duas visões: o
+ * trilho deita, a grade encolhe, e nenhum controle fica abaixo de 44px.
  *
- * A DECLARAÇÃO DE «NÃO MEDIDO» REUSA `.studio-nao-sustenta`. A caixa é a mesma
- * família de honestidade: lá é o acervo que não sustenta um indicador, aqui é o
- * custo de um parâmetro que ninguém mediu. O que muda é o rótulo, que vem do
- * TSX, e não a caixa.
- *
- * SÓ NA VISÃO WEB. O layout de `(bastidor)` esconde o conteúdo na visão app e
- * mostra o aviso de superfície (D-67); por isso não há aqui regra nenhuma sob
- * `[data-view="mobile"]`.
+ * O QUE ELA NÃO COBRE, DE PROPÓSITO. Superfície, cabeçalho, tabela densa e
+ * botões existem em `studio.css`, e as telas do Admin consomem aquelas classes
+ * em vez de ganharem cópias. O que diverge mora aqui, escopado na superfície:
+ * mexer em `studio.css` moveria Moderação, Redação e Organização, que são mesa
+ * de trabalho por decisão e não pediram nada.
  *
  * REGRAS DA CASA:
  *  - NUNCA importe esta folha de um componente. O único `import` de CSS do
  *    projeto é `src/app/layout.tsx → ./globals.css`.
  *  - Nenhum hex: `var(--ic-*)`, token semântico e `color-mix` (D-06, D-08).
- *  - Medida em múltiplo de 0.25rem; px só como detalhe físico de borda.
+ *  - Medida em múltiplo de 0.25rem; px só como detalhe físico de borda, e como
+ *    unidade de usuário dentro de um `viewBox`, onde rem não escalaria junto.
  * ------------------------------------------------------------------------- */
-
-/* ---------------------------------------------------------------------------
- * O bloco de parâmetro — valor à esquerda, medição à direita.
- *
- * FLEX COM QUEBRA, E NÃO GRADE COM CONSULTA DE LARGURA. O valor é curto («0,65»,
- * «60», «20», «1 por feed») e a justificativa é longa: duas colunas de `1fr`
- * fariam o número crescer até o tamanho do argumento e a leitura perderia o
- * ponto de entrada. A esquerda pede 14rem, a direita pede 24rem, e quando as
- * duas não cabem a medição quebra para a própria linha — as duas passam a
- * ocupar a largura inteira, na ordem do DOM, que já é a ordem da leitura.
- *
- * O container nomeado `canvas` de `web.css` NÃO alcança aqui: ele é declarado
- * em `[data-view="web"] main`, e o `main` mora no layout de `(app)`. As rotas de
- * `(bastidor)` não têm um. Uma `@container` neste arquivo nunca casaria, e a
- * regra de dentro seria morta em silêncio — que é o pior tipo de regra.
- * ------------------------------------------------------------------------- */
-
-.admin-parametro {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-g);
-  background: var(--cor-superficie);
-}
-
-/* A esquerda: o nome do parâmetro, o valor, e o que ele decide. */
-.admin-parametro-valor {
-  display: flex;
-  flex: 0 1 14rem;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-/* Tabular de propósito: os quatro parâmetros são lidos em coluna, um embaixo do
- * outro, e algarismo de largura variável desalinha a comparação. */
-.admin-parametro-numero {
-  font-family: var(--fonte-display);
-  font-size: var(--tipo-titulo-1);
-  font-weight: 700;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-
-.admin-parametro-decide {
-  font-size: var(--tipo-detalhe);
-  line-height: 1.5;
-  color: var(--cor-tinta-2);
-}
-
-/* A direita: a medição. Nunca colapsa em «ver detalhes» — a justificativa que
- * precisa de um clique para aparecer é, na prática, um número solto. */
-.admin-medicao {
-  display: flex;
-  flex: 1 1 24rem;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-  /* A MEDIDA DE LEITURA, e não a largura disponível. A mesma 78ch de `.studio-nota`, e pelo
-   * mesmo motivo: num monitor largo a coluna chegava a 1.100px, o texto quebrava aos 610 e a
-   * régua da barra de ações atravessava um terço vazio — a caixa parecia ter esquecido uma
-   * restrição. O cartão continua ocupando a largura da superfície; o conteúdo dele, não. */
-  max-width: 78ch;
-}
-
-/* A alternativa medida e recusada, com o que ela custaria e o que ganharia.
- * Borda à esquerda e não caixa cheia: ela é o contraponto do valor atual, e uma
- * segunda caixa da mesma força faria as duas parecerem opções empatadas. */
-.admin-alternativa {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.25rem 0.75rem;
-  padding: 0.75rem 0 0.75rem 0.75rem;
-  border-left: 3px solid var(--cor-borda-forte);
-  font-size: var(--tipo-detalhe);
-  line-height: 1.5;
-}
-
-.admin-alternativa-rotulo {
-  font-weight: 600;
-  color: var(--cor-tinta-2);
-  white-space: nowrap;
-}
-
-.admin-alternativa-valor {
-  overflow-wrap: anywhere;
-}
-
-/* O ganho zero é o achado do limiar: dobrar a fila e capturar nenhum clone a
- * mais. Ele precisa ler como resultado, não como campo vazio. */
-.admin-alternativa-nulo {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---------------------------------------------------------------------------
- * O campo de escrita — o único lugar desta superfície onde se digita.
- *
- * Existe porque a primeira versão usou só `.studio-literal`, que dá fonte e nada
- * mais: na tela, o campo preenchido ficava idêntico a um trecho de texto fixo, e
- * quem fosse mudar um parâmetro não tinha como saber onde clicar. Um campo sem
- * moldura não é um campo — é uma afirmação com cursor.
- *
- * Monoespaçado porque o que se digita aqui é valor de parâmetro e motivo curto, e
- * o valor é comparado caractere a caractere com o que está na tela ao lado.
- * ------------------------------------------------------------------------- */
-
-.admin-campo {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--cor-borda-forte);
-  border-radius: var(--raio-m);
-  background: var(--cor-superficie);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: var(--tipo-detalhe);
-  line-height: 1.45;
-}
-
-.admin-campo:focus-visible {
-  outline: 2px solid var(--cor-acao);
-  outline-offset: 1px;
-}
-
-/* ---------------------------------------------------------------------------
- * A tabela de concentradores — a única que precisa de coluna de rótulo larga.
- *
- * `.studio-linha` fixa a primeira coluna em 11rem, que serve para «Título» ou
- * «Espaço». Aqui o rótulo é um id — `linguagem:cms:artes-visuais` —, e a 11rem
- * ele quebrava no meio da palavra: `linguagem:cms:teat` / `ro`. Um id partido em
- * duas linhas derrota o motivo de ele ser monoespaçado, que é ser comparado
- * caractere a caractere.
- *
- * LARGURA FIXA, E NÃO `max-content`. Com `max-content` cada linha é uma grade
- * própria e dimensiona a coluna pelo seu próprio id: os ids param de quebrar, mas
- * as contagens passam a começar em x diferente a cada linha, e uma tabela de
- * comparação com a coluna de números serrilhada é pior do que a quebra que ela
- * consertou. 19rem cabe o maior id do acervo de hoje; um id maior amanhã quebra em
- * duas linhas, com a coluna ainda alinhada — que é a degradação certa.
- *
- * `studio.css` não é tocada: ela é da S7, e o ajuste é desta tela.
- * ------------------------------------------------------------------------- */
-
-.admin-concentradores .studio-linha {
-  grid-template-columns: 19rem 1fr;
-}
-
-/* A ação dentro de uma linha de tabela.
- *
- * `.studio-acoes` é o RODAPÉ de um painel: ela traz `border-top` e respiro para separar as
- * decisões do conteúdo acima. Dentro de uma célula, aquela régua atravessa a linha inteira e
- * lê como separador de registro — na tabela de candidatos, doze linhas ganharam doze traços
- * que não separavam nada. O botão em linha não precisa de moldura própria; precisa de
- * distância do texto ao lado. */
-
-.admin-acao-em-linha {
-  margin-top: 0.25rem;
-  margin-left: 0.5rem;
-  padding: 0.25rem 0.75rem;
-}
-
-/* A tabela de procedência tem TRÊS colunas — rótulo, nós, ligações —, e `.studio-linha` só
- * conhece duas. As duas contagens precisam ficar lado a lado para a comparação que a tabela
- * existe para permitir: 61,8% dos nós e 22,4% das ligações vindos da mesma fonte é o
- * contraste que conta a história do acervo. */
-
-.admin-procedencia .studio-linha {
-  grid-template-columns: 12rem 1fr 1fr;
-}
-
-/* As tabelas de três e de quatro colunas desta superfície.
- *
- * `.studio-linha` conhece duas — rótulo e valor. A matriz de autoria precisa de quatro
- * (elemento, escreve, aprova, contagem) e as tabelas de nível e procedência de três: o
- * contraste entre as colunas É o conteúdo, e empilhá-las em duas o desfaz. */
-
-.admin-niveis .studio-linha {
-  grid-template-columns: 14rem 1fr 12rem;
-}
-
-.admin-matriz .studio-linha {
-  grid-template-columns: 20rem 12rem 10rem 1fr;
-}
-
-/* A aresta impressa — `pessoa —[modera, escopo=PA]→ plataforma`. Ela é a forma do modelo,
- * não um exemplo de código: merece o tamanho de um valor, não o de uma legenda. */
-
-.admin-aresta {
-  font-size: var(--tipo-corpo);
-  line-height: 1.4;
-}
-
-/* O formulário de concessão.
- *
- * LARGURA MÁXIMA, e não a da superfície. Um campo de texto de 1.350px é desenho ruim por
- * dois motivos: o olho perde a linha de base entre o rótulo e o começo do que foi digitado,
- * e a largura promete um parágrafo onde cabe um nome. 46rem é o mesmo teto de leitura do
- * resto da tela, aplicado ao ato de escrever.
- *
- * `align-items: flex-start` para o botão de enviar não esticar junto com os campos: botão
- * do tamanho da coluna lê como faixa, não como ação. */
-
-.admin-formulario {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  max-width: 46rem;
-}
-
-/* O rótulo de um grupo de campos precisa de ar acima dele: sem isso, «Escopo — os três
- * eixos» cola no campo anterior e parece legenda dele, não título do que vem depois. */
-.admin-formulario .studio-rotulo {
-  margin-top: 0.75rem;
-}
-
-/* A trilha: ação, alvo, motivo, autor. Quatro colunas porque as quatro perguntas de uma
- * auditoria são «o quê», «em quê», «por quê» e «quem» — juntar duas delas numa coluna
- * obrigaria quem lê a separá-las de novo, linha a linha. */
-
-.admin-trilha .studio-linha {
-  grid-template-columns: 14rem 1fr 16rem 16rem;
-}
 
 /* ---------------------------------------------------------------------------
  * A TIRA DO ADMINISTRADOR, que aparece em cima do item dentro do aplicativo.
@@ -389,31 +160,287 @@
 }
 
 /* ---------------------------------------------------------------------------
- * O PAINEL DA PLATAFORMA, e as listas onde se age.
+ * O MENU DE AÇÕES, que substituiu a fileira de botões.
+ *
+ * A FILEIRA FUNCIONAVA EM CIMA DE UM ITEM, onde ela aparece uma vez. Numa lista
+ * de trezentas linhas ela aparecia trezentas vezes, quatro verbos por linha, e o
+ * que o olho via era ruído em vez de conteúdo. O gatilho passou a ser um só.
+ *
+ * ELE ANCORA NA CAIXA, e não na janela: `fixed` fora do `.canto` é proibido
+ * (D-03) e escaparia da moldura do telefone. `absolute` contra a caixa relativa
+ * acompanha a rolagem, que é o que se espera de um menu preso a uma linha.
+ * --------------------------------------------------------------------------- */
+
+.adm-menu-caixa {
+  position: relative;
+  margin-inline-start: auto;
+}
+
+.adm-gatilho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.adm-gatilho-seta {
+  width: 0;
+  height: 0;
+  border-inline: 0.25rem solid transparent;
+  border-top: 0.3125rem solid currentColor;
+}
+
+.adm-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.25rem);
+  inset-inline-end: 0;
+  min-width: 11rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-2);
+}
+
+.adm-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: var(--raio-p);
+  background: transparent;
+  color: var(--cor-tinta);
+  text-align: start;
+  cursor: pointer;
+}
+
+.adm-menu-item:hover {
+  background: var(--cor-superficie-2);
+}
+
+.adm-menu-item:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: -2px;
+}
+
+/* Suspender e apagar tiram algo do ar. Os outros três não, e a diferença tem que
+   estar no menu, antes do clique, e não só no aviso depois dele. */
+.adm-menu-item[data-grave="sim"] {
+  color: var(--cor-acao-tinta);
+  font-weight: 600;
+}
+
+.adm-botao-forte {
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
+  border-color: var(--cor-acao);
+}
+
+/* ---------------------------------------------------------------------------
+ * A CASCA, e a navegação que faltava.
+ *
+ * O GRUPO `(bastidor)` NÃO MONTA NAVEGAÇÃO. O Studio resolve com coluna própria
+ * e as outras superfícies são mesa de trabalho fechada; a Administração nascia
+ * órfã, sem trilho e sem barra, e quem chegava nela só saía pela URL. O layout
+ * de `/admin` passou a montar `NavegacaoPrincipal`, a mesma do app.
+ *
+ * A SEGUNDA NAVEGAÇÃO É UM HEADER, e não uma segunda coluna. O trilho da
+ * plataforma já ocupa 15rem na visão web; um segundo trilho de 13rem ao lado
+ * dele comia 28rem antes de qualquer conteúdo aparecer. Deitado no topo, custa
+ * duas linhas de altura e devolve a largura inteira ao painel.
+ *
+ * ELE GRUDA NO TOPO com `sticky`, e não `fixed`: `fixed` fora do `.canto` é
+ * proibido (D-03) e se ancoraria na janela, escapando da moldura do telefone.
+ * --------------------------------------------------------------------------- */
+
+.adm-casca {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.adm-conteudo {
+  flex: 1;
+  min-width: 0;
+}
+
+.adm-cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
+}
+
+.adm-cabecalho-cima {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-inline: var(--espaco-tela);
+}
+
+.adm-cabecalho-marca {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+/* ---- As saídas para o app ---- */
+.adm-saidas {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.adm-saidas-rotulo {
+  flex: none;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.adm-saidas-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.adm-saida {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+  text-decoration: none;
+}
+
+.adm-saida:hover {
+  color: var(--cor-acao-tinta);
+  text-decoration: underline;
+}
+
+.adm-saida:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* A barra inferior já leva ao app inteiro. Repetir a mesma árvore aqui roubaria
+   metade da largura útil de um aparelho de 390px. */
+[data-view="mobile"] .adm-saidas {
+  display: none;
+}
+
+/* ---- As abas ----
+ *
+ * ELAS ROLAM NO PRÓPRIO EIXO nas duas visões. Nove abas não cabem em 370px, e
+ * encolher até o rótulo sumir seria pior que rolar. Rolagem dentro do próprio
+ * contêiner é a regra da casa para conteúdo largo, e a página nunca rola de lado. */
+.adm-abas {
+  min-width: 0;
+}
+
+.adm-abas-lista {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding-inline: var(--espaco-tela);
+  scroll-padding-inline: var(--espaco-tela);
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.adm-abas-lista::-webkit-scrollbar {
+  display: none;
+}
+
+.adm-aba {
+  display: flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  border-bottom: 2px solid transparent;
+  color: var(--cor-tinta-3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.adm-aba:hover {
+  color: var(--cor-tinta);
+}
+
+.adm-aba:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: -2px;
+}
+
+/* A ABA ACESA É A DA ROTA, e o acendimento vem do `aria-current` que a casca já
+   escreve: uma classe `ativo` em paralelo seria a mesma verdade em dois lugares. */
+.adm-aba[aria-current="page"] {
+  border-bottom-color: var(--cor-acao);
+  color: var(--cor-acao-tinta);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * O PAINEL DA PLATAFORMA, em quatro faixas.
+ *
+ * A ORDEM É A DA PERGUNTA: quanta coisa existe, de que ela é feita, até onde ela
+ * chega, e o que fazer com ela. Antes era uma pilha de cartões de tamanhos
+ * diferentes, e ler exigia adivinhar o que era resumo e o que era detalhe.
  * --------------------------------------------------------------------------- */
 
 .adm-painel,
-.adm-lista,
-.adm-area {
+.adm-lista {
   display: flex;
   flex-direction: column;
   gap: var(--espaco-secao);
+  min-width: 0;
+}
+
+.adm-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .adm-titulo {
-  margin: 0 0 0.75rem;
-  font-size: var(--tipo-detalhe);
+  margin: 0;
+  font-size: var(--tipo-corpo);
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--cor-tinta-2);
 }
 
-/* Os números, em grade que se adapta sem media query. */
+/* ---- Faixa 1: as contagens ----
+ *
+ * SEIS CAIXAS IGUAIS. Eram oito, e duas delas carregavam denominador («472 de
+ * 7.810»): num cartão estreito o «de 7.810» quebrava para a terceira linha e
+ * desalinhava a fileira inteira. O que é parte de um todo desceu para os
+ * medidores, onde o denominador tem linha própria. */
 .adm-numeros {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
   gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -422,94 +449,336 @@
 .adm-numero {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.75rem;
+  gap: 0.125rem;
+  min-width: 0;
+  padding: 0.875rem 1rem;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-m);
   background: var(--cor-superficie);
 }
 
 .adm-numero-valor {
-  font-size: var(--tipo-cartaz);
+  font-size: var(--tipo-titulo-2);
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
-  color: var(--cor-tinta);
 }
 
 .adm-numero-rotulo {
   font-size: var(--tipo-legenda);
-  color: var(--cor-tinta-2);
-}
-
-/* O denominador nunca some: ele é o que torna o número honesto. */
-.adm-numero-de {
-  font-style: normal;
   color: var(--cor-tinta-3);
+  text-wrap: balance;
 }
 
+[data-view="mobile"] .adm-numeros {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* ---- Faixa 2: os três cartões ---- */
 .adm-cartoes {
   display: grid;
-  gap: var(--espaco-pilha);
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+[data-view="web"] .adm-cartoes {
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
 }
 
 .adm-cartao {
-  padding: var(--espaco-cartao);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-m);
-  background: var(--cor-superficie);
-  min-width: 0;
-}
-
-.adm-cartao-largo {
-  grid-column: 1 / -1;
-}
-
-.adm-rosca,
-.adm-medidores {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
 }
 
-.adm-mapa {
-  max-width: 28rem;
-  margin-inline: auto;
+/* ---- A rosca ----
+ *
+ * O `font-size` em px é unidade de usuário do `viewBox`, e não medida de tela:
+ * rem aqui não escalaria com o desenho, e o número do centro sairia do furo. */
+.adm-rosca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
 }
 
-.adm-mapa svg {
-  width: 100%;
-  height: auto;
+.adm-rosca-desenho {
+  flex: none;
+  width: 8.5rem;
+  height: 8.5rem;
 }
 
-/* As portas: o que administrar. */
-.adm-grade {
-  display: grid;
+.adm-rosca-trilho {
+  fill: none;
+  stroke: var(--cor-superficie-2);
+  stroke-width: 16;
+}
+
+.adm-rosca-arco {
+  fill: none;
+  stroke-width: 16;
+}
+
+.adm-rosca-centro {
+  text-anchor: middle;
+  font-size: 22px;
+  font-weight: 700;
+  fill: var(--cor-tinta);
+}
+
+.adm-rosca-centro-rotulo {
+  text-anchor: middle;
+  font-size: 11px;
+  fill: var(--cor-tinta-3);
+}
+
+.adm-legenda {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   gap: 0.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 9rem;
+}
+
+.adm-legenda li {
+  display: grid;
+  grid-template-columns: 0.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--tipo-legenda);
+}
+
+.adm-legenda-cor {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--raio-pilula);
+}
+
+.adm-legenda-rotulo {
+  color: var(--cor-tinta-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-legenda-valor {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-legenda-valor em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--cor-tinta-3);
+}
+
+/* ---- As barras, deitadas ----
+ *
+ * DEITADAS, E NÃO EM PÉ. Em 370px de largura útil, cinco barras verticais dão
+ * 31px de rótulo para palavras como «instituicao», e o texto transborda a barra.
+ * Deitada, a barra tem a largura inteira e o rótulo tem a linha inteira. Foi
+ * também o que dispensou o remendo de `overflow-x` que vivia nesta folha.
+ *
+ * A COR CAI COM A POSIÇÃO, e é o que faz a ordem ser legível sem ler o número.
+ * A peça do Produtor acende só a barra mais alta e apaga o resto, que serve para
+ * achar o pico de um mês e não serve para comparar cinco classes. */
+.adm-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.adm-porta {
+.adm-barra {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 0.5rem;
+  align-items: baseline;
+}
+
+.adm-barra-rotulo {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-barra-valor {
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-barra-trilho {
+  grid-column: 1 / -1;
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  overflow: hidden;
+}
+
+.adm-barra-cheia {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ic-azul);
+}
+
+.adm-barra-cheia[data-posicao="1"] {
+  background: color-mix(in srgb, var(--ic-azul) 85%, var(--cor-superficie));
+}
+
+.adm-barra-cheia[data-posicao="2"] {
+  background: color-mix(in srgb, var(--ic-azul) 72%, var(--cor-superficie));
+}
+
+.adm-barra-cheia[data-posicao="3"] {
+  background: color-mix(in srgb, var(--ic-azul) 60%, var(--cor-superficie));
+}
+
+.adm-barra-cheia[data-posicao="4"] {
+  background: color-mix(in srgb, var(--ic-azul) 48%, var(--cor-superficie));
+}
+
+/* ---- Os medidores ---- */
+.adm-medidores {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.adm-medidor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.adm-medidor-cima {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.adm-medidor-rotulo {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-2);
+}
+
+.adm-medidor-porcento {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-medidor-trilho {
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  overflow: hidden;
+}
+
+.adm-medidor-cheio {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ic-verde-agua);
+}
+
+.adm-medidor-detalhe {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Faixa 3: o mapa ----
+ *
+ * ELE ENCHE O CARTÃO. `.msp-desenho` trava em 44rem e centraliza, o que é certo
+ * quando o mapa é a tela inteira e vira uma ilha com margem enorme dentro de um
+ * cartão largo. Aqui o cartão vira duas colunas: o desenho de um lado, a legenda
+ * e a leitura do outro, e não sobra vazio no meio. */
+.adm-cartao-largo {
+  gap: 1.25rem;
+}
+
+.adm-cartao-largo .msp-desenho {
+  max-width: none;
+}
+
+[data-view="web"] .adm-cartao-largo .msp {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(15rem, 1fr);
+  align-items: start;
+  gap: 1.25rem 1.5rem;
+}
+
+[data-view="web"] .adm-cartao-largo .msp-quadro {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* A leitura acompanha o mapa inteiro na coluna da direita, e é o que enche o cartão: sem
+   isto o desenho trava em 44rem, centraliza, e sobra vazio dos dois lados. */
+[data-view="web"] .adm-cartao-largo .msp-leitura-caixa {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+}
+
+[data-view="web"] .adm-cartao-largo .msp-leitura {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+[data-view="web"] .adm-cartao-largo .msp-fonte {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+/* ---- Faixa 4: as portas ---- */
+.adm-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-view="mobile"] .adm-grade {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adm-porta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   min-height: 2.75rem;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-m);
   background: var(--cor-superficie);
-  color: var(--cor-tinta);
+  color: inherit;
   text-decoration: none;
 }
 
 .adm-porta:hover {
   border-color: var(--cor-acao);
-  color: var(--cor-acao-tinta);
+  background: var(--cor-acao-lavada);
 }
 
 .adm-porta:focus-visible {
@@ -518,20 +787,29 @@
 }
 
 .adm-porta-nome {
-  font-size: var(--tipo-detalhe);
   font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .adm-porta-num {
-  font-variant-numeric: tabular-nums;
+  font-size: var(--tipo-legenda);
   color: var(--cor-tinta-3);
+  font-variant-numeric: tabular-nums;
 }
 
-/* A lista, e os filtros dela. */
+/* ---------------------------------------------------------------------------
+ * AS LISTAS, onde ele acha o que não está na tela.
+ * --------------------------------------------------------------------------- */
+
 .adm-filtros {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
 }
 
 .adm-conta {
@@ -550,11 +828,15 @@
   list-style: none;
 }
 
+/* A LINHA NÃO RECORTA. O menu de ações é sobreposto e ancora aqui dentro; um
+   `overflow: hidden` nesta caixa cortaria o menu na primeira linha da lista. */
 .adm-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-m);
   background: var(--cor-superficie);
@@ -562,12 +844,16 @@
 
 .adm-item-cima {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
 }
 
+/* O NOME QUEBRA, e não corta. «Arquivo de Negativos/DIM/DPH/SMC/PMSP» é uma palavra só
+   para o navegador, e `text-overflow` sem `white-space: nowrap` não faz nada: ela
+   transbordava os 370px úteis do telefone. Podia virar reticências, mas numa lista onde a
+   pessoa procura pelo nome, esconder o fim do nome é pior que usar duas linhas. */
 .adm-item-nome {
   font-weight: 600;
   min-width: 0;
@@ -579,59 +865,65 @@
   color: var(--cor-tinta-3);
 }
 
-/* Na lista a tira perde moldura: são dezenas por tela, e a moldura repetida vira ruído. */
-.adm-compacto {
-  padding: 0;
-  border: none;
-  background: none;
-}
-
 .adm-vazio {
   margin: 0;
-  font-size: var(--tipo-detalhe);
   color: var(--cor-tinta-3);
 }
 
 .adm-volta {
   font-size: var(--tipo-legenda);
-  color: var(--cor-tinta-2);
+  color: var(--cor-tinta-3);
   text-decoration: none;
 }
 
 .adm-volta:hover {
   color: var(--cor-acao-tinta);
+  text-decoration: underline;
 }
 
-/* O registro do que foi feito. */
+/* ---------------------------------------------------------------------------
+ * O QUE ELE FEZ.
+ * --------------------------------------------------------------------------- */
+
 .adm-registro {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin: 0 0 0.75rem;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .adm-registro li {
   display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  padding: 0.5rem 0.75rem;
-  border-left: 2px solid var(--cor-acao);
-  background: var(--cor-superficie-2);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
 }
 
 .adm-registro-acao {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
   font-size: var(--tipo-legenda);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--cor-acao-tinta);
+}
+
+/* Suspender e apagar tiram algo do ar. Os outros três não, e a diferença fica
+   visível na lista do que foi feito sem precisar ler o verbo. */
+.adm-registro-acao[data-acao-feita="suspender"],
+.adm-registro-acao[data-acao-feita="apagar"] {
+  background: var(--cor-acao);
+  color: var(--cor-sobre-acao);
 }
 
 .adm-registro-alvo {
-  font-size: var(--tipo-detalhe);
-  color: var(--cor-tinta);
+  flex: 1;
+  min-width: 0;
 }
 
 .adm-registro-quem {
@@ -639,40 +931,71 @@
   color: var(--cor-tinta-3);
 }
 
+/* Numa lista a tira perde a moldura e a marca: são dezenas por tela, e a moldura
+   repetida vira ruído. Em cima de um item ela precisa se destacar do conteúdo. */
+.adm-compacto {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* O botão de reiniciar não estica: numa coluna flex, um filho sem esta linha
+   ocuparia a largura inteira da seção. */
+.adm-feito {
+  align-items: flex-start;
+}
 
 /* ---------------------------------------------------------------------------
- * O MAPA DE SÃO PAULO, por município.
+ * O MAPA DE SÃO PAULO, em três camadas.
  *
- * A COR SAI DA INTENSIDADE, que o componente calcula por raiz quadrada da taxa por 10 mil
- * habitantes. Nenhum município tem cor escrita aqui: se o dado mudar, o mapa muda junto.
+ * A BASE FICOU NEUTRA. Ela era laranja, e laranja embaixo de rosa e ciano dá três
+ * matizes brigando pela mesma leitura. Agora a base é tinta lavada e a cor está
+ * onde ela informa: no ponto. A intensidade continua vindo do componente, que a
+ * calcula por raiz quadrada da taxa por 10 mil habitantes. Nenhum município tem
+ * cor escrita aqui: se o dado mudar, o mapa muda junto.
+ *
+ * AS DUAS CORES DOS PONTOS SÃO AS DO MAPA DE ORIGEM, e caem na paleta da casa sem
+ * um hex novo: `--ic-rosa` para museu, teatro, cinema e galeria; `--ic-azul` para
+ * biblioteca e centro cultural.
  * --------------------------------------------------------------------------- */
 
 .msp {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.msp-quadro {
+  min-width: 0;
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+  padding: 0.5rem;
 }
 
 .msp-desenho {
+  display: block;
   width: 100%;
   height: auto;
   max-width: 44rem;
   margin-inline: auto;
 }
 
+/* ---- Camada 1: a taxa ---- */
 .msp-municipio {
   stroke: var(--cor-superficie);
   stroke-width: 0.4;
   fill: color-mix(
     in srgb,
-    var(--cor-acao) calc(8% + var(--intensidade, 0) * 85%),
+    var(--cor-tinta-crua) calc(4% + var(--intensidade, 0) * 30%),
     var(--cor-papel-cru)
   );
 }
 
-/* Um equipamento não é meio caminho para zero: fica quase branco, mas AINDA preenchido. */
+/* Um equipamento não é meio caminho para zero: fica quase liso, mas AINDA preenchido. */
 .msp-municipio[data-faixa="minimo"] {
-  fill: color-mix(in srgb, var(--cor-acao) 7%, var(--cor-papel-cru));
+  fill: color-mix(in srgb, var(--cor-tinta-crua) 4%, var(--cor-papel-cru));
   stroke: var(--cor-borda-forte);
 }
 
@@ -683,66 +1006,202 @@
   stroke-dasharray: 2 1.5;
 }
 
+/* O DESERTO É OUTRA PERGUNTA, e por isso é outra marca. «Sem equipamento» é sobre o
+   município; «deserto» é sobre a distância até o mais próximo, que pode estar do outro
+   lado da divisa. Os dois se sobrepõem em quase todo lugar, e onde não se sobrepõem
+   está o que o mapa tem de mais duro para dizer. */
+.msp-municipio[data-deserto="sim"] {
+  stroke: var(--cor-acao);
+  stroke-width: 0.5;
+  stroke-opacity: 0.5;
+}
+
 .msp-hachura-traco {
   stroke: var(--cor-borda-forte);
   stroke-width: 0.75;
 }
 
-.msp-legenda {
+/* ---- Camada 2: os equipamentos ----
+ *
+ * O `r` MORA AQUI, e não no atributo: repetido 2.503 vezes ele seria o maior custo da
+ * camada no HTML do build, e é a mesma medida para todos os pontos. */
+.msp-camada-pontos circle {
+  r: 1.5;
+  fill-opacity: 0.72;
+  stroke: none;
+}
+
+.msp-camada-pontos g[data-grupo="0"] circle {
+  fill: var(--ic-rosa);
+}
+
+.msp-camada-pontos g[data-grupo="1"] circle {
+  fill: var(--ic-azul);
+}
+
+/* ---- A leitura ao lado ---- */
+.msp-leitura-caixa {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.msp-numeros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.msp-numeros li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.msp-numero-valor {
+  font-size: var(--tipo-titulo-3);
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.msp-numero-rotulo {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  text-wrap: balance;
+}
+
+.msp-legenda {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.msp-legenda li {
+  display: grid;
+  grid-template-columns: 0.625rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
   font-size: var(--tipo-legenda);
   color: var(--cor-tinta-2);
 }
 
-.msp-legenda li {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
+.msp-legenda em {
+  font-style: normal;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-tinta);
 }
 
 .msp-amostra {
-  width: 1rem;
-  height: 1rem;
-  border-radius: var(--raio-p);
-  border: 1px solid var(--cor-borda-forte);
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--raio-pilula);
 }
 
-.msp-amostra[data-amostra="tem"] {
-  background: color-mix(in srgb, var(--cor-acao) 70%, var(--cor-papel-cru));
+.msp-amostra[data-amostra="museu"] {
+  background: var(--ic-rosa);
+}
+
+.msp-amostra[data-amostra="biblioteca"] {
+  background: var(--ic-azul);
 }
 
 .msp-amostra[data-amostra="vazio"] {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--cor-papel-cru),
-    var(--cor-papel-cru) 2px,
-    var(--cor-borda-forte) 2px,
-    var(--cor-borda-forte) 3px
+  border-radius: 0.125rem;
+  border: 1px dashed var(--cor-borda-forte);
+  background: var(--cor-superficie-2);
+}
+
+.msp-escala {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+}
+
+.msp-escala-barra {
+  flex: 1;
+  height: 0.375rem;
+  border-radius: var(--raio-pilula);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--cor-tinta-crua) 4%, var(--cor-papel-cru)),
+    color-mix(in srgb, var(--cor-tinta-crua) 34%, var(--cor-papel-cru))
   );
+}
+
+.msp-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.msp-ranking-titulo {
+  margin: 0;
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.msp-ranking-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: posicao;
+}
+
+.msp-ranking-lista li {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: var(--tipo-legenda);
+  counter-increment: posicao;
+}
+
+.msp-ranking-lista li::before {
+  content: counter(posicao);
+  color: var(--cor-tinta-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.msp-ranking-nome {
+  color: var(--cor-tinta-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msp-ranking-taxa {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .msp-leitura {
   margin: 0;
   font-size: var(--tipo-detalhe);
-  line-height: 1.5;
   color: var(--cor-tinta-2);
-  max-width: 46rem;
+  max-width: 62ch;
 }
 
 .msp-fonte {
   margin: 0;
   font-size: var(--tipo-legenda);
   color: var(--cor-tinta-3);
-}
-
-/* CONTEÚDO LARGO ROLA DENTRO DO PRÓPRIO CONTÊINER, e a página nunca rola para o lado. É a
- * regra da casa para tabela, diagrama e gráfico. O de barras vem do Produtor e não se mexe
- * nele: o recorte acontece aqui, no escopo do Admin. */
-.adm-cartao .prod-barras-v {
-  overflow-x: auto;
 }

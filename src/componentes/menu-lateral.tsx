@@ -125,7 +125,7 @@ const BASTIDOR: ItemDeBastidor[] = [
   { href: "/moderacao/fila", rotulo: "Moderação", superficie: "/moderacao", soWeb: true },
   { href: "/redacao/trilha", rotulo: "Redação", superficie: "/redacao", soWeb: true },
   { href: "/observatorio", rotulo: "Observatório", superficie: "/observatorio", soWeb: true },
-  { href: "/admin/papeis", rotulo: "Administração", superficie: "/admin", soWeb: true },
+  { href: "/admin", rotulo: "Administração", superficie: "/admin", soWeb: false },
   { href: "/roteiro", rotulo: "Roteiro guiado", superficie: "/roteiro", soWeb: true },
 ];
 

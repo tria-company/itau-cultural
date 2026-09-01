@@ -72,20 +72,40 @@ try {
     "0 tiras, com conteúdo",
   );
 
-  // ---- 2. como ADMIN, a tira aparece com os quatro verbos ----
+  // ---- 2. como ADMIN, a tira aparece, e o menu guarda os quatro verbos ----
+  //
+  // OS VERBOS DEIXARAM DE ESTAR NA TIRA e passaram para um menu: uma fileira de quatro
+  // botoes por linha virava ruido numa lista de trezentas. A sonda tem que abrir o menu
+  // antes de contar, senao ela mede a ausencia dos botoes e chama de defeito.
   await cdp.avaliar(`localStorage.setItem('${CHAVE_PAPEL}', 'admin');`);
   await cdp.navegar(rota);
-  const adm = await cdp.avaliar(
+  const tiras = await cdp.avaliar(
     naPagina(`return {
       tiras: document.querySelectorAll('[data-admin-controles]').length,
+      gatilhos: document.querySelectorAll('[data-menu-de]').length,
+      antesDeAbrir: document.querySelectorAll('[data-acao]').length,
+    };`),
+  );
+  exigir(
+    tiras.tiras === 1 && tiras.gatilhos === 1 && tiras.antesDeAbrir === 0,
+    "como admin, a tira aparece com um gatilho, e nenhum verbo solto na linha",
+    `tiras: ${tiras.tiras} · gatilhos: ${tiras.gatilhos} · verbos soltos: ${tiras.antesDeAbrir}`,
+    "1 tira, 1 gatilho, 0 verbos soltos",
+  );
+
+  await cdp.clicar(`document.querySelector('[data-menu-de]')`);
+  const adm = await cdp.avaliar(
+    naPagina(`return {
+      aberto: document.querySelectorAll('[data-menu-aberto]').length,
       acoes: Array.from(document.querySelectorAll('[data-acao]')).map(b => b.getAttribute('data-acao')),
     };`),
   );
   exigir(
-    adm.tiras === 1 && ["editar", "mover", "suspender", "apagar"].every((a) => adm.acoes.includes(a)),
-    "como admin, a tira aparece com editar, mover, suspender e apagar",
-    `tiras: ${adm.tiras} · ações: ${adm.acoes.join(", ")}`,
-    "1 tira com os quatro verbos",
+    adm.aberto === 1 &&
+      ["editar", "mover", "suspender", "apagar"].every((a) => adm.acoes.includes(a)),
+    "o menu abre com editar, mover, suspender e apagar",
+    `menus abertos: ${adm.aberto} · ações: ${adm.acoes.join(", ")}`,
+    "1 menu com os quatro verbos",
   );
 
   // ---- 3. suspender exige motivo ----

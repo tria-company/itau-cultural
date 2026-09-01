@@ -21,7 +21,7 @@
     "verificar-tema": "node scripts/verificar-tema.mjs",
     "capturar-telas": "node scripts/capturar-telas.mjs",
     "checar": "tsc --noEmit --incremental false && node scripts/verificar-ds.mjs",
-    "verificar-admin": "node scripts/verificar-admin.mjs",
+    "verificar-admin": "node scripts/sonda-admin.mjs && node scripts/sonda-admin-telefone.mjs",
     "verificar-gestor": "node scripts/verificar-gestor.mjs",
     "verificar-moderacao": "node scripts/verificar-moderacao.mjs",
     "verificar-pontos": "tsx scripts/verificar-pontos.ts",
