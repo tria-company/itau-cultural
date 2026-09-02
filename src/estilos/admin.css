@@ -841,11 +841,16 @@
   vertical-align: middle;
 }
 
+/* DUAS LINHAS, E ELA QUEBRA. `-webkit-box` com `line-clamp` corta na altura, mas não
+   quebra palavra: uma descrição com um nome longo sem espaço transbordava os 370px úteis
+   do telefone, e a sonda achou 22 delas. `min-width: 0` deixa a caixa encolher dentro do
+   flex, e `overflow-wrap` quebra o que não tem onde quebrar. */
 .adm-item-descricao {
+  min-width: 0;
   font-size: var(--tipo-legenda);
   color: var(--cor-tinta-2);
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

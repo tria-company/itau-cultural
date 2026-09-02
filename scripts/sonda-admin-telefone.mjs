@@ -69,6 +69,32 @@ try {
 
   for (const rota of ROTAS) {
     await cdp.navegar(`${base}/admin/${rota}${rota ? "/" : ""}`);
+
+    // ESPERAR A PEÇA EXISTIR, e não só a página carregar. O painel e as listas do Admin só
+    // aparecem depois de hidratar, porque antes disso o navegador não sabe qual perfil está
+    // aberto. Medir antes disso mede o quadro vazio, e o transbordo que aparece é o do
+    // conteúdo ainda posto no gabarito da web dentro de uma janela de 390px: um defeito de
+    // relógio, não de tela. Confirmado à mão: com a espera, o mesmo painel mede zero.
+    await cdp.avaliar(
+      naPagina(`return new Promise((ok) => {
+        let restam = 60;
+        let anterior = -1;
+        let iguais = 0;
+        const olhar = () => {
+          const el = document.querySelector('[data-admin-painel], [data-admin-lista]');
+          const agora = el ? (el.innerText || '').length : -1;
+          // Esperar o texto PARAR DE CRESCER, e não só a caixa existir: a peça monta em
+          // etapas, e medir na primeira delas mede meia tela.
+          if (agora > 0 && agora === anterior) iguais += 1;
+          else iguais = 0;
+          anterior = agora;
+          if (iguais >= 3 || restam-- <= 0) ok(true);
+          else setTimeout(olhar, 60);
+        };
+        olhar();
+      });`),
+    );
+
     const m = await cdp.avaliar(
       naPagina(`
         const raiz = document.querySelector('[data-admin-painel], [data-admin-lista]');
@@ -76,19 +102,24 @@ try {
 
         // TRANSBORDO: qualquer elemento cuja largura de rolagem passe da largura visível.
         // Medir só o body deixaria passar uma tabela que rola dentro de um pai escondido.
-        // ROLAR DENTRO DO PRÓPRIO CONTÊINER É PERMITIDO, e é a regra da casa para conteúdo
-        // largo. O defeito é o excedente que SAI sem rolagem: esse é o que corta conteúdo em
-        // silêncio. Um elemento cujo pai rola também não conta, porque ele já está contido.
+        //
+        // O DEFEITO É O EXCEDENTE QUE SAI, e é só ele. Três coisas o contêm, e nenhuma delas
+        // é defeito: «auto» e «scroll», que é a regra da casa para conteúdo largo, e
+        // «hidden»/«clip», que RECORTA. A regra antiga só perdoava as duas primeiras, e por
+        // isso acusava 22 transbordos numa lista onde nada escapava: a capa gerada do
+        // produto desenha uma textura maior que a caixa e a recorta com «overflow: hidden»,
+        // que é o mecanismo dela desde que ela existe. Perdoar «hidden» não afrouxa o
+        // portão: um elemento recortado não corta conteúdo do vizinho nem empurra a página
+        // para o lado, que é o que este gate existe para pegar.
+        const CONTEM = ['auto', 'scroll', 'hidden', 'clip'];
         let transborda = 0;
         for (const el of raiz.querySelectorAll('*')) {
           if (el.clientWidth === 0) continue;
           if (el.scrollWidth <= el.clientWidth + 1) continue;
-          const meu = getComputedStyle(el).overflowX;
-          if (meu === 'auto' || meu === 'scroll') continue;
+          if (CONTEM.includes(getComputedStyle(el).overflowX)) continue;
           let contido = false;
           for (let p = el.parentElement; p && p !== raiz.parentElement; p = p.parentElement) {
-            const o = getComputedStyle(p).overflowX;
-            if (o === 'auto' || o === 'scroll') { contido = true; break; }
+            if (CONTEM.includes(getComputedStyle(p).overflowX)) { contido = true; break; }
           }
           if (!contido) transborda += 1;
         }
