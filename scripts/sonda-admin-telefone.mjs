@@ -17,6 +17,9 @@ import { servir } from "./servir-out.mjs";
 
 const ROTAS = [
   "",
+  // A EQUIPE É TELA DO ADMIN, e passou a ser medida como as outras: ela tem uma tabela de
+  // cinco colunas, que é justamente a forma que mais transborda em 370px.
+  "equipe",
   "pessoas",
   "coletivos",
   "instituicoes",
@@ -81,7 +84,7 @@ try {
         let anterior = -1;
         let iguais = 0;
         const olhar = () => {
-          const el = document.querySelector('[data-admin-painel], [data-admin-lista]');
+          const el = document.querySelector('[data-admin-painel], [data-admin-lista], [data-admin-equipe]');
           const agora = el ? (el.innerText || '').length : -1;
           // Esperar o texto PARAR DE CRESCER, e não só a caixa existir: a peça monta em
           // etapas, e medir na primeira delas mede meia tela.
@@ -97,7 +100,7 @@ try {
 
     const m = await cdp.avaliar(
       naPagina(`
-        const raiz = document.querySelector('[data-admin-painel], [data-admin-lista]');
+        const raiz = document.querySelector('[data-admin-painel], [data-admin-lista], [data-admin-equipe]');
         if (!raiz) return { chars: 0, transborda: 0, curtos: 0, largura: 0 };
 
         // TRANSBORDO: qualquer elemento cuja largura de rolagem passe da largura visível.
@@ -152,7 +155,7 @@ try {
 
   exigir(
     semConteudo === 0,
-    "as 9 telas do Admin APARECEM na visão de app",
+    `as ${ROTAS.length} telas do Admin APARECEM na visão de app`,
     `sem conteúdo: ${semConteudo} de ${ROTAS.length}`,
     "0 vazias",
   );

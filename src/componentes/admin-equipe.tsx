@@ -171,48 +171,82 @@ export function AdminEquipe({ carimbo }: { carimbo: string }) {
           {mudou > 0 ? ` · ${mudou} alterada${mudou === 1 ? "" : "s"} neste navegador` : ""}
         </p>
 
-        <ul className="adm-linhas">
-          {visiveis.map((p) => (
-            <li key={p.id} className="adm-item adm-equipe-linha" data-pessoa={p.id}>
-              <span className="adm-equipe-monograma" aria-hidden="true">
-                {p.nome.slice(0, 1)}
-              </span>
-              <div className="adm-item-cima">
-                <span className="adm-item-nome">{p.nome}</span>
-                <span className="adm-item-descricao">{p.funcao}</span>
-                <span className="adm-item-contexto">
-                  Desde {p.desde}
-                  {p.papel === "produtor" ? ` · ${p.pautas.length} de ${PAUTAS_DA_EQUIPE.length} pautas` : ""}
+        {/* UMA TABELA, E NÃO DOZE CARTÕES. O quadro é uma lista homogênea: as mesmas
+            quatro informações, doze vezes. Em cartão, cada linha ganhava a própria
+            moldura e o seletor levava um rótulo «Papel» dentro dela, o que fazia cada
+            linha ter uma altura diferente da vizinha e nada alinhar na vertical. O
+            rótulo subiu para o cabeçalho da coluna, que é onde ele só aparece uma vez,
+            e as molduras viraram um fio entre as linhas. */}
+        <div className="adm-tabela" role="table" aria-label="Quadro da equipe">
+          <div className="adm-tabela-cabeca" role="row">
+            <span role="columnheader">Pessoa</span>
+            <span role="columnheader">Papel</span>
+            <span role="columnheader">Publica em</span>
+            <span role="columnheader">Desde</span>
+            <span role="columnheader" className="adm-tabela-fim">
+              Acessos
+            </span>
+          </div>
+
+          <ul className="adm-tabela-corpo">
+            {visiveis.map((p) => (
+              <li key={p.id} className="adm-tabela-linha" data-pessoa={p.id} role="row">
+                <span className="adm-tabela-quem" role="cell">
+                  <span className="adm-equipe-monograma" aria-hidden="true">
+                    {p.nome.slice(0, 1)}
+                  </span>
+                  <span className="adm-tabela-nome">
+                    <strong>{p.nome}</strong>
+                    <em>{p.funcao}</em>
+                  </span>
                 </span>
-              </div>
 
-              <label className="adm-campo adm-equipe-papel">
-                <span>Papel</span>
-                <select
-                  value={p.papel}
-                  data-papel-de={p.id}
-                  onChange={(e) => trocarPapel(p.id, e.target.value as PapelDaEquipe)}
-                >
-                  {PAPEIS_DA_EQUIPE.map((papel) => (
-                    <option key={papel} value={papel}>
-                      {ROTULO_DO_PAPEL[papel]}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <span role="cell">
+                  <select
+                    className="adm-tabela-papel"
+                    value={p.papel}
+                    data-papel-de={p.id}
+                    aria-label={`Papel de ${p.nome}`}
+                    onChange={(e) => trocarPapel(p.id, e.target.value as PapelDaEquipe)}
+                  >
+                    {PAPEIS_DA_EQUIPE.map((papel) => (
+                      <option key={papel} value={papel}>
+                        {ROTULO_DO_PAPEL[papel]}
+                      </option>
+                    ))}
+                  </select>
+                </span>
 
-              <button
-                type="button"
-                className="adm-botao"
-                data-abrir-pessoa={p.id}
-                aria-expanded={aberta === p.id}
-                onClick={() => definirAberta((a) => (a === p.id ? null : p.id))}
-              >
-                Acessos
-              </button>
-            </li>
-          ))}
-        </ul>
+                <span className="adm-tabela-pautas" role="cell">
+                  {p.papel === "produtor" ? (
+                    <span className="adm-tabela-pilula" data-cheia={p.pautas.length > 0 ? "sim" : "nao"}>
+                      {p.pautas.length} de {PAUTAS_DA_EQUIPE.length}
+                    </span>
+                  ) : (
+                    <span className="adm-tabela-nada">não publica</span>
+                  )}
+                </span>
+
+                <span className="adm-tabela-desde" role="cell">
+                  {p.desde}
+                </span>
+
+                <span className="adm-tabela-fim" role="cell">
+                  <button
+                    type="button"
+                    className="adm-botao"
+                    data-abrir-pessoa={p.id}
+                    aria-expanded={aberta === p.id}
+                    aria-label={`Acessos de ${p.nome}`}
+                    onClick={() => definirAberta((a) => (a === p.id ? null : p.id))}
+                  >
+                    Acessos
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <p className="adm-equipe-procedencia">{PROCEDENCIA_DA_EQUIPE}</p>
 

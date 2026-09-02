@@ -2008,11 +2008,6 @@
   color: inherit;
 }
 
-/* ---- A linha da pessoa ---- */
-.adm-equipe-linha {
-  gap: 0.75rem;
-}
-
 /* MONOGRAMA, NUNCA FOTO. Não há foto de nenhuma destas pessoas porque nenhuma
    delas existe: o quadro é autorado, e a tela diz isso embaixo. */
 .adm-equipe-monograma {
@@ -2028,13 +2023,222 @@
   font-weight: 700;
 }
 
-.adm-equipe-papel {
-  flex: none;
-  min-width: 9rem;
+/* ---------------------------------------------------------------------------
+ * A TABELA DO QUADRO.
+ *
+ * UMA TABELA, E NÃO DOZE CARTÕES. O quadro é uma lista homogênea: as mesmas
+ * quatro informações, doze vezes. Em cartão, cada linha ganhava a própria
+ * moldura e o seletor levava um rótulo «Papel» dentro dela, o que fazia cada
+ * linha ter altura diferente da vizinha e nada alinhar na vertical. O rótulo
+ * subiu para o cabeçalho da coluna, onde ele aparece uma vez, e as molduras
+ * viraram um fio entre as linhas.
+ *
+ * AS COLUNAS SÃO FIXAS onde o conteúdo é fixo. Papel tem cinco valores, «publica
+ * em» tem duas casas e um denominador, e a data tem dez caracteres: dar a elas
+ * largura própria é o que faz as doze linhas lerem como coluna, e não como doze
+ * frases de comprimentos diferentes. Só a coluna da pessoa é elástica.
+ * --------------------------------------------------------------------------- */
+
+.adm-tabela {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  overflow: hidden;
 }
 
-[data-view="mobile"] .adm-equipe-papel {
-  min-width: 100%;
+/* A ÚLTIMA COLUNA TEM LARGURA, e não «auto», e a razão é medida: cabeçalho e
+   corpo são duas grades separadas, e uma faixa «auto» se dimensiona pelo
+   conteúdo de CADA UMA. A palavra «Acessos» do cabeçalho é mais estreita que o
+   botão do corpo, e as quatro colunas anteriores saíam 22px fora de esquadro.
+   Com largura declarada, as duas grades concordam. */
+.adm-tabela-cabeca,
+.adm-tabela-linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 11rem 7rem 6.5rem 7rem;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+/* TODA CÉLULA TEM A MESMA ALTURA MÍNIMA, senão a linha de quem «não publica»
+   fica 1px mais baixa que a de quem tem a pílula, e doze linhas quase iguais
+   leem pior que doze linhas iguais. */
+.adm-tabela-linha > span {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  min-width: 0;
+}
+
+.adm-tabela-cabeca {
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-superficie-2);
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-3);
+}
+
+.adm-tabela-corpo {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A ALTURA DA LINHA É DECLARADA, e não resultado do conteúdo. Com «min-height» a
+   linha de quem «não publica» saía 1px mais baixa que a de quem tem a pílula, e
+   doze linhas quase iguais leem pior que doze linhas iguais. Numa tabela, a
+   altura da linha é decisão de diagramação. */
+.adm-tabela-linha {
+  height: 3.75rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+[data-view="mobile"] .adm-tabela-linha {
+  height: auto;
+}
+
+.adm-tabela-corpo > .adm-tabela-linha:first-child {
+  border-top: 0;
+}
+
+.adm-tabela-linha:hover {
+  background: var(--cor-superficie-2);
+}
+
+.adm-tabela-fim {
+  justify-content: flex-end;
+  text-align: end;
+}
+
+/* ---- A célula da pessoa ---- */
+.adm-tabela-quem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.adm-tabela-nome {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.adm-tabela-nome strong {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-tabela-nome em {
+  font-style: normal;
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- O seletor de papel: controle, e não campo de formulário ---- */
+.adm-tabela-papel {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.625rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+  font-size: var(--tipo-detalhe);
+  cursor: pointer;
+}
+
+.adm-tabela-papel:hover {
+  border-color: var(--cor-acao);
+}
+
+.adm-tabela-papel:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* ---- Quantas pautas ---- */
+.adm-tabela-pilula {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-size: var(--tipo-legenda);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-tabela-pilula[data-cheia="sim"] {
+  background: var(--cor-acao-lavada);
+  color: var(--cor-acao-tinta);
+}
+
+.adm-tabela-nada,
+.adm-tabela-desde {
+  font-size: var(--tipo-legenda);
+  color: var(--cor-tinta-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * NO TELEFONE A TABELA VIRA PILHA. Cinco colunas em 370px dariam 70px cada, e a
+ * data sozinha ocupa mais que isso. O cabeçalho some, porque o rótulo da coluna
+ * não faz sentido quando não há coluna, e cada linha volta a ser um cartão, que
+ * é a forma certa quando só cabe uma coisa por vez.
+ * --------------------------------------------------------------------------- */
+[data-view="mobile"] .adm-tabela {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+
+[data-view="mobile"] .adm-tabela-cabeca {
+  display: none;
+}
+
+[data-view="mobile"] .adm-tabela-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+[data-view="mobile"] .adm-tabela-linha {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+/* A pessoa toma a linha inteira; papel, pautas e data dividem a de baixo. */
+[data-view="mobile"] .adm-tabela-quem {
+  grid-column: 1 / -1;
+}
+
+[data-view="mobile"] .adm-tabela-linha > span:nth-child(2) {
+  grid-column: 1;
+}
+
+[data-view="mobile"] .adm-tabela-fim {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+[data-view="mobile"] .adm-tabela-pautas,
+[data-view="mobile"] .adm-tabela-desde {
+  grid-column: 1 / -1;
 }
 
 .adm-equipe-procedencia {
